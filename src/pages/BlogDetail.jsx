@@ -1,0 +1,110 @@
+import React, { useEffect } from 'react';
+import { useParams, Link, Navigate } from 'react-router-dom';
+import { blogPosts } from '../data/siteData';
+import Contact from '../components/Utils/Contact';
+import BlogCard from '../components/Utils/BlogCard';
+
+export default function BlogDetail() {
+  const { slug } = useParams();
+  const post = blogPosts.find(p => p.slug === slug);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [slug]);
+
+  if (!post) {
+    return <Navigate to="/404" replace />;
+  }
+
+  const idx = blogPosts.findIndex(p => p.slug === slug);
+  const prevPost = idx > 0 ? blogPosts[idx - 1] : null;
+  const nextPost = idx < blogPosts.length - 1 ? blogPosts[idx + 1] : null;
+  const otherPosts = blogPosts.filter(p => p.slug !== slug).slice(0, 2);
+
+  const renderParagraph = (p, i) => {
+    const parts = p.split('\n\n');
+    if (parts.length > 1 && (p.startsWith('Note') || /^\d+\./.test(p))) {
+      return (
+        <div key={i}>
+          <h3 className="text-[1.4rem] font-medium text-white tracking-[-0.02em] mt-[30px] mb-[10px]">
+            {parts[0]}
+          </h3>
+          {parts.slice(1).map((part, j) => (
+            <p key={j}>{part}</p>
+          ))}
+        </div>
+      );
+    }
+    return <p key={i}>{p}</p>;
+  };
+
+  return (
+    <div className="pt-20 bg-bg-dark">
+
+      {/* Article header */}
+      <section className="pt-[100px] pb-[60px] px-10 max-[810px]:pt-[60px] max-[810px]:px-5 max-w-[900px] mx-auto flex flex-col items-center text-center border-b border-border">
+        <div className="flex items-center gap-4 font-mono text-[0.95rem] mb-5">
+          <span className="text-accent uppercase">{post.category}</span>
+          <span className="text-text-muted">•</span>
+          <span className="text-text-muted">{post.date}</span>
+        </div>
+        <h1 className="text-[2.8rem] md:text-[3.6rem] font-medium text-white tracking-[-0.03em] leading-[1.15] mb-4">
+          {post.title}
+        </h1>
+        <p className="text-[1.25rem] text-text-secondary leading-[1.4]">{post.subtitle}</p>
+      </section>
+
+      {/* Hero image */}
+      <div className="max-w-[900px] mx-auto my-10 px-10 max-[810px]:px-5">
+        <img
+          src={post.coverImage}
+          alt={post.title}
+          className="w-full rounded-[30px] border border-border"
+        />
+      </div>
+
+      {/* Article body */}
+      <article className="max-w-[800px] mx-auto px-10 max-[810px]:px-5 pb-[80px] flex flex-col gap-6 text-[1.15rem] leading-[1.6] text-text-secondary">
+        {post.paragraphs.map((p, i) => renderParagraph(p, i))}
+      </article>
+
+      {/* Prev / Next navigator */}
+      <div className="max-w-[900px] mx-auto px-10 max-[810px]:px-5 py-10 border-t border-b border-border flex justify-between items-center">
+        {prevPost ? (
+          <Link to={`/blog/${prevPost.slug}`} className="flex flex-col gap-[6px] max-w-[45%] items-start text-left group">
+            <span className="font-mono text-[0.85rem] text-text-muted uppercase">‹ Previous Post</span>
+            <span className="text-[1rem] font-medium text-white transition-colors duration-200 group-hover:text-accent">{prevPost.title}</span>
+          </Link>
+        ) : <div />}
+
+        {nextPost ? (
+          <Link to={`/blog/${nextPost.slug}`} className="flex flex-col gap-[6px] max-w-[45%] items-end text-right group">
+            <span className="font-mono text-[0.85rem] text-text-muted uppercase">Next Post ›</span>
+            <span className="text-[1rem] font-medium text-white transition-colors duration-200 group-hover:text-accent">{nextPost.title}</span>
+          </Link>
+        ) : <div />}
+      </div>
+
+      {/* More articles */}
+      <section className="py-[100px] px-10 max-[810px]:py-[60px] max-[810px]:px-5 flex flex-col items-center border-b border-border">
+        <div className="text-center max-w-[800px] mb-[60px] flex flex-col items-center">
+          <div className="flex items-center gap-3 mb-5">
+            <span className="font-mono text-[0.9rem] text-accent opacity-80">01</span>
+            <span className="font-mono text-[0.9rem] text-text-secondary opacity-50 uppercase">Latest articles</span>
+            <span className="font-mono text-[0.9rem] text-text-secondary opacity-50 uppercase">Blog</span>
+          </div>
+          <h2 className="text-[2.2rem] md:text-[3rem] font-medium tracking-[-0.04em] leading-[1.1] text-white mb-3">More Articles</h2>
+          <p className="text-[1.15rem] text-text-secondary mb-10">Notes from behind the screen</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-[30px] w-full max-w-[1600px]">
+          {otherPosts.map((otherPost) => (
+            <BlogCard key={otherPost.slug} post={otherPost} />
+          ))}
+        </div>
+      </section>
+
+      {/* Contact */}
+      <Contact />
+    </div>
+  );
+}

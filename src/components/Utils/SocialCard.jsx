@@ -1,5 +1,6 @@
 import React from 'react';
-import { FiTwitter, FiInstagram, FiFramer, FiMail } from 'react-icons/fi';
+import { FiTwitter, FiInstagram, FiAtSign } from 'react-icons/fi';
+import { BsMedium } from 'react-icons/bs';
 
 const renderIcon = (label) => {
   const normalized = label.toLowerCase();
@@ -9,20 +10,21 @@ const renderIcon = (label) => {
   if (normalized.includes('instagram')) {
     return <FiInstagram className="w-5 h-5" strokeWidth={2} />;
   }
-  if (normalized.includes('framer')) {
-    return <FiFramer className="w-5 h-5" strokeWidth={2} />;
+  if (normalized.includes('medium')) {
+    return <BsMedium className="w-5 h-5" />;
   }
-  // Default Email icon
-  return <FiMail className="w-5 h-5" strokeWidth={2} />;
+  if (normalized.includes('email') || normalized.includes('mail')) {
+    return <FiAtSign className="w-5 h-5" strokeWidth={2} />;
+  }
 };
 
 export default function SocialCard({ label, value, href, isEmail = false }) {
-  const cardClasses = "bg-[#262626] rounded-[24px] p-8 flex flex-col gap-6 w-full text-left transition-all duration-200 hover:bg-[#323232] group";
+  const cardClasses = "bg-[#262626] rounded-[24px] p-8 flex flex-col gap-6 w-full text-left";
 
   const content = (
     <>
       {/* squircle icon badge */}
-      <div className="w-10 h-10 bg-[#E0FF6F] text-[#1A1A1A] rounded-[12px] flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
+      <div className="w-10 h-10 bg-[#E0FF6F] text-[#1A1A1A] rounded-[12px] flex items-center justify-center">
         {renderIcon(label)}
       </div>
 
@@ -31,7 +33,7 @@ export default function SocialCard({ label, value, href, isEmail = false }) {
           {label}
         </span>
         {/* Hidden on mobile to make layout simple and compact */}
-        <span className="text-[0.85rem] text-[#E0FF6F] uppercase tracking-wider hidden sm:block">
+        <span className="text-[0.85rem] text-[#E0FF6F] tracking-wider hidden sm:block">
           {value}
         </span>
       </div>

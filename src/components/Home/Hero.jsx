@@ -20,6 +20,49 @@ export default function Hero() {
     return () => resizeObserver.disconnect();
   }, []);
 
+  const jobs = ["Full-Stack Developer", "UX Designer", "Freelancer", "Philosopher", "The Leader", "The Sage", "Hi!", "Hello!", "Welcome!"];
+  const [jobIndex, setJobIndex] = useState(0);
+  const [isRolling, setIsRolling] = useState(false);
+  const [speed, setSpeed] = useState(400);
+
+  const rollJob = () => {
+    if (isRolling) return;
+    setIsRolling(true);
+
+    // Randomize next target index (ensure it doesn't get stuck on the same one)
+    let targetIndex;
+    do {
+      targetIndex = Math.floor(Math.random() * jobs.length);
+    } while (targetIndex === jobIndex);
+
+    const steps = 8;
+    // Step delay durations (faster to slower)
+    const delays = [80, 80, 100, 150, 220, 320, 480, 700];
+    // Matching CSS transition durations for visual coherence
+    const speeds = [80, 80, 100, 150, 220, 320, 480, 700];
+
+    let currentStep = 0;
+    let currentTempIndex = jobIndex;
+
+    const tick = () => {
+      currentStep++;
+      currentTempIndex = (currentTempIndex + 1) % jobs.length;
+      
+      setSpeed(speeds[currentStep - 1] || 300);
+      
+      if (currentStep === steps) {
+        setJobIndex(targetIndex);
+        setIsRolling(false);
+        return;
+      }
+      
+      setJobIndex(currentTempIndex);
+      setTimeout(tick, delays[currentStep - 1]);
+    };
+
+    setTimeout(tick, 80);
+  };
+
   return (
     <section
       id="hero"
@@ -27,14 +70,34 @@ export default function Hero() {
     >
       {/* Content */}
       <div ref={contentRef} className="flex flex-col items-center text-center xl:items-start xl:text-left xl:w-1/2 w-full justify-center">
-        <span className="font-mono text-[1rem] tracking-[-0.02em] text-text-primary uppercase mb-5">
-          Graphic Designer
-        </span>
+        
+        {/* Interactive rolling job slot */}
+        <button
+          onClick={rollJob}
+          disabled={isRolling}
+          className="font-mono text-[1rem] tracking-[-0.02em] text-text-primary uppercase mb-5 select-none cursor-pointer flex flex-col items-center xl:items-start h-[1.5em] overflow-hidden group focus:outline-none disabled:cursor-default"
+          title="Click to roll next job!"
+        >
+          <div 
+            className="transition-transform ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col items-center xl:items-start"
+            style={{ 
+              transform: `translateY(-${jobIndex * 1.5}em)`,
+              transitionDuration: `${speed}ms`
+            }}
+          >
+            {jobs.map((job) => (
+              <span key={job} className="h-[1.5em] leading-[1.5em] block group-hover:text-accent transition-colors duration-200">
+                {job} <span className={`text-accent/60 text-[0.85em] ml-1 transition-all duration-200 ${isRolling ? 'animate-spin inline-block' : 'opacity-0 group-hover:opacity-100'}`}>⟳</span>
+              </span>
+            ))}
+          </div>
+        </button>
+
         <h1 className="max-w-[600px] text-[3rem] md:text-[4.8rem] font-medium leading-[1.05] tracking-[-0.04em] text-white mb-6">
-          I Design Brands You Can't Ignore
+          I Build Apps That Work Awesome!
         </h1>
         <p className="text-[1.25rem] text-text-secondary leading-[1.4] mb-10 max-w-[480px]">
-          Visual identity, layout, and design systems — for brands that want to stand out and stay consistent
+          Clean code, solid structure, and interfaces that actually help people do things
         </p>
 
         {/* CTA buttons */}

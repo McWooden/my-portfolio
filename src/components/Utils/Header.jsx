@@ -1,29 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Button from './Button';
+import { SiGithub, SiMedium } from 'react-icons/si';
+import { FaLinkedinIn } from "react-icons/fa";
 
 export default function Header() {
   const location = useLocation();
-  const isHome = location.pathname === '/';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const headerRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (headerRef.current && !headerRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isMenuOpen]);
 
   const handleContactClick = (e) => {
-    if (isHome) {
-      e.preventDefault();
-      const contactSection = document.getElementById('contact');
-      if (contactSection) {
-        contactSection.scrollIntoView({ behavior: 'smooth' });
-      }
+    e.preventDefault();
+    const contactSection = document.getElementById('contact');
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
   const navLinkClass = (active) =>
     `font-mono text-[0.95rem] font-medium uppercase tracking-tight transition-colors duration-200 ${
-      active ? 'text-accent' : 'text-text-primary hover:text-accent'
+      active ? 'text-accent' : 'text-text-primary'
     }`;
 
   return (
-    <nav className="fixed top-0 left-0 w-full h-[100px] bg-bg-dark z-[1000] flex justify-center items-center">
+    <nav ref={headerRef} className="fixed top-0 left-0 w-full h-[100px] bg-bg-dark z-[1000] flex justify-center items-center">
       <div className="w-full max-w-[1600px] px-5 xl:px-10 flex justify-between items-center relative h-full">
 
         {/* Left — Nav Links (Desktop) / Hamburger Button & "Huddin" (Mobile) */}
@@ -36,8 +54,11 @@ export default function Header() {
             <Link to="/blog" className={navLinkClass(location.pathname.startsWith('/blog'))}>
               Blog
             </Link>
+            <Link to="/network" className={navLinkClass(location.pathname === '/network')}>
+              Network
+            </Link>
             <a
-              href={isHome ? '#contact' : '/#contact'}
+              href="#contact"
               onClick={handleContactClick}
               className={navLinkClass(false)}
             >
@@ -78,7 +99,7 @@ export default function Header() {
             <div className="w-4 h-4 flex justify-center items-center relative">
               <span className="pulse-dot"></span>
             </div>
-            <span className="max-md:hidden">Julian Blake</span>
+            <span className="max-md:hidden">Sholahuddin Ahmad</span>
           </Link>
         </div>
 
@@ -87,50 +108,44 @@ export default function Header() {
           {/* Social icons — hidden on mobile */}
           <div className="flex gap-4 items-center max-md:hidden">
             <a
-              href="https://framer.link/sashamozdir"
+              href="https://github.com/McWooden"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center w-5 h-5 text-text-secondary transition-all duration-200 hover:text-text-primary hover:-translate-y-0.5"
-              title="Framer"
+              title="GitHub"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" className="w-full h-full fill-current">
-                <path d="M208,104V40a8,8,0,0,0-8-8H56a8,8,0,0,0-5.31,14L107,96H56a8,8,0,0,0-8,8v64a8,8,0,0,0,2.34,5.66l72,72A8,8,0,0,0,136,240V176h64a8,8,0,0,0,5.31-14L149,112h51A8,8,0,0,0,208,104Zm-29,56H128a8,8,0,0,0-8,8v52.69l-56-56V112h61Zm13-64H131L77,48H192Z" />
-              </svg>
+              <SiGithub className="w-full h-full" />
             </a>
             <a
-              href="https://x.com/sashamozdir"
+              href="https://www.linkedin.com/in/sholahuddin-ahmad/"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center w-5 h-5 text-text-secondary transition-all duration-200 hover:text-text-primary hover:-translate-y-0.5"
-              title="X"
+              title="LinkedIn"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" className="w-full h-full fill-current">
-                <path d="M214.75,211.71l-62.6-98.38,61.77-67.95a8,8,0,0,0-11.84-10.76L143.24,99.34,102.75,35.71A8,8,0,0,0,96,32H48a8,8,0,0,0-6.75,12.3l62.6,98.37-61.77,68a8,8,0,1,0,11.84,10.76l58.84-64.72,40.49,63.63A8,8,0,0,0,160,224h48a8,8,0,0,0,6.75-12.29ZM164.39,208,62.57,48h29L193.43,208Z" />
-              </svg>
+              <FaLinkedinIn className="w-full h-full" />
             </a>
             <a
-              href="https://www.instagram.com/Sasha.mozdir"
+              href="https://medium.com/@halohuddin"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center w-5 h-5 text-text-secondary transition-all duration-200 hover:text-text-primary hover:-translate-y-0.5"
-              title="Instagram"
+              title="Medium"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" className="w-full h-full fill-current">
-                <path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160ZM176,24H80A56.06,56.06,0,0,0,24,80v96a56.06,56.06,0,0,0,56,56h96a56.06,56.06,0,0,0,56-56V80A56.06,56.06,0,0,0,176,24Zm40,152a40,40,0,0,1-40,40H80a40,40,0,0,1-40-40V80A40,40,0,0,1,80,40h96a40,40,0,0,1,40,40ZM192,76a12,12,0,1,1-12-12A12,12,0,0,1,192,76Z" />
-              </svg>
+              <SiMedium className="w-full h-full" />
             </a>
           </div>
 
           {/* Email button */}
           <Button
-            href="mailto:hello@tmpl.digital"
+            href="mailto:halohuddin@gmail.com"
             variant="email-pill"
           >
             <span>Email me</span>
             <img
               src="https://framerusercontent.com/images/NkL1zDB0ea9KmqIpMf80b6TCw.png?width=1024&height=1024"
-              alt="Julian Blake"
-              className="w-[2.5em] h-[2.5em] rounded-full object-cover border border-border"
+              alt="Sholahuddin Ahmad"
+              className="w-[2.5em] h-[2.5em] rounded-full object-cover border border-accent"
             />
           </Button>
         </div>
@@ -144,12 +159,30 @@ export default function Header() {
         }`}
       >
         <div className="flex flex-col gap-6">
+          {/* Profile link */}
+          <Link
+            to="/"
+            onClick={() => setIsMenuOpen(false)}
+            className={`${navLinkClass(location.pathname === '/')} flex items-center gap-3.5`}
+            style={{
+              transitionDelay: isMenuOpen ? '50ms' : '0ms',
+              transform: isMenuOpen ? 'translateX(0)' : 'translateX(-20px)',
+              opacity: isMenuOpen ? 1 : 0,
+              transitionProperty: 'all',
+            }}
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            <span>Home</span>
+          </Link>
+          
           <Link
             to="/portfolio"
             onClick={() => setIsMenuOpen(false)}
             className={`${navLinkClass(location.pathname === '/portfolio')} flex items-center gap-3.5`}
             style={{
-              transitionDelay: isMenuOpen ? '50ms' : '0ms',
+              transitionDelay: isMenuOpen ? '100ms' : '0ms',
               transform: isMenuOpen ? 'translateX(0)' : 'translateX(-20px)',
               opacity: isMenuOpen ? 1 : 0,
               transitionProperty: 'all',
@@ -165,7 +198,7 @@ export default function Header() {
             onClick={() => setIsMenuOpen(false)}
             className={`${navLinkClass(location.pathname.startsWith('/blog'))} flex items-center gap-3.5`}
             style={{
-              transitionDelay: isMenuOpen ? '125ms' : '0ms',
+              transitionDelay: isMenuOpen ? '150ms' : '0ms',
               transform: isMenuOpen ? 'translateX(0)' : 'translateX(-20px)',
               opacity: isMenuOpen ? 1 : 0,
               transitionProperty: 'all',
@@ -176,15 +209,31 @@ export default function Header() {
             </svg>
             <span>Blog</span>
           </Link>
+          <Link
+            to="/network"
+            onClick={() => setIsMenuOpen(false)}
+            className={`${navLinkClass(location.pathname === '/network')} flex items-center gap-3.5`}
+            style={{
+              transitionDelay: isMenuOpen ? '200ms' : '0ms',
+              transform: isMenuOpen ? 'translateX(0)' : 'translateX(-20px)',
+              opacity: isMenuOpen ? 1 : 0,
+              transitionProperty: 'all',
+            }}
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2m16-10a4 4 0 11-8 0 4 4 0 018 0zm6 10v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75" />
+            </svg>
+            <span>Network</span>
+          </Link>
           <a
-            href={isHome ? '#contact' : '/#contact'}
+            href="#contact"
             onClick={(e) => {
               setIsMenuOpen(false);
               handleContactClick(e);
             }}
             className={`${navLinkClass(false)} flex items-center gap-3.5`}
             style={{
-              transitionDelay: isMenuOpen ? '200ms' : '0ms',
+              transitionDelay: isMenuOpen ? '250ms' : '0ms',
               transform: isMenuOpen ? 'translateX(0)' : 'translateX(-20px)',
               opacity: isMenuOpen ? 1 : 0,
               transitionProperty: 'all',
@@ -195,22 +244,6 @@ export default function Header() {
             </svg>
             <span>Contact</span>
           </a>
-
-          {/* Profile online status */}
-          <div
-            className="flex items-center gap-3 font-mono text-[0.95rem] font-medium uppercase tracking-tight text-text-secondary mt-4 pt-6 border-t border-border/30"
-            style={{
-              transitionDelay: isMenuOpen ? '275ms' : '0ms',
-              transform: isMenuOpen ? 'translateX(0)' : 'translateX(-20px)',
-              opacity: isMenuOpen ? 1 : 0,
-              transitionProperty: 'all',
-            }}
-          >
-            <div className="relative w-3 h-3 flex items-center justify-center">
-              <span className="pulse-dot"></span>
-            </div>
-            <span>Julian Blake</span>
-          </div>
         </div>
 
       </div>

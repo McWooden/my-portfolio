@@ -5,6 +5,7 @@ import Footer from './components/Utils/Footer';
 import Home from './pages/Home';
 import Portfolio from './pages/Portfolio';
 import Blog from './pages/Blog';
+import Network from './pages/Network';
 import ProjectDetail from './pages/ProjectDetail';
 import BlogDetail from './pages/BlogDetail';
 import NotFound from './pages/NotFound';
@@ -21,6 +22,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/network" element={<Network />} />
           <Route path="/portfolio/:slug" element={<ProjectDetail />} />
           <Route path="/blog/:slug" element={<BlogDetail />} />
           <Route path="*" element={<NotFound />} />

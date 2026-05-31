@@ -14,16 +14,16 @@ export default function NotFound() {
           404
         </h1>
         <h2 className="text-[2.2rem] font-medium text-white tracking-[-0.04em] mb-2">
-          Lost? Not really
+          Are you lost?
         </h2>
         <p className="text-[1.15rem] text-text-secondary leading-[1.5] mb-[30px] max-w-[480px]">
-          We couldn't find the page you were looking for. Start fresh with something worth reading.
+          Of all the pages you could've visited, you landed on this one?
         </p>
         <Link
           to="/"
           className="bg-accent text-bg-dark font-sans text-[1.05rem] font-semibold px-7 py-[14px] rounded-full transition-all duration-200 hover:bg-white hover:-translate-y-0.5"
         >
-          Back to home
+          Get back to home
         </Link>
       </section>
 

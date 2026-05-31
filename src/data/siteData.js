@@ -345,31 +345,109 @@ export const faqs = [
   {
     number: "01",
     question: "What kind of projects do you take on?",
-    answer: "I specialize in visual identity, layout design, and brand assets — things like logos, pitch decks, social templates, and packaging. If it needs to look great and work hard, I’m interested."
+    answer: "I do both code and design — websites, tools, apps, logos, posters, banners, or anything in between. If we can imagine it, I can build it."
   },
   {
     number: "02",
     question: "Do you work with small businesses or only big brands?",
-    answer: "Both. I’ve worked with early-stage startups, solo founders, and large teams. What matters most is clarity, collaboration, and shared standards for good design."
+    answer: "Both. Startups, solo founders, big teams — size doesn't matter. What matters is we're on the same page and both care about the outcome."
   },
   {
     number: "03",
     question: "How long does a typical project take?",
-    answer: "Most projects take 1–2 weeks. For more complex work (like full brand identity), we’ll align on a timeline together — I always keep things moving fast and focused."
+    answer: "Design work usually wraps in 1-2 weeks. Dev projects closer to 4-6. Bigger stuff like a full brand from scratch? We'll figure out a timeline together — but I don't drag things out."
   },
   {
     number: "04",
     question: "What tools do you use?",
-    answer: "Figma, Illustrator, InDesign, and sometimes Framer or Webflow for handoff. I keep files organized and editable for easy future use."
+      answer: "Affinity Studio, Figma, Antigravity IDE — sometimes Framer or Claude Code depending on the build. Files always clean and ready for whoever touches them next."
   },
   {
     number: "05",
     question: "Do you offer revisions?",
-    answer: "Yes — every project includes at least one revision round. But most clients are happy from the first delivery, since we define the direction clearly from the start."
+    answer: "Yes, at least one revision round is always included. Honestly though, most projects don't need much — because we nail down the direction before anything gets built."
   },
   {
     number: "06",
     question: "How do we start working together?",
-    answer: "Just reach out via the contact form or email. I’ll reply within 1–2 business days with availability and next steps."
+    answer: "Just reach out via the contact form or email. I'll reply within 1–2 business days — though sometimes I get too deep in design or code to surface. If I haven't replied, feel free to ping again."
   }
 ];
+
+export const services = {
+  tabs: ["All", "Code", "Design"],
+  content: {
+    all: {
+      items: [
+        {
+          number: "1",
+          title: "Brand Identity",
+          description: "Visual systems that hold up everywhere — screen, print, or code. Logos, colors, type, and the logic behind them."
+        },
+        {
+          number: "2",
+          title: "Design Apps",
+          description: "Designed and built by the same person. No handoff friction, no 'that's not what I meant' — just one clean result."
+        },
+        {
+          number: "3",
+          title: "Docs & Decks",
+          description: "Proposals, pitch decks, and internal docs — structured to communicate clearly and look like you mean it."
+        },
+        {
+          number: "4",
+          title: "Tools & Templates",
+          description: "Social templates, custom web tools, or anything repeatable — built once, used forever."
+        }
+      ]
+    },
+    code: {
+      items: [
+        {
+          number: "1",
+          title: "Discovery",
+          description: "We start by asking the right questions — what you need, what you don't, and what the thing actually has to do."
+        },
+        {
+          number: "2",
+          title: "Build",
+          description: "Clean, organized code built around your requirements. No bloat, no guesswork."
+        },
+        {
+          number: "3",
+          title: "Testing & Feedback",
+          description: "We pressure-test it together — catching edge cases before real users do."
+        },
+        {
+          number: "4",
+          title: "Launch",
+          description: "Ship it. Files handed off clean, documented, and ready for whatever comes next."
+        }
+      ]
+    },
+    design: {
+      items: [
+        {
+          number: "1",
+          title: "Brand Identity",
+          description: "Logos, colors, and typography systems that reflect who you are — and stick in people's minds."
+        },
+        {
+          number: "2",
+          title: "Presentations",
+          description: "Pitch decks, client proposals, and internal docs that look as sharp as your ideas."
+        },
+        {
+          number: "3",
+          title: "Social Media",
+          description: "Templates and visuals that make your content scroll-stopping and on-brand across every platform."
+        },
+        {
+          number: "4",
+          title: "Print",
+          description: "Print & Packaging: Business cards, posters, labels — tangible design with real-world impact."
+        }
+      ]
+    }
+  }
+};

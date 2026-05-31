@@ -44,21 +44,21 @@ export default function Footer() {
           <div className="flex items-center gap-3">
             <img
               src="https://framerusercontent.com/images/NkL1zDB0ea9KmqIpMf80b6TCw.png?width=1024&height=1024"
-              alt="Julian Blake"
+              alt="Sholahuddin Ahmad"
               className="w-9 h-9 rounded-full object-cover border border-white/10"
             />
             <span className="font-mono text-[1.3rem] font-normal text-white uppercase tracking-tight">
-              Julian Blake
+              Sholahuddin Ahmad
             </span>
           </div>
           <p className="text-[1rem] text-text-secondary leading-relaxed">
             Visual designer focused on bold, modern branding
           </p>
           <a
-            href="mailto:hello@tmpl.digital"
+            href="mailto:halohuddin@gmail.com"
             className="font-sans text-[1rem] text-[#E0FF6F] hover:opacity-80 transition-opacity duration-200 mt-2 block"
           >
-            hello@tmpl.digital
+            halohuddin@gmail.com
           </a>
         </address>
 
@@ -97,6 +97,11 @@ export default function Footer() {
               </Link>
             </li>
             <li>
+              <Link to="/network" className="font-sans text-[0.95rem]  text-white hover:text-[#E0FF6F] transition-colors duration-200 uppercase">
+                Network
+              </Link>
+            </li>
+            <li>
               <a
                 href={path === '/' ? '#contact' : '/#contact'}
                 onClick={handleContactClick}
@@ -111,32 +116,32 @@ export default function Footer() {
           <ul className="flex flex-col gap-4 text-left list-none p-0 m-0">
             <li>
               <a
-                href="https://x.com/sashamozdir"
+                href="https://www.linkedin.com/in/sholahuddin-ahmad/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-sans text-[0.95rem]  text-[#E0FF6F] hover:opacity-80 transition-opacity duration-200"
               >
-                X/Twitter
+                LinkedIn
               </a>
             </li>
             <li>
               <a
-                href="https://www.instagram.com/Sasha.mozdir"
+                href="https://github.com/McWooden"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-sans text-[0.95rem]  text-[#E0FF6F] hover:opacity-80 transition-opacity duration-200"
               >
-                Instagram
+                GitHub
               </a>
             </li>
             <li>
               <a
-                href="https://framer.link/sashamozdir"
+                href="https://medium.com/@halohuddin"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-sans text-[0.95rem]  text-[#E0FF6F] hover:opacity-80 transition-opacity duration-200"
               >
-                Framer
+                Medium
               </a>
             </li>
           </ul>
@@ -168,17 +173,17 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Large Julian Blake Heading Text Background */}
-      <div className="w-full max-w-[1600px] select-none overflow-hidden pt-4 pb-4 pointer-events-none flex justify-center">
+      {/* Large Sholahuddin Ahmad Heading Text Background */}
+      <div className="w-full max-w-[1600px] select-none overflow-hidden pt-4 pb-4 pointer-events-none flex justify-end">
         <h1
-          className="w-full text-right font-sans uppercase font-normal text-transparent bg-clip-text leading-none tracking-tighter text-[11.5vw] xl:text-[184px] whitespace-nowrap"
+          className="w-full text-right uppercase font-mono text-transparent bg-clip-text leading-none tracking-tighter text-[clamp(5rem,10vw,100rem)] whitespace-nowrap mask-r-from-90%"
           style={{
             backgroundImage: 'linear-gradient(90deg, #262626 0%, #eaeaea 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
           }}
         >
-          JULIAN BLAKE
+          SHOLAHUDDIN AHMAD
         </h1>
       </div>
 

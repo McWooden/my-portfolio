@@ -5,10 +5,10 @@ import SocialCard from './SocialCard';
 
 export default function Contact() {
   const socials = [
-    { label: 'X/Twitter', value: '@SashaMozdir', href: 'https://x.com/SashaMozdir' },
-    { label: 'Instagram', value: '@Sasha.mozdir', href: 'https://www.instagram.com/Sasha.mozdir' },
-    { label: 'Framer', value: '@SashaMozdir', href: 'https://framer.link/gTuEdNG' },
-    { label: 'Email', value: 'hello@tmpl.digital', href: 'mailto:hello@tmpl.digital', isEmail: true }
+    { label: 'X/Twitter', value: '@halohuddin', href: 'https://x.com/halohuddin' },
+    { label: 'Instagram', value: '@halohuddin', href: 'https://www.instagram.com/halohuddin' },
+    { label: 'Medium', value: '@halohuddin', href: 'https://medium.com/@halohuddin' },
+    { label: 'Email', value: 'halohuddin@gmail.com', href: 'mailto:halohuddin@gmail.com', isEmail: true }
   ];
 
   return (

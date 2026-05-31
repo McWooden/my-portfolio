@@ -24,6 +24,23 @@ export default function ReviewsSection() {
   const speedChangeTimeRef = useRef(null);
   const speedChangeDirectionRef = useRef(null);
 
+  // Visibility state to pause animations when off-screen
+  const [isVisible, setIsVisible] = useState(false);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.05 }
+    );
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+    return () => observer.disconnect();
+  }, []);
+
   // Responsive breakpoint listener
   useEffect(() => {
     const handleResize = () => {
@@ -56,7 +73,7 @@ export default function ReviewsSection() {
   }, [currentIndex, isDesktop]);
 
   useEffect(() => {
-    if (isDesktop) return;
+    if (isDesktop || !isVisible) return;
 
     let animationFrameId;
 
@@ -94,11 +111,11 @@ export default function ReviewsSection() {
       cancelAnimationFrame(animationFrameId);
       lastTimeRef.current = null;
     };
-  }, [isPaused, currentIndex, isDesktop]);
+  }, [isPaused, currentIndex, isDesktop, isVisible]);
 
   // Animation frame loop for Desktop infinite scroller
   useEffect(() => {
-    if (!isDesktop) return;
+    if (!isDesktop || !isVisible) return;
 
     let animationFrameId;
     const baseSpeed = 1.0; // base pixels per frame
@@ -140,7 +157,7 @@ export default function ReviewsSection() {
           if (scrollOffsetRef.current < 0) {
             scrollOffsetRef.current += oneSetWidth;
           }
-          trackRef.current.style.transform = `translateX(-${scrollOffsetRef.current}px)`;
+          trackRef.current.style.transform = `translate3d(-${scrollOffsetRef.current}px, 0, 0)`;
         }
       }
       animationFrameId = requestAnimationFrame(tick);
@@ -151,7 +168,7 @@ export default function ReviewsSection() {
       cancelAnimationFrame(animationFrameId);
       lastTimeRef.current = null;
     };
-  }, [isDesktop, isHovered]);
+  }, [isDesktop, isHovered, isVisible]);
 
   // Mobile Navigation handlers
   const handleNext = () => {
@@ -203,26 +220,28 @@ export default function ReviewsSection() {
         subtitle="Feedback from clients"
       />
 
-      {isDesktop ? (
-        /* LAPTOP/DESKTOP VIEW: Infinite Scrolling Marquee with Edge Controls */
-        <div className="relative w-full overflow-hidden mask-ticker mt-16 py-4 select-none">
+      <div ref={containerRef} className="w-full">
+        {isDesktop ? (
+          /* LAPTOP/DESKTOP VIEW: Infinite Scrolling Marquee with Edge Controls */
+          <div className="relative w-full overflow-hidden mt-16 py-4 select-none">
           
           {/* Left Edge Hotspot (Rewind) */}
           <div
             onClick={() => triggerSpeedChange('backward')}
-            className="absolute left-0 top-0 bottom-0 w-[15%] z-20 cursor-pointer bg-gradient-to-r from-[#1a1a1a] via-[#1a1a1a]/30 to-transparent transition-all select-none active:scale-95 duration-200"
+            className="absolute left-0 top-0 bottom-0 w-[15%] z-20 cursor-pointer bg-gradient-to-r from-[#1a1a1a] via-[#1a1a1a]/30 to-transparent transition-all select-none duration-200"
           />
 
           {/* Right Edge Hotspot (Fast Forward) */}
           <div
             onClick={() => triggerSpeedChange('forward')}
-            className="absolute right-0 top-0 bottom-0 w-[15%] z-20 cursor-pointer bg-gradient-to-l from-[#1a1a1a] via-[#1a1a1a]/30 to-transparent transition-all select-none active:scale-95 duration-200"
+            className="absolute right-0 top-0 bottom-0 w-[15%] z-20 cursor-pointer bg-gradient-to-l from-[#1a1a1a] via-[#1a1a1a]/30 to-transparent transition-all select-none duration-200"
           />
 
           {/* Ticker Track */}
           <div
             ref={trackRef}
             className="flex gap-[32px] w-max py-4"
+            style={{ willChange: 'transform' }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
@@ -300,8 +319,9 @@ export default function ReviewsSection() {
           </div>
         </div>
       )}
-    </Section>
-  );
+    </div>
+  </Section>
+);
 }
 
 

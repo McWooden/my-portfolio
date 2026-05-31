@@ -24,28 +24,26 @@
   --animate-ticker:        ticker 60s linear infinite;
   --animate-float:         float 6s ease-in-out infinite;
   --animate-float-delayed: float-delayed 8s ease-in-out infinite 2s;
-  --animate-pulse-green:   pulse-green 2s infinite;
 
   /* Keyframes */
   @keyframes ticker {
-    0%   { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+    0%   { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-50%, 0, 0); }
   }
 
   @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50%       { transform: translateY(-8px); }
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50%       { transform: translate3d(0, -8px, 0); }
   }
 
   @keyframes float-delayed {
-    0%, 100% { transform: translateY(0px); }
-    50%       { transform: translateY(-6px); }
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50%       { transform: translate3d(0, -6px, 0); }
   }
 
-  @keyframes pulse-green {
-    0%   { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(30, 255, 0, 0.7); }
-    70%  { transform: scale(1);    box-shadow: 0 0 0 6px rgba(30, 255, 0, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(30, 255, 0, 0); }
+  @keyframes pulse-ring {
+    0%       { transform: scale(0.95); opacity: 0.8; }
+    80%, 100% { transform: scale(2.5); opacity: 0; }
   }
 }
 
@@ -105,28 +103,37 @@
 
 /* ── Custom Utilities ── */
 @layer utilities {
-  /* Ticker fade mask */
-  .mask-ticker {
-    mask-image: linear-gradient(to right, rgba(0,0,0,0) 0%, rgb(0,0,0) 20%, rgb(0,0,0) 80%, rgba(0,0,0,0) 100%);
-    -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,0) 0%, rgb(0,0,0) 20%, rgb(0,0,0) 80%, rgba(0,0,0,0) 100%);
-  }
-
-  /* Pulse dot (online indicator) */
+  /* Pulse dot (online indicator) with high-performance halo ring */
   .pulse-dot {
     width: 8px;
     height: 8px;
     background-color: theme(--color-online-green);
     border-radius: 50%;
     display: inline-block;
-    animation: var(--animate-pulse-green);
+    position: relative;
+  }
+  .pulse-dot::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    background-color: theme(--color-online-green);
+    animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    transform-origin: center;
   }
 
   /* Float animations */
   .animate-float         { animation: var(--animate-float); }
   .animate-float-delayed { animation: var(--animate-float-delayed); }
 
-  /* Ticker animation */
-  .animate-ticker { animation: var(--animate-ticker); }
+  /* Ticker animation with layer promotion */
+  .animate-ticker { 
+    animation: var(--animate-ticker); 
+    will-change: transform;
+  }
 
   /* List item with accent bullet */
   .accent-list-item {
@@ -138,5 +145,18 @@
     position: absolute;
     left: 0;
     color: theme(--color-accent);
+  }
+
+  /* Scroll Reveal Utilities */
+  .reveal-item {
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform, opacity;
+  }
+
+  .reveal-item.revealed {
+    opacity: 1;
+    transform: scale(1);
   }
 }

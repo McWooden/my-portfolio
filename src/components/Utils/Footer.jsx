@@ -171,7 +171,7 @@ export default function Footer() {
       {/* Large Julian Blake Heading Text Background */}
       <div className="w-full max-w-[1600px] select-none overflow-hidden pt-4 pb-4 pointer-events-none flex justify-center">
         <h1
-          className="w-full text-center font-sans uppercase font-normal text-transparent bg-clip-text leading-none tracking-tighter text-[11.5vw] xl:text-[184px] whitespace-nowrap"
+          className="w-full text-right font-sans uppercase font-normal text-transparent bg-clip-text leading-none tracking-tighter text-[11.5vw] xl:text-[184px] whitespace-nowrap"
           style={{
             backgroundImage: 'linear-gradient(90deg, #262626 0%, #eaeaea 100%)',
             WebkitBackgroundClip: 'text',

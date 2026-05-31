@@ -3,8 +3,11 @@ import { blogPosts } from '../../data/siteData';
 import BlogCard from '../Utils/BlogCard';
 import SectionHeader from '../Utils/SectionHeader';
 import Section from '../Utils/Section';
+import { useScrollReveal } from '../../hooks/useScrollReveal';
 
 export default function BlogSection() {
+  const [gridRef, isRevealed] = useScrollReveal(0.05);
+
   return (
     <Section id="blog">
       <SectionHeader
@@ -14,9 +17,17 @@ export default function BlogSection() {
         title="Behind The Work: Passion Projects, Documented"
         subtitle="Notes from behind the screen"
       />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-[30px] w-full max-w-[1600px]">
-        {blogPosts.map((post) => (
-          <BlogCard key={post.slug} post={post} />
+      <div 
+        ref={gridRef}
+        className="grid grid-cols-1 md:grid-cols-2 gap-[30px] w-full max-w-[1600px]"
+      >
+        {blogPosts.map((post, index) => (
+          <BlogCard 
+            key={post.slug} 
+            post={post} 
+            className={`reveal-item ${isRevealed ? 'revealed' : ''}`}
+            style={{ transitionDelay: `${index * 100}ms` }}
+          />
         ))}
       </div>
     </Section>

@@ -4,8 +4,11 @@ import Contact from '../components/Utils/Contact';
 import SectionHeader from '../components/Utils/SectionHeader';
 import BlogCard from '../components/Utils/BlogCard';
 import Section from '../components/Utils/Section';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 
 export default function Blog() {
+  const [gridRef, isRevealed] = useScrollReveal(0.05);
+
   return (
     <div className="pt-[140px] max-[810px]:pt-[100px] bg-bg-dark">
       
@@ -22,9 +25,17 @@ export default function Blog() {
 
       {/* 2. Blog Grid Section */}
       <Section id="blog-grid" extraClass="py-0">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-[30px] w-full">
-          {blogPosts.map((post) => (
-            <BlogCard key={post.slug} post={post} />
+        <div 
+          ref={gridRef}
+          className="grid grid-cols-1 md:grid-cols-2 gap-[30px] w-full"
+        >
+          {blogPosts.map((post, index) => (
+            <BlogCard 
+              key={post.slug} 
+              post={post} 
+              className={`reveal-item ${isRevealed ? 'revealed' : ''}`}
+              style={{ transitionDelay: `${index * 100}ms` }}
+            />
           ))}
         </div>
       </Section>

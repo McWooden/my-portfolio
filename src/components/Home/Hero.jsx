@@ -111,7 +111,7 @@ export default function Hero() {
         </Link>
 
         {/* Floating slots badge */}
-        <div className="absolute bottom-5 right-5 bg-bg-dark/85 backdrop-blur-[8px] border border-border px-6 py-3 rounded-[20px] flex items-center gap-[10px] z-[5] animate-float-delayed">
+        <div className="absolute bottom-5 right-5 bg-[#222222]/95 border border-border px-6 py-3 rounded-[20px] flex items-center gap-[10px] z-[5] animate-float-delayed">
           <span className="pulse-dot"></span>
           <span className="font-mono text-[0.95rem] font-medium uppercase text-text-primary tracking-[-0.02em]">
             3 Open slots

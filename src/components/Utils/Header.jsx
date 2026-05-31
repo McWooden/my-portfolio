@@ -51,16 +51,22 @@ export default function Header() {
             className="hidden max-md:flex items-center gap-3 z-50 text-text-primary hover:text-accent transition-colors cursor-pointer select-none"
             aria-label="Toggle Menu"
           >
-            <div className="w-6 h-6 flex items-center justify-center">
-              {isMenuOpen ? (
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              )}
+            <div className="w-6 h-4.5 relative flex flex-col justify-between items-end">
+              <span
+                className={`h-[1.5px] bg-current rounded-full transition-all duration-300 ease-out origin-right ${
+                  isMenuOpen ? 'w-5.5 -rotate-45 translate-x-[-1px] translate-y-[-1px]' : 'w-5.5'
+                }`}
+              />
+              <span
+                className={`h-[1.5px] bg-current rounded-full transition-all duration-300 ease-out ${
+                  isMenuOpen ? 'w-0 opacity-0' : 'w-3.5'
+                }`}
+              />
+              <span
+                className={`h-[1.5px] bg-current rounded-full transition-all duration-300 ease-out origin-right ${
+                  isMenuOpen ? 'w-5.5 rotate-45 translate-x-[-1px] translate-y-[1px]' : 'w-4.5'
+                }`}
+              />
             </div>
             <span className="font-mono text-[1.1rem] uppercase tracking-tight">Huddin</span>
           </button>
@@ -124,7 +130,7 @@ export default function Header() {
             <img
               src="https://framerusercontent.com/images/NkL1zDB0ea9KmqIpMf80b6TCw.png?width=1024&height=1024"
               alt="Julian Blake"
-              className="w-10 h-10 rounded-full object-cover border border-border max-md:w-8 max-md:h-8"
+              className="w-[2.5em] h-[2.5em] rounded-full object-cover border border-border"
             />
           </Button>
         </div>

@@ -6,8 +6,11 @@ import Contact from '../components/Utils/Contact';
 import SectionHeader from '../components/Utils/SectionHeader';
 import ProjectCard from '../components/Utils/ProjectCard';
 import Section from '../components/Utils/Section';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 
 export default function Portfolio() {
+  const [gridRef, isRevealed] = useScrollReveal(0.05);
+
   return (
     <div className="pt-[140px] max-[810px]:pt-[100px] bg-bg-dark">
       
@@ -24,9 +27,17 @@ export default function Portfolio() {
 
       {/* 2. Projects Grid Section */}
       <Section id="portfolio-grid" extraClass="py-0">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 w-full">
-          {projects.map((project) => (
-            <ProjectCard key={project.slug} project={project} />
+        <div 
+          ref={gridRef}
+          className="grid grid-cols-1 md:grid-cols-2 gap-10 w-full"
+        >
+          {projects.map((project, index) => (
+            <ProjectCard 
+              key={project.slug} 
+              project={project} 
+              className={`reveal-item ${isRevealed ? 'revealed' : ''}`}
+              style={{ transitionDelay: `${index * 100}ms` }}
+            />
           ))}
         </div>
       </Section>

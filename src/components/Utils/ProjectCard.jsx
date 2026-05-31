@@ -1,13 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-export const ProjectCard = ({ project }) => (
+export const ProjectCard = ({ project, className = '', style = {} }) => (
   <Link
     to={`/portfolio/${project.slug}`}
     className="flex flex-col gap-4 group text-left w-full"
   >
     {/* Rounded cover image container with no border or background */}
-    <div className="w-full aspect-[1.6] overflow-hidden rounded-[30px]">
+    <div 
+      className={`w-full aspect-[1.6] overflow-hidden rounded-[30px] ${className}`}
+      style={style}
+    >
       <img
         src={project.coverImage}
         alt={project.title}

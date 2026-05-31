@@ -1,4 +1,5 @@
 import React from 'react';
+import { useScrollReveal } from '../../hooks/useScrollReveal';
 
 /**
  * SectionHeader Component
@@ -24,12 +25,16 @@ import React from 'react';
  */
 const SectionHeader = ({ index, tag, name, title, subtitle }) => {
   const showStar = index === null || index === undefined;
+  const [revealRef, isRevealed] = useScrollReveal(0.05);
 
   return (
     <div className="flex flex-col items-center w-full max-w-[1600px] mx-auto mb-[60px]">
       
       {/* 1. Meta-Header (Top Row) */}
-      <div className="flex flex-row items-center justify-between w-full font-mono text-[14px] md:text-[16px] font-normal tracking-[-0.2px] md:tracking-[-0.32px] uppercase gap-2 flex-wrap md:flex-nowrap pb-4">
+      <div 
+        ref={revealRef}
+        className={`flex flex-row items-center justify-between w-full font-mono text-[14px] md:text-[16px] font-normal tracking-[-0.2px] md:tracking-[-0.32px] uppercase gap-2 flex-wrap md:flex-nowrap pb-4 reveal-item ${isRevealed ? 'revealed' : ''}`}
+      >
         
         {/* Part A (Index/Star): Left-aligned */}
         <div className="flex items-center justify-start text-[#E0FF6F] min-w-[80px]">

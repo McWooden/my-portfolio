@@ -1,10 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-export const BlogCard = ({ post }) => (
+export const BlogCard = ({ post, className = '', style = {} }) => (
   <Link
     to={`/blog/${post.slug}`}
-    className="relative block w-full aspect-[1.6] rounded-[30px] overflow-hidden group text-left"
+    className={`relative block w-full aspect-[1.6] rounded-[30px] overflow-hidden group text-left ${className}`}
+    style={style}
   >
     {/* Background Image */}
     <img

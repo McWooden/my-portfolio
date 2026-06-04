@@ -3,9 +3,10 @@ import { useScrollReveal } from '../../hooks/useScrollReveal';
 
 const SectionHeader = ({ index, tag, name, title, subtitle, extraClass = '' }) => {
   const [revealRef, isRevealed] = useScrollReveal(0.05);
+  const marginClass = extraClass.includes('mb-') ? '' : 'mb-[60px]';
 
   return (
-    <div className={`flex flex-col items-center w-full max-w-[1600px] mx-auto mb-[60px] ${extraClass}`}>
+    <div className={`flex flex-col items-center w-full max-w-[1600px] mx-auto ${marginClass} ${extraClass}`}>
       
       {/* 1. Meta-Header (Top Row) */}
       <div 

@@ -2,13 +2,12 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { FiExternalLink, FiLinkedin, FiTwitter, FiGithub, FiUser, FiPlus, FiX, FiTrash2, FiMove } from 'react-icons/fi';
 import { networkPeople, centerNode } from '../../data/networkData';
+import NodeModal from './NodeModal';
 
 const IS_DEV = import.meta.env.DEV;
 
 const BOARD_WIDTH = 1400;
 const BOARD_HEIGHT = 900;
-
-const EMPTY_FORM = { name: '', role: '', avatar: '', website: '', social: '', socialType: 'linkedin' };
 
 // Toolbar modes
 const MODE = { VIEW: 'view', DELETE: 'delete', MOVE: 'move' };
@@ -38,12 +37,8 @@ export default function NetworkMap() {
   // Unified State & Dev Save Status
   const [nodes, setNodes] = useState(networkPeople);
   const [saveStatus, setSaveStatus] = useState(''); // '', 'saving', 'saved', 'error'
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [addForm, setAddForm] = useState(EMPTY_FORM);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editForm, setEditForm] = useState(EMPTY_FORM);
-  const [editingNodeId, setEditingNodeId] = useState(null);
-  const [formError, setFormError] = useState('');
+  const [modalMode, setModalMode] = useState(null); // null, 'add', 'edit'
+  const [editingNode, setEditingNode] = useState(null);
   const [toolbarMode, setToolbarMode] = useState(MODE.VIEW);
 
   // Move-mode state
@@ -89,27 +84,23 @@ export default function NetworkMap() {
     }
   }, []);
 
-  const handleAddNode = (e) => {
-    e.preventDefault();
-    if (!addForm.name.trim()) { setFormError('Name is required.'); return; }
+  const handleAddNodeSubmit = (formData) => {
     const pos = getAutoPosition(nodes.length);
     const newNode = {
       id: Date.now(),
-      name: addForm.name.trim(),
-      role: addForm.role.trim() || 'Connection',
-      avatar: addForm.avatar.trim() ||
-        `https://ui-avatars.com/api/?name=${encodeURIComponent(addForm.name.trim())}&background=2a2a2a&color=E0FF6F&size=256`,
-      website: addForm.website.trim() || '#',
-      social: addForm.social.trim() || '#',
-      socialType: addForm.socialType,
+      name: formData.name.trim(),
+      role: formData.role.trim() || 'Connection',
+      avatar: formData.avatar.trim() ||
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name.trim())}&background=2a2a2a&color=E0FF6F&size=256`,
+      website: formData.website.trim() || '#',
+      social: formData.social.trim() || '#',
+      socialType: formData.socialType,
       ...pos
     };
     const updatedNodes = [...nodes, newNode];
     setNodes(updatedNodes);
     saveNodes(updatedNodes);
-    setAddForm(EMPTY_FORM);
-    setFormError('');
-    setShowAddModal(false);
+    setModalMode(null);
   };
 
   const handleDeleteNode = (id) => {
@@ -120,33 +111,22 @@ export default function NetworkMap() {
   };
 
   const handleStartEdit = (node) => {
-    setEditingNodeId(node.id);
-    setEditForm({
-      name: node.name || '',
-      role: node.role || '',
-      avatar: node.avatar || '',
-      website: node.website === '#' ? '' : node.website || '',
-      social: node.social === '#' ? '' : node.social || '',
-      socialType: node.socialType || 'linkedin'
-    });
-    setFormError('');
-    setShowEditModal(true);
+    setEditingNode(node);
+    setModalMode('edit');
   };
 
-  const handleSaveEdit = (e) => {
-    e.preventDefault();
-    if (!editForm.name.trim()) { setFormError('Name is required.'); return; }
+  const handleSaveEditSubmit = (formData) => {
     const updatedNodes = nodes.map(n => {
-      if (n.id === editingNodeId) {
+      if (n.id === editingNode.id) {
         return {
           ...n,
-          name: editForm.name.trim(),
-          role: editForm.role.trim() || 'Connection',
-          avatar: editForm.avatar.trim() ||
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(editForm.name.trim())}&background=2a2a2a&color=E0FF6F&size=256`,
-          website: editForm.website.trim() || '#',
-          social: editForm.social.trim() || '#',
-          socialType: editForm.socialType
+          name: formData.name.trim(),
+          role: formData.role.trim() || 'Connection',
+          avatar: formData.avatar.trim() ||
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name.trim())}&background=2a2a2a&color=E0FF6F&size=256`,
+          website: formData.website.trim() || '#',
+          social: formData.social.trim() || '#',
+          socialType: formData.socialType
         };
       }
       return n;
@@ -154,15 +134,13 @@ export default function NetworkMap() {
     setNodes(updatedNodes);
     saveNodes(updatedNodes);
 
-    const updatedSelectedNode = updatedNodes.find(n => n.id === editingNodeId);
+    const updatedSelectedNode = updatedNodes.find(n => n.id === editingNode.id);
     if (updatedSelectedNode) {
       setSelectedNode(updatedSelectedNode);
     }
 
-    setShowEditModal(false);
-    setEditForm(EMPTY_FORM);
-    setEditingNodeId(null);
-    setFormError('');
+    setModalMode(null);
+    setEditingNode(null);
   };
 
   const handleNodeClick = (node) => {
@@ -603,7 +581,7 @@ export default function NetworkMap() {
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-1 bg-[#1a1a1a]/90 backdrop-blur-xl border border-border/60 rounded-2xl p-1.5 shadow-[0_8px_40px_rgba(0,0,0,0.6)]">
           {/* Add */}
           <button
-            onClick={() => { setShowAddModal(true); setFormError(''); setToolbarMode(MODE.VIEW); }}
+            onClick={() => { setModalMode('add'); setToolbarMode(MODE.VIEW); }}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[0.78rem] font-mono uppercase tracking-wider cursor-pointer select-none focus:outline-none transition-all duration-200 bg-accent text-bg-dark font-semibold hover:opacity-90"
             title="Add a new node"
           >
@@ -652,171 +630,18 @@ export default function NetworkMap() {
         </div>
       )}
 
-      {/* Dev-only: Add Node Modal */}
-      {IS_DEV && showAddModal && createPortal(
-        <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }}
-          onClick={(e) => { if (e.target === e.currentTarget) { setShowAddModal(false); setAddForm(EMPTY_FORM); } }}
-        >
-          <div
-            className="relative w-full max-w-md bg-[#171717] border border-border rounded-[24px] shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden"
-          >
-            {/* Modal header */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-border">
-              <div>
-                <h2 className="text-white font-semibold text-[1.1rem] tracking-tight">Add Network Node</h2>
-                <p className="text-[0.78rem] text-yellow-400/80 font-mono uppercase tracking-wider mt-0.5">⚡ Dev mode only</p>
-              </div>
-              <button
-                onClick={() => { setShowAddModal(false); setAddForm(EMPTY_FORM); setFormError(''); }}
-                className="w-8 h-8 bg-white/5 hover:bg-white/10 border border-border rounded-full flex items-center justify-center text-white/60 hover:text-white cursor-pointer focus:outline-none transition-colors"
-              >
-                <FiX className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Modal form */}
-            <form onSubmit={handleAddNode} className="px-6 py-5 flex flex-col gap-3.5">
-              {formError && (
-                <p className="text-red-400 text-[0.8rem] font-mono bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">{formError}</p>
-              )}
-
-              {[
-                { label: 'Name *', field: 'name', placeholder: 'e.g. Jane Doe', type: 'text' },
-                { label: 'Role', field: 'role', placeholder: 'e.g. UX Designer', type: 'text' },
-                { label: 'Avatar URL', field: 'avatar', placeholder: 'Leave blank for auto-generated', type: 'text' },
-                { label: 'Website', field: 'website', placeholder: 'https://example.com', type: 'text' },
-                { label: 'Social URL', field: 'social', placeholder: 'https://linkedin.com/in/...', type: 'text' },
-              ].map(({ label, field, placeholder, type }) => (
-                <div key={field}>
-                  <label className="block text-[0.75rem] font-mono uppercase tracking-wider text-text-secondary mb-1.5">{label}</label>
-                  <input
-                    type={type}
-                    value={addForm[field]}
-                    onChange={e => setAddForm(f => ({ ...f, [field]: e.target.value }))}
-                    placeholder={placeholder}
-                    className="w-full bg-[#1f1f1f] border border-border rounded-xl px-4 py-2.5 text-[0.9rem] text-white placeholder-text-secondary/40 focus:outline-none focus:border-accent/60 transition-colors"
-                  />
-                </div>
-              ))}
-
-              <div>
-                <label className="block text-[0.75rem] font-mono uppercase tracking-wider text-text-secondary mb-1.5">Social Type</label>
-                <select
-                  value={addForm.socialType}
-                  onChange={e => setAddForm(f => ({ ...f, socialType: e.target.value }))}
-                  className="w-full bg-[#1f1f1f] border border-border rounded-xl px-4 py-2.5 text-[0.9rem] text-white focus:outline-none focus:border-accent/60 transition-colors appearance-none cursor-pointer"
-                >
-                  <option value="linkedin">LinkedIn</option>
-                  <option value="github">GitHub</option>
-                  <option value="twitter">Twitter / X</option>
-                </select>
-              </div>
-
-              <div className="flex gap-3 pt-1">
-                <button
-                  type="button"
-                  onClick={() => { setShowAddModal(false); setAddForm(EMPTY_FORM); setFormError(''); }}
-                  className="flex-1 bg-white/5 hover:bg-white/10 border border-border text-text-secondary hover:text-white py-2.5 rounded-xl text-[0.9rem] font-medium cursor-pointer focus:outline-none transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 bg-accent text-bg-dark font-semibold py-2.5 rounded-xl text-[0.9rem] hover:opacity-90 cursor-pointer focus:outline-none transition-opacity"
-                >
-                  Add Node
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>,
-        document.body
+      {/* Reusable Node Modal (Add / Edit) */}
+      {IS_DEV && (
+        <NodeModal
+          isOpen={modalMode !== null}
+          onClose={() => { setModalMode(null); setEditingNode(null); }}
+          onSubmit={modalMode === 'add' ? handleAddNodeSubmit : handleSaveEditSubmit}
+          title={modalMode === 'add' ? 'Add Network Node' : 'Edit Network Node'}
+          submitLabel={modalMode === 'add' ? 'Add Node' : 'Save Changes'}
+          initialData={modalMode === 'edit' ? editingNode : null}
+        />
       )}
 
-      {/* Dev-only: Edit Node Modal */}
-      {IS_DEV && showEditModal && createPortal(
-        <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }}
-          onClick={(e) => { if (e.target === e.currentTarget) { setShowEditModal(false); setEditForm(EMPTY_FORM); setEditingNodeId(null); } }}
-        >
-          <div
-            className="relative w-full max-w-md bg-[#171717] border border-border rounded-[24px] shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden"
-          >
-            {/* Modal header */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-border">
-              <div>
-                <h2 className="text-white font-semibold text-[1.1rem] tracking-tight">Edit Network Node</h2>
-                <p className="text-[0.78rem] text-yellow-400/80 font-mono uppercase tracking-wider mt-0.5">⚡ Dev mode only</p>
-              </div>
-              <button
-                onClick={() => { setShowEditModal(false); setEditForm(EMPTY_FORM); setEditingNodeId(null); setFormError(''); }}
-                className="w-8 h-8 bg-white/5 hover:bg-white/10 border border-border rounded-full flex items-center justify-center text-white/60 hover:text-white cursor-pointer focus:outline-none transition-colors"
-              >
-                <FiX className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Modal form */}
-            <form onSubmit={handleSaveEdit} className="px-6 py-5 flex flex-col gap-3.5">
-              {formError && (
-                <p className="text-red-400 text-[0.8rem] font-mono bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">{formError}</p>
-              )}
-
-              {[
-                { label: 'Name *', field: 'name', placeholder: 'e.g. Jane Doe', type: 'text' },
-                { label: 'Role', field: 'role', placeholder: 'e.g. UX Designer', type: 'text' },
-                { label: 'Avatar URL', field: 'avatar', placeholder: 'Leave blank for auto-generated', type: 'text' },
-                { label: 'Website', field: 'website', placeholder: 'https://example.com', type: 'text' },
-                { label: 'Social URL', field: 'social', placeholder: 'https://linkedin.com/in/...', type: 'text' },
-              ].map(({ label, field, placeholder, type }) => (
-                <div key={field}>
-                  <label className="block text-[0.75rem] font-mono uppercase tracking-wider text-text-secondary mb-1.5">{label}</label>
-                  <input
-                    type={type}
-                    value={editForm[field]}
-                    onChange={e => setEditForm(f => ({ ...f, [field]: e.target.value }))}
-                    placeholder={placeholder}
-                    className="w-full bg-[#1f1f1f] border border-border rounded-xl px-4 py-2.5 text-[0.9rem] text-white placeholder-text-secondary/40 focus:outline-none focus:border-accent/60 transition-colors"
-                  />
-                </div>
-              ))}
-
-              <div>
-                <label className="block text-[0.75rem] font-mono uppercase tracking-wider text-text-secondary mb-1.5">Social Type</label>
-                <select
-                  value={editForm.socialType}
-                  onChange={e => setEditForm(f => ({ ...f, socialType: e.target.value }))}
-                  className="w-full bg-[#1f1f1f] border border-border rounded-xl px-4 py-2.5 text-[0.9rem] text-white focus:outline-none focus:border-accent/60 transition-colors appearance-none cursor-pointer"
-                >
-                  <option value="linkedin">LinkedIn</option>
-                  <option value="github">GitHub</option>
-                  <option value="twitter">Twitter / X</option>
-                </select>
-              </div>
-
-              <div className="flex gap-3 pt-1">
-                <button
-                  type="button"
-                  onClick={() => { setShowEditModal(false); setEditForm(EMPTY_FORM); setEditingNodeId(null); setFormError(''); }}
-                  className="flex-1 bg-white/5 hover:bg-white/10 border border-border text-text-secondary hover:text-white py-2.5 rounded-xl text-[0.9rem] font-medium cursor-pointer focus:outline-none transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 bg-accent text-bg-dark font-semibold py-2.5 rounded-xl text-[0.9rem] hover:opacity-90 cursor-pointer focus:outline-none transition-opacity"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>,
-        document.body
-      )}
 
       {/* Save Status Indicator */}
       {saveStatus && (

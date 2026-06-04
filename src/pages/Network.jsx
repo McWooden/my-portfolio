@@ -3,6 +3,7 @@ import Section from '../components/Utils/Section';
 import NetworkMap from '../components/Utils/NetworkMap';
 import Contact from '../components/Utils/Contact';
 import { useScrollReveal } from '../hooks/useScrollReveal';
+import { certifications, communities } from '../data/siteData';
 
 export default function Network() {
   const [certGridRef, certsRevealed] = useScrollReveal(0.05);
@@ -41,66 +42,29 @@ export default function Network() {
           ref={certGridRef}
           className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-[1200px]"
         >
-          {/* freeCodeCamp */}
-          <div 
-            className={`bg-bg-card rounded-[30px] p-[40px] flex flex-col gap-6 text-left reveal-item ${certsRevealed ? 'revealed' : ''}`}
-            style={{ transitionDelay: '0ms' }}
-          >
-            <div className="flex flex-row items-center gap-[10px]">
-              <div className="w-[40px] h-[40px] bg-accent rounded-[15px] flex items-center justify-center">
-                <span className="font-mono text-[20px] font-normal text-bg-dark uppercase">
-                  fC
-                </span>
+          {certifications.map((cert, index) => (
+            <div 
+              key={cert.id}
+              className={`bg-bg-card rounded-[30px] p-[40px] flex flex-col gap-6 text-left reveal-item ${certsRevealed ? 'revealed' : ''}`}
+              style={{ transitionDelay: `${index * 100}ms` }}
+            >
+              <div className="flex flex-row items-center gap-[10px]">
+                <div className="w-[40px] h-[40px] bg-accent rounded-[15px] flex items-center justify-center">
+                  <span className="font-mono text-[20px] font-normal text-bg-dark uppercase">
+                    {cert.label}
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-3">
+                <h4 className="text-[26px] font-medium text-[#F2F2F2] tracking-[-1.56px] leading-tight">{cert.name}</h4>
+                <p className="text-[16px] font-normal text-text-secondary leading-relaxed">
+                  {cert.description}
+                </p>
               </div>
             </div>
-            <div className="flex flex-col gap-3">
-              <h4 className="text-[26px] font-medium text-[#F2F2F2] tracking-[-1.56px] leading-tight">freeCodeCamp</h4>
-              <p className="text-[16px] font-normal text-text-secondary leading-relaxed">
-                Completed interactive curriculums covering responsive design, front-end libraries, and back-end APIs.
-              </p>
-            </div>
-          </div>
-
-          {/* Sololearn */}
-          <div 
-            className={`bg-bg-card rounded-[30px] p-[40px] flex flex-col gap-6 text-left reveal-item ${certsRevealed ? 'revealed' : ''}`}
-            style={{ transitionDelay: '100ms' }}
-          >
-            <div className="flex flex-row items-center gap-[10px]">
-              <div className="w-[40px] h-[40px] bg-accent rounded-[15px] flex items-center justify-center">
-                <span className="font-mono text-[20px] font-normal text-bg-dark uppercase">
-                  SL
-                </span>
-              </div>
-            </div>
-            <div className="flex flex-col gap-3">
-              <h4 className="text-[26px] font-medium text-[#F2F2F2] tracking-[-1.56px] leading-tight">Sololearn</h4>
-              <p className="text-[16px] font-normal text-text-secondary leading-relaxed">
-                Earned certificates for core programming concepts, data structures, and algorithms across multiple technologies.
-              </p>
-            </div>
-          </div>
-
-          {/* Codepolitan */}
-          <div 
-            className={`bg-bg-card rounded-[30px] p-[40px] flex flex-col gap-6 text-left reveal-item ${certsRevealed ? 'revealed' : ''}`}
-            style={{ transitionDelay: '200ms' }}
-          >
-            <div className="flex flex-row items-center gap-[10px]">
-              <div className="w-[40px] h-[40px] bg-accent rounded-[15px] flex items-center justify-center">
-                <span className="font-mono text-[20px] font-normal text-bg-dark uppercase">
-                  CP
-                </span>
-              </div>
-            </div>
-            <div className="flex flex-col gap-3">
-              <h4 className="text-[26px] font-medium text-[#F2F2F2] tracking-[-1.56px] leading-tight">Codepolitan</h4>
-              <p className="text-[16px] font-normal text-text-secondary leading-relaxed">
-                Completed professional developer bootcamps covering modern frameworks, database management, and tooling.
-              </p>
-            </div>
-          </div>
+          ))}
         </div>
+
       </Section>
 
       {/* Communities Section */}
@@ -117,56 +81,34 @@ export default function Network() {
           ref={commGridRef}
           className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-[1000px]"
         >
-          {/* Titik Koma */}
-          <a 
-            href="https://www.youtube.com/@webprogrammingunpas" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className={`bg-bg-card rounded-[30px] p-[40px] flex flex-col gap-6 text-left group reveal-item ${commsRevealed ? 'revealed' : ''}`}
-            style={{ transitionDelay: '0ms' }}
-          >
-            <div className="flex items-center gap-[10px]">
-              <div className="w-[40px] h-[40px] bg-accent rounded-[15px] flex items-center justify-center">
-                <span className="font-mono text-[20px] font-normal text-bg-dark uppercase">
-                  ;
-                </span>
+          {communities.map((comm, index) => (
+            <a 
+              key={comm.id}
+              href={comm.url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className={`bg-bg-card rounded-[30px] p-[40px] flex flex-col gap-6 text-left group reveal-item ${commsRevealed ? 'revealed' : ''}`}
+              style={{ transitionDelay: `${index * 100}ms` }}
+            >
+              <div className="flex items-center gap-[10px]">
+                <div className="w-[40px] h-[40px] bg-accent rounded-[15px] flex items-center justify-center">
+                  <span className="font-mono text-[20px] font-normal text-bg-dark uppercase">
+                    {comm.label}
+                  </span>
+                </div>
               </div>
-            </div>
-            <div className="flex flex-col gap-3">
-              <h4 className="text-[26px] font-medium text-[#F2F2F2] tracking-[-1.56px] leading-tight group-hover:text-accent transition-colors">
-                Titik Koma
-              </h4>
-              <p className="text-[16px] font-normal text-[#F2F2F2]/60 leading-relaxed">
-                An active programming learning space led by Sandhika Galih (Web Programming UNPAS). Highly focused on web development fundamentals, modern ecosystems, and mentoring Indonesian developers.
-              </p>
-            </div>
-          </a>
-
-          {/* Cuy Universe */}
-          <a 
-            href="https://deaafrizal.com" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className={`bg-bg-card rounded-[30px] p-[40px] flex flex-col gap-6 text-left group reveal-item ${commsRevealed ? 'revealed' : ''}`}
-            style={{ transitionDelay: '100ms' }}
-          >
-            <div className="flex items-center gap-[10px]">
-              <div className="w-[40px] h-[40px] bg-accent rounded-[15px] flex items-center justify-center">
-                <span className="font-mono text-[20px] font-normal text-bg-dark uppercase">
-                  CU
-                </span>
+              <div className="flex flex-col gap-3">
+                <h4 className="text-[26px] font-medium text-[#F2F2F2] tracking-[-1.56px] leading-tight group-hover:text-accent transition-colors">
+                  {comm.name}
+                </h4>
+                <p className="text-[16px] font-normal text-[#F2F2F2]/60 leading-relaxed">
+                  {comm.description}
+                </p>
               </div>
-            </div>
-            <div className="flex flex-col gap-3">
-              <h4 className="text-[26px] font-medium text-[#F2F2F2] tracking-[-1.56px] leading-tight group-hover:text-accent transition-colors">
-                Cuy Universe
-              </h4>
-              <p className="text-[16px] font-normal text-[#F2F2F2]/60 leading-relaxed">
-                A software engineering and technology discussion community founded by Dea Afrizal. Focused on engineering challenges, career pathways, dev roundtables, and project showcases.
-              </p>
-            </div>
-          </a>
+            </a>
+          ))}
         </div>
+
       </Section>
 
       {/* Trusted By Section */}

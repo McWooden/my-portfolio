@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { navigationMenu } from '../../data/siteData';
 
 export default function Footer() {
   const location = useLocation();
@@ -86,31 +87,24 @@ export default function Footer() {
         <nav className="flex gap-20 max-[810px]:gap-12" aria-label="Footer Navigation">
           {/* Sub-column 1: Explore */}
           <ul className="flex flex-col gap-4 text-left list-none p-0 m-0">
-            <li>
-              <Link to="/portfolio" className="font-sans text-[0.95rem]  text-white hover:text-[#E0FF6F] transition-colors duration-200 uppercase">
-                Portfolio
-              </Link>
-            </li>
-            <li>
-              <Link to="/blog" className="font-sans text-[0.95rem]  text-white hover:text-[#E0FF6F] transition-colors duration-200 uppercase">
-                Blog
-              </Link>
-            </li>
-            <li>
-              <Link to="/network" className="font-sans text-[0.95rem]  text-white hover:text-[#E0FF6F] transition-colors duration-200 uppercase">
-                Network
-              </Link>
-            </li>
+            {navigationMenu.filter(item => item.path !== '/').map(item => (
+              <li key={item.path}>
+                <Link to={item.path} className="font-sans text-[0.95rem] text-white hover:text-[#E0FF6F] transition-colors duration-200 uppercase">
+                  {item.label}
+                </Link>
+              </li>
+            ))}
             <li>
               <a
                 href={path === '/' ? '#contact' : '/#contact'}
                 onClick={handleContactClick}
-                className="font-sans text-[0.95rem]  text-white hover:text-[#E0FF6F] transition-colors duration-200 uppercase"
+                className="font-sans text-[0.95rem] text-white hover:text-[#E0FF6F] transition-colors duration-200 uppercase"
               >
                 Contact
               </a>
             </li>
           </ul>
+
 
           {/* Sub-column 2: Social Links */}
           <ul className="flex flex-col gap-4 text-left list-none p-0 m-0">

@@ -1,24 +1,60 @@
-import React from 'react';
-import { FiTwitter, FiInstagram, FiAtSign } from 'react-icons/fi';
-import { BsMedium } from 'react-icons/bs';
+import { FiAtSign } from 'react-icons/fi';
+import { SiMedium, SiGithub, SiTiktok, SiX } from 'react-icons/si';
+import { FaLinkedinIn, FaInstagram } from 'react-icons/fa';
 
 const renderIcon = (label) => {
   const normalized = label.toLowerCase();
   if (normalized.includes('twitter') || normalized.includes('x')) {
-    return <FiTwitter className="w-5 h-5" strokeWidth={2} />;
+    return <SiX className="w-5 h-5" />;
   }
   if (normalized.includes('instagram')) {
-    return <FiInstagram className="w-5 h-5" strokeWidth={2} />;
+    return <FaInstagram className="w-5 h-5" />;
   }
   if (normalized.includes('medium')) {
-    return <BsMedium className="w-5 h-5" />;
+    return <SiMedium className="w-5 h-5" />;
+  }
+  if (normalized.includes('github')) {
+    return <SiGithub className="w-5 h-5" />;
+  }
+  if (normalized.includes('linkedin')) {
+    return <FaLinkedinIn className="w-5 h-5" />;
+  }
+  if (normalized.includes('tiktok')) {
+    return <SiTiktok className="w-5 h-5" />;
   }
   if (normalized.includes('email') || normalized.includes('mail')) {
     return <FiAtSign className="w-5 h-5" strokeWidth={2} />;
   }
 };
 
-export default function SocialCard({ label, value, href, isEmail = false }) {
+export default function SocialCard({ label, value, href, isEmail = false, isTextCard = false }) {
+  if (isTextCard) {
+    return (
+      <div className="bg-[#262626] rounded-[24px] p-8 flex flex-col items-center justify-center text-center w-full min-h-[160px] select-none font-sans">
+        <div className="flex flex-col items-center relative mt-1">
+          <span 
+            className="text-[2.2rem] leading-[1.1] text-white font-normal select-none"
+            style={{ fontFamily: "'Sedgwick Ave', cursive" }}
+          >
+            Halo
+          </span>
+          <span 
+            className="text-[2.2rem] leading-[1.1] text-white font-normal select-none mt-0.5"
+            style={{ fontFamily: "'Sedgwick Ave', cursive" }}
+          >
+            Huddin
+          </span>
+          {/* bent underline */}
+          <div className="w-[110%] h-3 mt-1.5 text-accent relative">
+            <svg className="w-full h-full text-accent fill-none stroke-current" viewBox="0 0 100 10" preserveAspectRatio="none">
+              <path d="M2,3 Q50,9 98,2" strokeWidth="4" strokeLinecap="round" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const cardClasses = "bg-[#262626] rounded-[24px] p-8 flex flex-col gap-6 w-full text-left";
 
   const content = (

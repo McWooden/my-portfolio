@@ -5,9 +5,13 @@ import SocialCard from './SocialCard';
 
 export default function Contact() {
   const socials = [
-    { label: 'X/Twitter', value: '@halohuddin', href: 'https://x.com/halohuddin' },
-    { label: 'Instagram', value: '@halohuddin', href: 'https://www.instagram.com/halohuddin' },
+    { isTextCard: true },
+    { label: 'LinkedIn', value: 'sholahuddin-ahmad', href: 'https://www.linkedin.com/in/sholahuddin-ahmad/' },
+    { label: 'GitHub', value: 'McWooden', href: 'https://github.com/McWooden' },
     { label: 'Medium', value: '@halohuddin', href: 'https://medium.com/@halohuddin' },
+    { label: 'Instagram', value: '@halohuddin', href: 'https://www.instagram.com/halohuddin' },
+    { label: 'X/Twitter', value: '@halohuddin', href: 'https://x.com/halohuddin' },
+    { label: 'TikTok', value: '@halohuddin', href: 'https://www.tiktok.com/@halohuddin' },
     { label: 'Email', value: 'halohuddin@gmail.com', href: 'mailto:halohuddin@gmail.com', isEmail: true }
   ];
 
@@ -20,9 +24,10 @@ export default function Contact() {
           name="Contact"
           title="Feel Free To Reach Out — Whether It's About A Project Or Just To Say Hi"
           subtitle="You'll usually find me designing something, testing an idea, or sharing notes from the process"
+          extraClass="mb-0"
         />
 
-        {/* 4-column horizontal card grid */}
+        {/* 4-column horizontal card grid (perfectly balanced with 8 cards) */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 w-full">
           {socials.map((social, index) => (
             <SocialCard
@@ -31,6 +36,7 @@ export default function Contact() {
               value={social.value}
               href={social.href}
               isEmail={social.isEmail}
+              isTextCard={social.isTextCard}
             />
           ))}
         </div>

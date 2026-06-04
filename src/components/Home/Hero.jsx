@@ -261,7 +261,7 @@ export default function Hero() {
             ))}
           </div>
           <div className="flex flex-col gap-1">
-            <span className="font-mono text-[0.95rem] text-text-primary uppercase">50+ reviews</span>
+            <span className="font-mono text-[0.95rem] text-text-primary uppercase">15+ networks</span>
             <div className="flex gap-[3px] text-accent">
               {[...Array(5)].map((_, i) => (
                 <svg key={i} viewBox="0 0 24 24" fill="currentColor" className="w-[14px] h-[14px]">
@@ -276,7 +276,7 @@ export default function Hero() {
       {/* Visual panel */}
       <div 
         style={contentHeight ? { height: `${contentHeight}px` } : {}}
-        className="w-full xl:w-1/2 relative rounded-[30px] overflow-visible bg-bg-card border border-border"
+        className="w-full xl:w-1/2 relative rounded-[30px] overflow-visible bg-bg-card border-8 border-border"
       >
         <ScratchCanvas />
 
@@ -290,7 +290,7 @@ export default function Hero() {
             cursor: isDragging ? 'grabbing' : 'grab',
             touchAction: 'none'
           }}
-          className={`absolute top-[30px] left-5 bg-white text-bg-dark p-5 rounded-[24px] w-[280px] shadow-[0_20px_40px_rgba(0,0,0,0.4)] flex flex-col gap-4 z-30 select-none ${canFloat ? 'animate-float' : ''}`}
+          className="absolute top-[30px] left-5 bg-white text-bg-dark p-5 rounded-[24px] w-[280px] shadow-[0_20px_40px_rgba(0,0,0,0.4)] flex flex-col gap-4 z-30 select-none"
         >
           <p className="font-sans text-[0.95rem] leading-[1.4] text-[#1a1a1a] font-medium">
             "They captured our brand's personality instantly. Clients love the new look"
@@ -316,7 +316,7 @@ export default function Hero() {
         </div>
 
         {/* Floating slots badge */}
-        <div className="absolute bottom-5 right-5 bg-[#222222]/95 border border-border px-6 py-3 rounded-[20px] flex items-center gap-[10px] z-30 animate-float-delayed">
+        <div className="absolute bottom-5 right-5 bg-[#222222]/95 border border-border px-6 py-3 rounded-[20px] flex items-center gap-[10px] z-30">
           <span className="pulse-dot"></span>
           <span className="font-mono text-[0.95rem] font-medium uppercase text-text-primary tracking-[-0.02em]">
             3 Open slots

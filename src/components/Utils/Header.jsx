@@ -57,13 +57,6 @@ export default function Header() {
             <Link to="/network" className={navLinkClass(location.pathname === '/network')}>
               Network
             </Link>
-            <a
-              href="#contact"
-              onClick={handleContactClick}
-              className={navLinkClass(false)}
-            >
-              Contact
-            </a>
           </div>
 
           {/* Mobile hamburger menu toggle & Huddin branding */}
@@ -105,41 +98,33 @@ export default function Header() {
 
         {/* Right — Socials (Desktop) + Email Button */}
         <div className="flex justify-end items-center gap-[30px] w-[30%] max-md:w-auto max-md:shrink-0 max-md:gap-3">
-          {/* Social icons — hidden on mobile */}
-          <div className="flex gap-4 items-center max-md:hidden">
-            <a
-              href="https://github.com/McWooden"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center w-5 h-5 text-text-secondary transition-all duration-200 hover:text-text-primary hover:-translate-y-0.5"
-              title="GitHub"
-            >
-              <SiGithub className="w-full h-full" />
-            </a>
-            <a
-              href="https://www.linkedin.com/in/sholahuddin-ahmad/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center w-5 h-5 text-text-secondary transition-all duration-200 hover:text-text-primary hover:-translate-y-0.5"
-              title="LinkedIn"
-            >
-              <FaLinkedinIn className="w-full h-full" />
-            </a>
-            <a
-              href="https://medium.com/@halohuddin"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center w-5 h-5 text-text-secondary transition-all duration-200 hover:text-text-primary hover:-translate-y-0.5"
-              title="Medium"
-            >
-              <SiMedium className="w-full h-full" />
-            </a>
-          </div>
+          {/* Social icons wrapper link — hidden on mobile, scrolls to contact */}
+          {/* Social icons wrapper link — hidden on mobile, scrolls to contact with sliding hover animation */}
+          <a
+            href="#contact"
+            onClick={handleContactClick}
+            className="group relative h-[20px] min-w-[92px] overflow-hidden max-md:hidden block cursor-pointer select-none"
+            title="Scroll to Contact"
+          >
+            <div className="transition-transform duration-200 ease-out flex flex-col -translate-y-0 group-hover:-translate-y-[20px]">
+              {/* Row 1: Icons */}
+              <div className="flex gap-4 items-center justify-center h-[20px] text-text-secondary group-hover:text-text-primary transition-colors duration-200">
+                <SiGithub className="w-[18px] h-[18px]" />
+                <FaLinkedinIn className="w-[18px] h-[18px]" />
+                <SiMedium className="w-[18px] h-[18px]" />
+              </div>
+              {/* Row 2: Text */}
+              <div className="flex items-center justify-center h-[20px] text-accent font-mono text-[0.75rem] tracking-wider uppercase font-normal whitespace-nowrap">
+                Scroll To Contact ↓
+              </div>
+            </div>
+          </a>
 
           {/* Email button */}
           <Button
             href="mailto:halohuddin@gmail.com"
             variant="email-pill"
+            noTranslate
           >
             <span>Email me</span>
             <img
@@ -231,7 +216,7 @@ export default function Header() {
               setIsMenuOpen(false);
               handleContactClick(e);
             }}
-            className={`${navLinkClass(false)} flex items-center gap-3.5`}
+            className="flex gap-5 items-center pt-4 mt-2 border-t border-border/50 text-text-secondary hover:text-text-primary transition-all duration-200 cursor-pointer"
             style={{
               transitionDelay: isMenuOpen ? '250ms' : '0ms',
               transform: isMenuOpen ? 'translateX(0)' : 'translateX(-20px)',
@@ -239,10 +224,9 @@ export default function Header() {
               transitionProperty: 'all',
             }}
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-            <span>Contact</span>
+            <SiGithub className="w-5 h-5" />
+            <FaLinkedinIn className="w-5 h-5" />
+            <SiMedium className="w-5 h-5" />
           </a>
         </div>
 

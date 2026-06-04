@@ -52,7 +52,7 @@ export default function Footer() {
             </span>
           </div>
           <p className="text-[1rem] text-text-secondary leading-relaxed">
-            Visual designer focused on bold, modern branding
+            Coder n designer focused on bold, modern branding
           </p>
           <a
             href="mailto:halohuddin@gmail.com"
@@ -174,15 +174,8 @@ export default function Footer() {
       </div>
 
       {/* Large Sholahuddin Ahmad Heading Text Background */}
-      <div className="w-full max-w-[1600px] select-none overflow-hidden pt-4 pb-4 pointer-events-none flex justify-end">
-        <h1
-          className="w-full text-right uppercase font-mono text-transparent bg-clip-text leading-none tracking-tighter text-[clamp(5rem,10vw,100rem)] whitespace-nowrap mask-r-from-90%"
-          style={{
-            backgroundImage: 'linear-gradient(90deg, #262626 0%, #eaeaea 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}
-        >
+      <div className="w-full max-w-[1600px] select-none overflow-hidden pt-4 pb-4 pointer-events-none flex justify-end [mask-image:linear-gradient(to_right,rgba(0,0,0,0.15),#000)] [-webkit-mask-image:linear-gradient(to_right,rgba(0,0,0,0.15),#000)]">
+        <h1 className="w-full text-right uppercase font-mono text-text-primary leading-none tracking-tighter text-[clamp(5rem,10vw,100rem)] whitespace-nowrap">
           SHOLAHUDDIN AHMAD
         </h1>
       </div>

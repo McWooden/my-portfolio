@@ -4,8 +4,10 @@ export default function ScratchCanvas() {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [isResetting, setIsResetting] = useState(true);
+  const [isLoaded, setIsLoaded] = useState(false);
   const timeoutRef = useRef(null);
+  const animRef = useRef(null);
+  const scratchedStateRef = useRef(null);
   const imageRef = useRef(null); // original image loaded reference
 
   // Dimensions
@@ -13,11 +15,24 @@ export default function ScratchCanvas() {
 
   // Load the top image
   useEffect(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    if (animRef.current) {
+      cancelAnimationFrame(animRef.current);
+      animRef.current = null;
+    }
+    scratchedStateRef.current = null;
+
     const img = new Image();
     img.src = '/assets/hero.jpeg';
     img.onload = () => {
       imageRef.current = img;
-      initCanvas();
+      setIsLoaded(true);
+      if (isLoaded) {
+        initCanvas();
+      }
     };
   }, [dimensions]);
 
@@ -82,6 +97,13 @@ export default function ScratchCanvas() {
     ctx.drawImage(imageRef.current, x, y, width, height);
   };
 
+  // Run initCanvas once isLoaded changes to true
+  useEffect(() => {
+    if (isLoaded) {
+      initCanvas();
+    }
+  }, [isLoaded]);
+
   const getCoordinates = (e) => {
     const canvas = canvasRef.current;
     if (!canvas) return null;
@@ -115,6 +137,60 @@ export default function ScratchCanvas() {
     ctx.restore();
   };
 
+  const animateReset = () => {
+    const canvas = canvasRef.current;
+    if (!canvas || !imageRef.current) return;
+
+    const ctx = canvas.getContext('2d');
+    
+    // Create offscreen canvas to capture current scratched state
+    const offscreen = document.createElement('canvas');
+    offscreen.width = canvas.width;
+    offscreen.height = canvas.height;
+    const offscreenCtx = offscreen.getContext('2d');
+    offscreenCtx.drawImage(canvas, 0, 0);
+
+    scratchedStateRef.current = offscreen;
+
+    const startTime = performance.now();
+    const duration = 1000; // 1 second fade duration
+
+    const { x, y, width, height } = getCoverSize(
+      imageRef.current.naturalWidth,
+      imageRef.current.naturalHeight,
+      dimensions.width,
+      dimensions.height
+    );
+
+    const step = (now) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // Clear main canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw original scratched state with fading alpha
+      ctx.globalAlpha = 1 - progress;
+      ctx.drawImage(offscreen, 0, 0);
+
+      // Draw top image with rising alpha
+      ctx.globalAlpha = progress;
+      ctx.drawImage(imageRef.current, x, y, width, height);
+
+      // Reset alpha
+      ctx.globalAlpha = 1;
+
+      if (progress < 1) {
+        animRef.current = requestAnimationFrame(step);
+      } else {
+        animRef.current = null;
+        scratchedStateRef.current = null;
+      }
+    };
+
+    animRef.current = requestAnimationFrame(step);
+  };
+
   const handleStart = (e) => {
     // Only draw with left click or touch
     if (e.button !== undefined && e.button !== 0) return;
@@ -122,8 +198,23 @@ export default function ScratchCanvas() {
     // Prevent default browser dragging of page/images
     e.preventDefault();
 
+    if (animRef.current) {
+      cancelAnimationFrame(animRef.current);
+      animRef.current = null;
+      
+      // Instantly restore to the saved scratched state
+      if (scratchedStateRef.current) {
+        const canvas = canvasRef.current;
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(scratchedStateRef.current, 0, 0);
+        }
+      }
+    }
+    scratchedStateRef.current = null;
+
     setIsDrawing(true);
-    setIsResetting(false);
 
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -146,11 +237,7 @@ export default function ScratchCanvas() {
     // Set 10s auto-reset timeout after scratching stops
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
-      setIsResetting(true);
-      // Wait for the 1s CSS transition to complete, then redraw canvas fully
-      setTimeout(() => {
-        initCanvas();
-      }, 1000);
+      animateReset();
     }, 10000);
   };
 
@@ -177,45 +264,39 @@ export default function ScratchCanvas() {
     }
   }, [isDrawing]);
 
-  // Cleanup timeout on unmount
+  // Cleanup timeout and animation on unmount
   useEffect(() => {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (animRef.current) cancelAnimationFrame(animRef.current);
     };
   }, []);
 
   return (
     <div 
       ref={containerRef}
-      className="w-full h-full relative overflow-hidden rounded-[30px] select-none"
+      className="w-full h-full relative overflow-hidden rounded-[22px] select-none"
       style={{ touchAction: 'none' }}
     >
-      {/* Bottom Layer: hero-two.jpeg */}
-      <img
-        src="/assets/hero-two.jpeg"
-        alt="Erase reveal view"
-        className="w-full h-full object-cover rounded-[30px] pointer-events-none select-none absolute inset-0"
-      />
+      {isLoaded && (
+        <>
+          {/* Bottom Layer: hero-two.jpeg */}
+          <img
+            src="/assets/hero-two.jpeg"
+            alt="Erase reveal view"
+            className="w-full h-full object-cover pointer-events-none select-none absolute inset-0"
+          />
 
-      {/* Middle Layer: Scratch Canvas */}
-      <canvas
-        ref={canvasRef}
-        onMouseDown={handleStart}
-        onTouchStart={handleStart}
-        className="absolute inset-0 w-full h-full cursor-crosshair z-10"
-        style={{ touchAction: 'none' }}
-      />
-
-      {/* Top Layer: Smooth Fade-Back Overlay */}
-      <img
-        src="/assets/hero.jpeg"
-        alt="Top erase view overlay"
-        className="w-full h-full object-cover rounded-[30px] pointer-events-none select-none absolute inset-0 z-20"
-        style={{
-          opacity: isResetting ? 1 : 0,
-          transition: isResetting ? 'opacity 1000ms ease-in-out' : 'none'
-        }}
-      />
+          {/* Middle Layer: Scratch Canvas */}
+          <canvas
+            ref={canvasRef}
+            onMouseDown={handleStart}
+            onTouchStart={handleStart}
+            className="absolute inset-0 w-full h-full cursor-crosshair z-10"
+            style={{ touchAction: 'none' }}
+          />
+        </>
+      )}
     </div>
   );
 }

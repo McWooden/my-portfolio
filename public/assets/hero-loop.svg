@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 150" width="100%" height="100%">
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a1a1a">
+        <animate attributeName="stop-color" values="#1a1a1a;#111827;#0f172a;#1a1a1a" dur="15s" repeatCount="indefinite" />
+      </stop>
+      <stop offset="50%" stop-color="#262626">
+        <animate attributeName="stop-color" values="#262626;#1f2937;#1e293b;#262626" dur="15s" repeatCount="indefinite" />
+      </stop>
+      <stop offset="100%" stop-color="#e0ff6f" stop-opacity="0.7">
+        <animate attributeName="stop-color" values="#e0ff6f;#3b82f6;#8b5cf6;#e0ff6f" dur="15s" repeatCount="indefinite" />
+      </stop>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background with animated gradient -->
+  <rect width="100%" height="100%" fill="url(#gradient)" />
+  
+  <!-- Subtle grid lines to match the coder aesthetic -->
+  <g stroke="#ffffff" stroke-width="0.5" opacity="0.08">
+    <line x1="0" y1="30" x2="200" y2="30" />
+    <line x1="0" y1="60" x2="200" y2="60" />
+    <line x1="0" y1="90" x2="200" y2="90" />
+    <line x1="0" y1="120" x2="200" y2="120" />
+    <line x1="40" y1="0" x2="40" y2="150" />
+    <line x1="80" y1="0" x2="80" y2="150" />
+    <line x1="120" y1="0" x2="120" y2="150" />
+    <line x1="160" y1="0" x2="160" y2="150" />
+  </g>
+  
+  <!-- Slow rotating tech wireframe/circle -->
+  <g transform="translate(100, 75)">
+    <circle cx="0" cy="0" r="35" fill="none" stroke="#e0ff6f" stroke-width="1.5" opacity="0.3">
+      <animate attributeName="r" values="30;40;30" dur="12s" repeatCount="indefinite" />
+      <animate attributeName="opacity" values="0.2;0.5;0.2" dur="12s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="0" cy="0" r="20" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.15">
+      <animate attributeName="r" values="24;16;24" dur="12s" repeatCount="indefinite" />
+    </circle>
+    
+    <!-- Rotating crosshairs -->
+    <g opacity="0.4">
+      <line x1="-45" y1="0" x2="45" y2="0" stroke="#ffffff" stroke-width="0.75" />
+      <line x1="0" y1="-45" x2="0" y2="45" stroke="#ffffff" stroke-width="0.75" />
+      <animateTransform 
+        attributeName="transform" 
+        type="rotate" 
+        from="0" 
+        to="360" 
+        dur="25s" 
+        repeatCount="indefinite" 
+      />
+    </g>
+  </g>
+  
+  <!-- Gentle code-like nodes floating -->
+  <g opacity="0.6">
+    <circle cx="45" cy="50" r="2" fill="#e0ff6f">
+      <animate attributeName="cy" values="50;45;50" dur="6s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="155" cy="100" r="2.5" fill="#3b82f6">
+      <animate attributeName="cy" values="100;105;100" dur="8s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="160" cy="40" r="1.5" fill="#ffffff">
+      <animate attributeName="cy" values="40;35;40" dur="5s" repeatCount="indefinite" />
+    </circle>
+  </g>
+</svg>

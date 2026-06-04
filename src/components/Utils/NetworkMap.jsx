@@ -1,86 +1,29 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { FiExternalLink, FiLinkedin, FiTwitter, FiGithub, FiUser } from 'react-icons/fi';
+import { FiExternalLink, FiLinkedin, FiTwitter, FiGithub, FiUser, FiPlus, FiX, FiTrash2, FiMove } from 'react-icons/fi';
+import { networkPeople, centerNode } from '../../data/networkData';
 
-const people = [
-  {
-    id: 1,
-    name: 'Alina Rostova',
-    role: 'Co-Founder, Onyx Skincare',
-    avatar: 'https://framerusercontent.com/images/v4L6r5bO1P0gFP6z0HYvFxRmcYw.png?scale-down-to=512&width=1024&height=1024',
-    x: 380,
-    y: 220,
-    website: 'https://onyxskincare.com',
-    social: 'https://linkedin.com/in/alinarostova',
-    socialType: 'linkedin'
-  },
-  {
-    id: 2,
-    name: 'Johnathan Doe',
-    role: 'Lead Frontend Architect',
-    avatar: 'https://framerusercontent.com/images/XeylT9Ic2cwthJBQFpH03b3XEo.png?width=1024&height=1024',
-    x: 700,
-    y: 160,
-    website: 'https://johndoe.dev',
-    social: 'https://github.com/johndoe',
-    socialType: 'github'
-  },
-  {
-    id: 3,
-    name: 'Sarah Jenkins',
-    role: 'Senior Product Designer',
-    avatar: 'https://framerusercontent.com/images/qMrMTWyggoctZktmN3xk9LziWM.png?width=1024&height=1024',
-    x: 1020,
-    y: 220,
-    website: 'https://sarahj.design',
-    social: 'https://linkedin.com/in/sarahj',
-    socialType: 'linkedin'
-  },
-  {
-    id: 4,
-    name: 'Marcus Brody',
-    role: 'Creative Director',
-    avatar: 'https://framerusercontent.com/images/LVcACvWfr9MemEEBhRIZ9Mj0A.png?width=1024&height=1024',
-    x: 360,
-    y: 680,
-    website: 'https://marcusbrody.co',
-    social: 'https://linkedin.com/in/marcusbrody',
-    socialType: 'linkedin'
-  },
-  {
-    id: 5,
-    name: 'Elena Gilbert',
-    role: 'SaaS Founder & Writer',
-    avatar: 'https://framerusercontent.com/images/v4L6r5bO1P0gFP6z0HYvFxRmcYw.png?scale-down-to=512&width=1024&height=1024',
-    x: 1040,
-    y: 680,
-    website: 'https://elenag.io',
-    social: 'https://twitter.com/elenagilbert',
-    socialType: 'twitter'
-  },
-  {
-    id: 6,
-    name: 'David Miller',
-    role: 'Brand Consultant',
-    avatar: 'https://framerusercontent.com/images/NkL1zDB0ea9KmqIpMf80b6TCw.png?width=1024&height=1024',
-    x: 700,
-    y: 740,
-    website: 'https://davidmiller.agency',
-    social: 'https://linkedin.com/in/davidmiller',
-    socialType: 'linkedin'
-  }
-];
-
-const centerNode = {
-  name: 'Sholahuddin Ahmad',
-  role: 'Full-Stack Developer',
-  avatar: 'https://framerusercontent.com/images/NkL1zDB0ea9KmqIpMf80b6TCw.png?width=1024&height=1024',
-  x: 700,
-  y: 450
-};
+const IS_DEV = import.meta.env.DEV;
 
 const BOARD_WIDTH = 1400;
 const BOARD_HEIGHT = 900;
+
+const EMPTY_FORM = { name: '', role: '', avatar: '', website: '', social: '', socialType: 'linkedin' };
+
+// Toolbar modes
+const MODE = { VIEW: 'view', DELETE: 'delete', MOVE: 'move' };
+
+// Auto-position new nodes on a ring around the center
+const getAutoPosition = (index) => {
+  const radius = 300;
+  const baseAngle = -Math.PI / 6;
+  const step = (2 * Math.PI) / 8;
+  const angle = baseAngle + index * step;
+  return {
+    x: Math.round(centerNode.x + radius * Math.cos(angle)),
+    y: Math.round(centerNode.y + radius * Math.sin(angle))
+  };
+};
 
 export default function NetworkMap() {
   const viewportRef = useRef(null);
@@ -91,6 +34,197 @@ export default function NetworkMap() {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
+
+  // Unified State & Dev Save Status
+  const [nodes, setNodes] = useState(networkPeople);
+  const [saveStatus, setSaveStatus] = useState(''); // '', 'saving', 'saved', 'error'
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addForm, setAddForm] = useState(EMPTY_FORM);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState(EMPTY_FORM);
+  const [editingNodeId, setEditingNodeId] = useState(null);
+  const [formError, setFormError] = useState('');
+  const [toolbarMode, setToolbarMode] = useState(MODE.VIEW);
+
+  // Move-mode state
+  const [movingNodeId, setMovingNodeId] = useState(null);
+  const moveDragStart = useRef({ x: 0, y: 0, nodeX: 0, nodeY: 0 });
+
+  const allNodes = nodes;
+
+  // Sync state if networkPeople updates via dev HMR
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNodes(networkPeople);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [networkPeople]);
+
+  // Reset toolbar mode when exiting fullscreen
+  useEffect(() => {
+    if (!isFullScreen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setToolbarMode(MODE.VIEW);
+      setMovingNodeId(null);
+    }
+  }, [isFullScreen]);
+
+  // API Call to save the nodes to file (dev only)
+  const saveNodes = useCallback(async (nodesToSave) => {
+    if (!IS_DEV) return;
+    setSaveStatus('saving');
+    try {
+      const response = await fetch('/api/save-network-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ networkPeople: nodesToSave, centerNode })
+      });
+      if (!response.ok) throw new Error('Failed to save network data');
+      setSaveStatus('saved');
+      setTimeout(() => {
+        setSaveStatus('');
+      }, 2000);
+    } catch (err) {
+      console.error(err);
+      setSaveStatus('error');
+    }
+  }, []);
+
+  const handleAddNode = (e) => {
+    e.preventDefault();
+    if (!addForm.name.trim()) { setFormError('Name is required.'); return; }
+    const pos = getAutoPosition(nodes.length);
+    const newNode = {
+      id: Date.now(),
+      name: addForm.name.trim(),
+      role: addForm.role.trim() || 'Connection',
+      avatar: addForm.avatar.trim() ||
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(addForm.name.trim())}&background=2a2a2a&color=E0FF6F&size=256`,
+      website: addForm.website.trim() || '#',
+      social: addForm.social.trim() || '#',
+      socialType: addForm.socialType,
+      ...pos
+    };
+    const updatedNodes = [...nodes, newNode];
+    setNodes(updatedNodes);
+    saveNodes(updatedNodes);
+    setAddForm(EMPTY_FORM);
+    setFormError('');
+    setShowAddModal(false);
+  };
+
+  const handleDeleteNode = (id) => {
+    const updatedNodes = nodes.filter(n => n.id !== id);
+    setNodes(updatedNodes);
+    saveNodes(updatedNodes);
+    if (selectedNode?.id === id) setSelectedNode(null);
+  };
+
+  const handleStartEdit = (node) => {
+    setEditingNodeId(node.id);
+    setEditForm({
+      name: node.name || '',
+      role: node.role || '',
+      avatar: node.avatar || '',
+      website: node.website === '#' ? '' : node.website || '',
+      social: node.social === '#' ? '' : node.social || '',
+      socialType: node.socialType || 'linkedin'
+    });
+    setFormError('');
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = (e) => {
+    e.preventDefault();
+    if (!editForm.name.trim()) { setFormError('Name is required.'); return; }
+    const updatedNodes = nodes.map(n => {
+      if (n.id === editingNodeId) {
+        return {
+          ...n,
+          name: editForm.name.trim(),
+          role: editForm.role.trim() || 'Connection',
+          avatar: editForm.avatar.trim() ||
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(editForm.name.trim())}&background=2a2a2a&color=E0FF6F&size=256`,
+          website: editForm.website.trim() || '#',
+          social: editForm.social.trim() || '#',
+          socialType: editForm.socialType
+        };
+      }
+      return n;
+    });
+    setNodes(updatedNodes);
+    saveNodes(updatedNodes);
+
+    const updatedSelectedNode = updatedNodes.find(n => n.id === editingNodeId);
+    if (updatedSelectedNode) {
+      setSelectedNode(updatedSelectedNode);
+    }
+
+    setShowEditModal(false);
+    setEditForm(EMPTY_FORM);
+    setEditingNodeId(null);
+    setFormError('');
+  };
+
+  const handleNodeClick = (node) => {
+    if (toolbarMode === MODE.DELETE) {
+      handleDeleteNode(node.id);
+      return;
+    }
+
+    if (toolbarMode === MODE.MOVE) {
+      // In move mode, selecting a node highlights it; actual moving is via drag
+      return;
+    }
+
+    // Default: view profile card (toggle if clicking the already selected node)
+    setSelectedNode(prev => prev?.id === node.id ? null : node);
+  };
+
+  // --- Move-mode node dragging ---
+  const handleNodeMoveStart = (e, node) => {
+    if (toolbarMode !== MODE.MOVE) return;
+    e.stopPropagation();
+    e.preventDefault();
+    setMovingNodeId(node.id);
+    const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+    moveDragStart.current = { x: clientX, y: clientY, nodeX: node.x, nodeY: node.y };
+  };
+
+  const handleNodeMoveMove = useCallback((e) => {
+    if (!movingNodeId) return;
+    const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+    const scale = isFullScreen ? 1 : 0.6;
+    const dx = (clientX - moveDragStart.current.x) / scale;
+    const dy = (clientY - moveDragStart.current.y) / scale;
+    const newX = Math.round(Math.max(40, Math.min(BOARD_WIDTH - 40, moveDragStart.current.nodeX + dx)));
+    const newY = Math.round(Math.max(40, Math.min(BOARD_HEIGHT - 40, moveDragStart.current.nodeY + dy)));
+    setNodes(prev => prev.map(n => n.id === movingNodeId ? { ...n, x: newX, y: newY } : n));
+  }, [movingNodeId, isFullScreen]);
+
+  const handleNodeMoveEnd = useCallback(() => {
+    setMovingNodeId(null);
+    setNodes(prev => {
+      saveNodes(prev);
+      return prev;
+    });
+  }, [saveNodes]);
+
+  useEffect(() => {
+    if (movingNodeId) {
+      window.addEventListener('mousemove', handleNodeMoveMove);
+      window.addEventListener('mouseup', handleNodeMoveEnd);
+      window.addEventListener('touchmove', handleNodeMoveMove);
+      window.addEventListener('touchend', handleNodeMoveEnd);
+      return () => {
+        window.removeEventListener('mousemove', handleNodeMoveMove);
+        window.removeEventListener('mouseup', handleNodeMoveEnd);
+        window.removeEventListener('touchmove', handleNodeMoveMove);
+        window.removeEventListener('touchend', handleNodeMoveEnd);
+      };
+    }
+  }, [movingNodeId, handleNodeMoveMove, handleNodeMoveEnd]);
 
   // Recenter function based on active viewport bounds
   const recenterBoard = () => {
@@ -139,13 +273,15 @@ export default function NetworkMap() {
   }, []);
 
   const handleMouseDown = (e) => {
-    // Only handle left click dragging on the background
+    // Don't pan while moving a node
+    if (movingNodeId) return;
     if (e.button !== 0) return;
     setIsDragging(true);
     dragStart.current = { x: e.clientX - pan.x, y: e.clientY - pan.y };
   };
 
   const handleMouseMove = (e) => {
+    if (movingNodeId) return;
     if (!isDragging) return;
     const newX = e.clientX - dragStart.current.x;
     const newY = e.clientY - dragStart.current.y;
@@ -169,6 +305,7 @@ export default function NetworkMap() {
   };
 
   const handleTouchStart = (e) => {
+    if (movingNodeId) return;
     if (e.touches.length !== 1) return;
     setIsDragging(true);
     const touch = e.touches[0];
@@ -176,6 +313,7 @@ export default function NetworkMap() {
   };
 
   const handleTouchMove = (e) => {
+    if (movingNodeId) return;
     if (!isDragging || e.touches.length !== 1) return;
     const touch = e.touches[0];
     const newX = touch.clientX - dragStart.current.x;
@@ -225,6 +363,15 @@ export default function NetworkMap() {
     };
   };
 
+  // Cursor for current mode
+  const getCursorClass = () => {
+    if (movingNodeId) return 'cursor-grabbing';
+    if (toolbarMode === MODE.DELETE) return 'cursor-crosshair';
+    if (toolbarMode === MODE.MOVE) return 'cursor-move';
+    if (isDragging) return 'cursor-grabbing';
+    return 'cursor-grab';
+  };
+
   const mapContent = (
     <div 
       ref={viewportRef}
@@ -239,7 +386,7 @@ export default function NetworkMap() {
         isFullScreen 
           ? 'fixed inset-0 w-screen h-screen z-[2000] overflow-hidden' 
           : 'relative w-full max-w-[800px] h-[50vh] aspect-square mx-auto rounded-[30px] border border-border mt-10 overflow-hidden'
-      } ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+      } ${getCursorClass()}`}
       style={{
         backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.08) 1.5px, transparent 1.5px)',
         backgroundSize: '24px 24px'
@@ -257,8 +404,9 @@ export default function NetworkMap() {
       >
         {/* Connection SVG Lines */}
         <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox={`0 0 ${BOARD_WIDTH} ${BOARD_HEIGHT}`}>
-          {people.map((node) => {
+          {allNodes.map((node) => {
             const isHighlighted = selectedNode?.id === node.id || hoveredNode?.id === node.id;
+            const isMoving = movingNodeId === node.id;
             return (
               <line
                 key={node.id}
@@ -266,8 +414,8 @@ export default function NetworkMap() {
                 y1={centerNode.y}
                 x2={node.x}
                 y2={node.y}
-                stroke={isHighlighted ? '#E0FF6F' : 'rgba(234, 234, 234, 0.08)'}
-                strokeWidth={isHighlighted ? 2.5 : 1.5}
+                stroke={isMoving ? '#facc15' : isHighlighted ? '#E0FF6F' : 'rgba(234, 234, 234, 0.08)'}
+                strokeWidth={isHighlighted || isMoving ? 2.5 : 1.5}
                 className="transition-all duration-300"
               />
             );
@@ -285,6 +433,7 @@ export default function NetworkMap() {
                 src={centerNode.avatar}
                 alt={centerNode.name}
                 className="w-full h-full rounded-full object-cover border border-bg-dark"
+                draggable={false}
               />
             </div>
             {/* Center label */}
@@ -295,39 +444,68 @@ export default function NetworkMap() {
         </div>
 
         {/* Peer/Client Nodes */}
-        {people.map((node) => {
+        {allNodes.map((node) => {
           const isSelected = selectedNode?.id === node.id;
           const isHovered = hoveredNode?.id === node.id;
+          const isBeingMoved = movingNodeId === node.id;
+          const inDeleteMode = toolbarMode === MODE.DELETE;
+          const inMoveMode = toolbarMode === MODE.MOVE;
+
           return (
-            <button
+            <div
               key={node.id}
-              onClick={() => setSelectedNode(node)}
-              onMouseEnter={() => setHoveredNode(node)}
-              onMouseLeave={() => setHoveredNode(null)}
-              className="absolute -translate-x-1/2 -translate-y-1/2 z-20 focus:outline-none cursor-pointer"
+              className={`absolute -translate-x-1/2 -translate-y-1/2 z-20 ${isBeingMoved ? 'z-40' : ''}`}
               style={{ left: `${node.x}px`, top: `${node.y}px` }}
             >
-              <div 
-                className={`w-[52px] h-[52px] rounded-full p-[2px] bg-bg-card border-2 transition-all duration-300 hover:scale-110 ${
-                  isSelected 
-                    ? 'border-accent shadow-[0_0_15px_rgba(224,255,111,0.5)] scale-105' 
-                    : isHovered 
-                      ? 'border-accent/60 scale-105' 
-                      : 'border-border'
+              <button
+                onClick={() => handleNodeClick(node)}
+                onMouseDown={(e) => inMoveMode && handleNodeMoveStart(e, node)}
+                onTouchStart={(e) => inMoveMode && handleNodeMoveStart(e, node)}
+                onMouseEnter={() => setHoveredNode(node)}
+                onMouseLeave={() => setHoveredNode(null)}
+                className={`focus:outline-none block relative ${
+                  inDeleteMode ? 'cursor-crosshair' : inMoveMode ? 'cursor-move' : 'cursor-pointer'
                 }`}
               >
-                <img
-                  src={node.avatar}
-                  alt={node.name}
-                  className="w-full h-full rounded-full object-cover"
-                />
-              </div>
-            </button>
+                <div
+                  className={`w-[52px] h-[52px] rounded-full p-[2px] bg-bg-card border-2 transition-all duration-300 hover:scale-110 ${
+                    isBeingMoved
+                      ? 'border-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.5)] scale-110'
+                      : isSelected
+                        ? 'border-accent shadow-[0_0_15px_rgba(224,255,111,0.5)] scale-105'
+                        : isHovered
+                          ? 'border-accent/60 scale-105'
+                          : 'border-border'
+                  }`}
+                >
+                  <img
+                    src={node.avatar}
+                    alt={node.name}
+                    className="w-full h-full rounded-full object-cover"
+                    draggable={false}
+                  />
+                </div>
+
+                {/* Delete mode indicator on nodes */}
+                {inDeleteMode && (
+                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white pointer-events-none animate-pulse">
+                    <FiX className="w-3 h-3" />
+                  </div>
+                )}
+
+                {/* Move mode indicator on nodes */}
+                {inMoveMode && !isBeingMoved && (
+                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center text-black pointer-events-none">
+                    <FiMove className="w-2.5 h-2.5" />
+                  </div>
+                )}
+              </button>
+            </div>
           );
         })}
 
         {/* Absolute Detail Profile Card Overlay next to node on canvas */}
-        {selectedNode && (
+        {selectedNode && toolbarMode === MODE.VIEW && (
           <div 
             className="absolute bg-bg-dark border border-border rounded-[24px] flex flex-col shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden z-50 transition-all duration-300 animate-fade-in"
             style={getCardStyle(selectedNode)}
@@ -338,10 +516,24 @@ export default function NetworkMap() {
                 src={selectedNode.avatar}
                 alt={selectedNode.name}
                 className="w-full h-full object-cover"
+                draggable={false}
               />
               
               {/* Fade Overlay */}
               <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-bg-dark via-bg-dark/80 to-transparent pointer-events-none" />
+
+              {/* Dev Edit Button */}
+              {IS_DEV && (
+                <button
+                  onClick={() => handleStartEdit(selectedNode)}
+                  className="absolute top-4 left-4 w-8 h-8 bg-black/40 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white/80 hover:text-accent hover:bg-black/60 cursor-pointer select-none focus:outline-none transition-colors z-10"
+                  title="Edit Node Info"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+              )}
 
               {/* Close Button */}
               <button
@@ -398,8 +590,255 @@ export default function NetworkMap() {
 
       {/* Floating Instructions HUD */}
       <div className="absolute top-4 left-4 z-40 bg-bg-dark/80 backdrop-blur border border-border/80 px-4 py-2 rounded-full text-[0.8rem] text-text-secondary font-mono uppercase tracking-wider max-md:hidden pointer-events-none">
-        Drag to Pan • Click nodes to view
+        {toolbarMode === MODE.DELETE
+          ? 'Click a node to delete it'
+          : toolbarMode === MODE.MOVE
+            ? 'Drag a node to reposition it'
+            : 'Drag to Pan • Click nodes to view'
+        }
       </div>
+
+      {/* Dev-only: Floating Toolbar Bar — only in fullscreen */}
+      {IS_DEV && isFullScreen && (
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-1 bg-[#1a1a1a]/90 backdrop-blur-xl border border-border/60 rounded-2xl p-1.5 shadow-[0_8px_40px_rgba(0,0,0,0.6)]">
+          {/* Add */}
+          <button
+            onClick={() => { setShowAddModal(true); setFormError(''); setToolbarMode(MODE.VIEW); }}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[0.78rem] font-mono uppercase tracking-wider cursor-pointer select-none focus:outline-none transition-all duration-200 bg-accent text-bg-dark font-semibold hover:opacity-90"
+            title="Add a new node"
+          >
+            <FiPlus className="w-4 h-4" />
+            <span className="max-sm:hidden">Add</span>
+          </button>
+
+          {/* Divider */}
+          <div className="w-px h-6 bg-border/40 mx-1" />
+
+          {/* Delete toggle */}
+          <button
+            onClick={() => {
+              setToolbarMode(prev => prev === MODE.DELETE ? MODE.VIEW : MODE.DELETE);
+              setSelectedNode(null);
+              setMovingNodeId(null);
+            }}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[0.78rem] font-mono uppercase tracking-wider cursor-pointer select-none focus:outline-none transition-all duration-200 ${
+              toolbarMode === MODE.DELETE
+                ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                : 'text-text-secondary hover:text-white hover:bg-white/5'
+            }`}
+            title="Delete mode — click nodes to remove"
+          >
+            <FiTrash2 className="w-4 h-4" />
+            <span className="max-sm:hidden">Delete</span>
+          </button>
+
+          {/* Move toggle */}
+          <button
+            onClick={() => {
+              setToolbarMode(prev => prev === MODE.MOVE ? MODE.VIEW : MODE.MOVE);
+              setSelectedNode(null);
+              setMovingNodeId(null);
+            }}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[0.78rem] font-mono uppercase tracking-wider cursor-pointer select-none focus:outline-none transition-all duration-200 ${
+              toolbarMode === MODE.MOVE
+                ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                : 'text-text-secondary hover:text-white hover:bg-white/5'
+            }`}
+            title="Move mode — drag nodes to reposition"
+          >
+            <FiMove className="w-4 h-4" />
+            <span className="max-sm:hidden">Move</span>
+          </button>
+        </div>
+      )}
+
+      {/* Dev-only: Add Node Modal */}
+      {IS_DEV && showAddModal && createPortal(
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) { setShowAddModal(false); setAddForm(EMPTY_FORM); } }}
+        >
+          <div
+            className="relative w-full max-w-md bg-[#171717] border border-border rounded-[24px] shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden"
+          >
+            {/* Modal header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-border">
+              <div>
+                <h2 className="text-white font-semibold text-[1.1rem] tracking-tight">Add Network Node</h2>
+                <p className="text-[0.78rem] text-yellow-400/80 font-mono uppercase tracking-wider mt-0.5">⚡ Dev mode only</p>
+              </div>
+              <button
+                onClick={() => { setShowAddModal(false); setAddForm(EMPTY_FORM); setFormError(''); }}
+                className="w-8 h-8 bg-white/5 hover:bg-white/10 border border-border rounded-full flex items-center justify-center text-white/60 hover:text-white cursor-pointer focus:outline-none transition-colors"
+              >
+                <FiX className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal form */}
+            <form onSubmit={handleAddNode} className="px-6 py-5 flex flex-col gap-3.5">
+              {formError && (
+                <p className="text-red-400 text-[0.8rem] font-mono bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">{formError}</p>
+              )}
+
+              {[
+                { label: 'Name *', field: 'name', placeholder: 'e.g. Jane Doe', type: 'text' },
+                { label: 'Role', field: 'role', placeholder: 'e.g. UX Designer', type: 'text' },
+                { label: 'Avatar URL', field: 'avatar', placeholder: 'Leave blank for auto-generated', type: 'text' },
+                { label: 'Website', field: 'website', placeholder: 'https://example.com', type: 'text' },
+                { label: 'Social URL', field: 'social', placeholder: 'https://linkedin.com/in/...', type: 'text' },
+              ].map(({ label, field, placeholder, type }) => (
+                <div key={field}>
+                  <label className="block text-[0.75rem] font-mono uppercase tracking-wider text-text-secondary mb-1.5">{label}</label>
+                  <input
+                    type={type}
+                    value={addForm[field]}
+                    onChange={e => setAddForm(f => ({ ...f, [field]: e.target.value }))}
+                    placeholder={placeholder}
+                    className="w-full bg-[#1f1f1f] border border-border rounded-xl px-4 py-2.5 text-[0.9rem] text-white placeholder-text-secondary/40 focus:outline-none focus:border-accent/60 transition-colors"
+                  />
+                </div>
+              ))}
+
+              <div>
+                <label className="block text-[0.75rem] font-mono uppercase tracking-wider text-text-secondary mb-1.5">Social Type</label>
+                <select
+                  value={addForm.socialType}
+                  onChange={e => setAddForm(f => ({ ...f, socialType: e.target.value }))}
+                  className="w-full bg-[#1f1f1f] border border-border rounded-xl px-4 py-2.5 text-[0.9rem] text-white focus:outline-none focus:border-accent/60 transition-colors appearance-none cursor-pointer"
+                >
+                  <option value="linkedin">LinkedIn</option>
+                  <option value="github">GitHub</option>
+                  <option value="twitter">Twitter / X</option>
+                </select>
+              </div>
+
+              <div className="flex gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={() => { setShowAddModal(false); setAddForm(EMPTY_FORM); setFormError(''); }}
+                  className="flex-1 bg-white/5 hover:bg-white/10 border border-border text-text-secondary hover:text-white py-2.5 rounded-xl text-[0.9rem] font-medium cursor-pointer focus:outline-none transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-accent text-bg-dark font-semibold py-2.5 rounded-xl text-[0.9rem] hover:opacity-90 cursor-pointer focus:outline-none transition-opacity"
+                >
+                  Add Node
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Dev-only: Edit Node Modal */}
+      {IS_DEV && showEditModal && createPortal(
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) { setShowEditModal(false); setEditForm(EMPTY_FORM); setEditingNodeId(null); } }}
+        >
+          <div
+            className="relative w-full max-w-md bg-[#171717] border border-border rounded-[24px] shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden"
+          >
+            {/* Modal header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-border">
+              <div>
+                <h2 className="text-white font-semibold text-[1.1rem] tracking-tight">Edit Network Node</h2>
+                <p className="text-[0.78rem] text-yellow-400/80 font-mono uppercase tracking-wider mt-0.5">⚡ Dev mode only</p>
+              </div>
+              <button
+                onClick={() => { setShowEditModal(false); setEditForm(EMPTY_FORM); setEditingNodeId(null); setFormError(''); }}
+                className="w-8 h-8 bg-white/5 hover:bg-white/10 border border-border rounded-full flex items-center justify-center text-white/60 hover:text-white cursor-pointer focus:outline-none transition-colors"
+              >
+                <FiX className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal form */}
+            <form onSubmit={handleSaveEdit} className="px-6 py-5 flex flex-col gap-3.5">
+              {formError && (
+                <p className="text-red-400 text-[0.8rem] font-mono bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">{formError}</p>
+              )}
+
+              {[
+                { label: 'Name *', field: 'name', placeholder: 'e.g. Jane Doe', type: 'text' },
+                { label: 'Role', field: 'role', placeholder: 'e.g. UX Designer', type: 'text' },
+                { label: 'Avatar URL', field: 'avatar', placeholder: 'Leave blank for auto-generated', type: 'text' },
+                { label: 'Website', field: 'website', placeholder: 'https://example.com', type: 'text' },
+                { label: 'Social URL', field: 'social', placeholder: 'https://linkedin.com/in/...', type: 'text' },
+              ].map(({ label, field, placeholder, type }) => (
+                <div key={field}>
+                  <label className="block text-[0.75rem] font-mono uppercase tracking-wider text-text-secondary mb-1.5">{label}</label>
+                  <input
+                    type={type}
+                    value={editForm[field]}
+                    onChange={e => setEditForm(f => ({ ...f, [field]: e.target.value }))}
+                    placeholder={placeholder}
+                    className="w-full bg-[#1f1f1f] border border-border rounded-xl px-4 py-2.5 text-[0.9rem] text-white placeholder-text-secondary/40 focus:outline-none focus:border-accent/60 transition-colors"
+                  />
+                </div>
+              ))}
+
+              <div>
+                <label className="block text-[0.75rem] font-mono uppercase tracking-wider text-text-secondary mb-1.5">Social Type</label>
+                <select
+                  value={editForm.socialType}
+                  onChange={e => setEditForm(f => ({ ...f, socialType: e.target.value }))}
+                  className="w-full bg-[#1f1f1f] border border-border rounded-xl px-4 py-2.5 text-[0.9rem] text-white focus:outline-none focus:border-accent/60 transition-colors appearance-none cursor-pointer"
+                >
+                  <option value="linkedin">LinkedIn</option>
+                  <option value="github">GitHub</option>
+                  <option value="twitter">Twitter / X</option>
+                </select>
+              </div>
+
+              <div className="flex gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={() => { setShowEditModal(false); setEditForm(EMPTY_FORM); setEditingNodeId(null); setFormError(''); }}
+                  className="flex-1 bg-white/5 hover:bg-white/10 border border-border text-text-secondary hover:text-white py-2.5 rounded-xl text-[0.9rem] font-medium cursor-pointer focus:outline-none transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-accent text-bg-dark font-semibold py-2.5 rounded-xl text-[0.9rem] hover:opacity-90 cursor-pointer focus:outline-none transition-opacity"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Save Status Indicator */}
+      {saveStatus && (
+        <div className={`absolute top-4 right-16 z-[60] px-4 py-2 h-[42px] rounded-full text-[0.8rem] font-mono border transition-all duration-300 flex items-center gap-2 ${
+          saveStatus === 'saving'
+            ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+            : saveStatus === 'saved'
+              ? 'bg-green-500/10 text-green-400 border-green-500/20'
+              : 'bg-red-500/10 text-red-400 border-red-500/20'
+        }`}>
+          <span className={`w-2 h-2 rounded-full ${
+            saveStatus === 'saving'
+              ? 'bg-yellow-400 animate-pulse'
+              : saveStatus === 'saved'
+                ? 'bg-green-400'
+                : 'bg-red-400'
+          }`} />
+          {saveStatus === 'saving' && 'Saving...'}
+          {saveStatus === 'saved' && 'Saved'}
+          {saveStatus === 'error' && 'Save failed'}
+        </div>
+      )}
 
       {/* Fullscreen Toggle Button */}
       <button

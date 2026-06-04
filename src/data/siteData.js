@@ -386,18 +386,18 @@ export const services = {
         },
         {
           number: "2",
-          title: "Design Apps",
-          description: "Designed and built by the same person. No handoff friction, no 'that's not what I meant' — just one clean result."
+          title: "UI & UX Design",
+          description: "Interfaces designed with intent — layouts, components, and flows that feel obvious to use and good to look at."
         },
         {
           number: "3",
-          title: "Docs & Decks",
-          description: "Proposals, pitch decks, and internal docs — structured to communicate clearly and look like you mean it."
+          title: "App Development",
+          description: "Custom apps built from scratch — whether it's a client-facing product or an internal tool that actually works."
         },
         {
           number: "4",
-          title: "Tools & Templates",
-          description: "Social templates, custom web tools, or anything repeatable — built once, used forever."
+          title: "Promotional & Ads",
+          description: "Social content, campaign visuals, and ad creatives — made to stop the scroll and say the right thing fast."
         }
       ]
     },

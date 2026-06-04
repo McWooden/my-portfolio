@@ -15,7 +15,7 @@ export default function ReviewCard({ review, className = "" }) {
 
   return (
     <div
-      className={`bg-[#262626] rounded-[30px] p-[50px] flex flex-col justify-between text-left w-[360px] h-[360px] flex-shrink-0 ${className}`}
+      className={`bg-[#262626] rounded-[30px] p-6 sm:p-[50px] flex flex-col justify-between text-left w-full h-auto min-h-[360px] sm:w-[360px] sm:h-[360px] flex-shrink-0 ${className}`}
     >
       {/* Top Content Area: Grouped with 36px gap between rating, quote text, and author */}
       <div className="flex flex-col gap-[36px]">

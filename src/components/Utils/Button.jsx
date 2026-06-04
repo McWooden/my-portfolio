@@ -19,7 +19,7 @@ export default function Button({
   const variants = {
     primary: "bg-accent text-bg-dark text-[1.05rem] font-semibold px-7 py-[14px] rounded-full hover:bg-white",
     secondary: "border border-border text-text-primary text-[1.05rem] font-medium px-7 py-[14px] rounded-full hover:border-text-primary hover:bg-bg-card",
-    'email-pill': `flex items-center gap-3 bg-bg-dark border border-accent px-4 py-2 rounded-full text-[0.95rem] font-medium text-text-primary hover:border-text-primary hover:bg-bg-card ${noTranslate ? '' : 'hover:-translate-y-px'} max-md:px-3 max-md:py-1.5 max-md:text-[0.85rem]`,
+    'email-pill': `flex items-center gap-3 bg-bg-dark border border-accent px-4 py-2 rounded-full text-[0.95rem] font-medium text-text-primary hover:border-text-primary hover:bg-bg-card ${noTranslate ? '' : 'hover:-translate-y-px'} shrink-0`,
   };
 
   const finalClass = `${baseStyle} ${variants[variant] || variants.primary} ${className}`;

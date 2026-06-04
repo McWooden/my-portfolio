@@ -181,8 +181,11 @@ export default function Hero() {
             }}
           >
             {jobs.map((job) => (
-              <span key={job} className="h-[1.5em] leading-[1.5em] block group-hover:text-accent transition-colors duration-200">
-                {job} <span className={`text-accent/60 text-[0.85em] ml-1 transition-all duration-200 ${isRolling ? 'animate-spin inline-block' : 'opacity-0 group-hover:opacity-100'}`}>⟳</span>
+              <span key={job} className="h-[1.5em] leading-[1.5em] block group-hover:text-accent transition-colors duration-200 relative">
+                {job}
+                <span className={`text-accent/60 text-[0.85em] ml-1 transition-all duration-200 absolute left-full top-0 ${isRolling ? 'animate-spin inline-block' : 'opacity-0 group-hover:opacity-100'}`}>
+                  ⟳
+                </span>
               </span>
             ))}
           </div>
@@ -276,7 +279,7 @@ export default function Hero() {
       {/* Visual panel */}
       <div 
         style={contentHeight ? { height: `${contentHeight}px` } : {}}
-        className="w-full xl:w-1/2 relative rounded-[30px] overflow-visible bg-bg-card border-8 border-border"
+        className="w-full xl:w-1/2 relative rounded-[30px] overflow-visible bg-bg-card border-8 border-border -rotate-[1deg]"
       >
         <ScratchCanvas />
 

@@ -259,9 +259,9 @@ export default function ReviewsSection() {
         </div>
       ) : (
         /* MOBILE VIEW: Instagram Stories-style Carousel Card */
-        <div className="flex flex-col items-center justify-center mt-16 w-full">
+        <div className="flex flex-col items-center justify-center mt-16 w-full px-4">
           {/* Stories Progress Indicators */}
-          <div className="flex gap-2.5 w-[360px] max-w-full mb-8 px-2">
+          <div className="flex gap-2.5 w-full max-w-[360px] mb-8 px-2">
             {reviews.map((_, i) => {
               const initialWidth = i < currentIndex ? '100%' : '0%';
               return (
@@ -280,20 +280,20 @@ export default function ReviewsSection() {
 
           {/* Card Container */}
           <div
-            className="relative w-[360px] h-[360px] rounded-[30px] overflow-hidden select-none cursor-pointer group"
+            className="relative w-full max-w-[360px] rounded-[30px] overflow-hidden select-none cursor-pointer group"
             onMouseDown={handlePressStart}
             onMouseUp={handlePressEnd}
             onMouseLeave={handlePressEnd}
             onTouchStart={handlePressStart}
             onTouchEnd={handlePressEnd}
           >
-            {/* Card Slider with Gap */}
+            {/* Card Slider */}
             <div
-              className="flex transition-transform duration-500 ease-in-out h-full"
-              style={{ transform: `translateX(-${currentIndex * (360 + 24)}px)` }}
+              className="flex gap-[24px] transition-transform duration-500 ease-in-out"
+              style={{ transform: `translateX(calc(-${currentIndex * 100}% - ${currentIndex * 24}px))` }}
             >
               {reviews.map((review, i) => (
-                <div key={i} className="w-[360px] h-full shrink-0 mr-[24px]">
+                <div key={i} className="w-full shrink-0">
                   <ReviewCard review={review} className="w-full h-full" />
                 </div>
               ))}

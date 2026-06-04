@@ -45,7 +45,7 @@ export default function Header() {
       <div className="w-full max-w-[1600px] px-5 xl:px-10 flex justify-between items-center relative h-full">
 
         {/* Left — Nav Links (Desktop) / Hamburger Button & "Huddin" (Mobile) */}
-        <div className="flex items-center w-[30%] max-md:w-auto max-md:shrink-0">
+        <div className="flex items-center shrink-0">
           {/* Desktop links */}
           <div className="flex gap-6 max-md:hidden">
             <Link to="/portfolio" className={navLinkClass(location.pathname === '/portfolio')}>
@@ -87,7 +87,7 @@ export default function Header() {
         </div>
 
         {/* Center — Logo */}
-        <div className="flex justify-center items-center w-[40%] max-md:hidden">
+        <div className="flex justify-center items-center max-md:hidden">
           <Link to="/" className="flex items-center gap-2 font-mono text-[1.15rem] font-medium uppercase text-text-primary tracking-tight">
             <div className="w-4 h-4 flex justify-center items-center relative">
               <span className="pulse-dot"></span>
@@ -97,7 +97,7 @@ export default function Header() {
         </div>
 
         {/* Right — Socials (Desktop) + Email Button */}
-        <div className="flex justify-end items-center gap-[30px] w-[30%] max-md:w-auto max-md:shrink-0 max-md:gap-3">
+        <div className="flex justify-end items-center gap-[30px] shrink-0 max-md:gap-3">
           {/* Social icons wrapper link — hidden on mobile, scrolls to contact */}
           {/* Social icons wrapper link — hidden on mobile, scrolls to contact with sliding hover animation */}
           <a

@@ -18,7 +18,7 @@ export const BlogCard = ({ post, className = '', style = {} }) => (
     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/50" />
 
     {/* Foreground Content overlaying the image */}
-    <div className="absolute inset-0 p-[40px] flex flex-col justify-between z-10">
+    <div className="absolute inset-0 p-6 md:p-10 flex flex-col justify-between z-10">
       {/* Top row: Category tag & Date */}
       <div className="flex justify-between items-center w-full">
         <span className="font-mono text-[12px] md:text-[13px] tracking-[0.05em] uppercase text-white border border-white/40 px-[14px] py-[6px] rounded-full">

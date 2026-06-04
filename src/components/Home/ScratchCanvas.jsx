@@ -80,11 +80,15 @@ export default function ScratchCanvas() {
     const canvas = canvasRef.current;
     if (!canvas || !imageRef.current) return;
 
-    canvas.width = dimensions.width;
-    canvas.height = dimensions.height;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = dimensions.width * dpr;
+    canvas.height = dimensions.height * dpr;
 
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.save();
+    ctx.scale(dpr, dpr);
     
     const { x, y, width, height } = getCoverSize(
       imageRef.current.naturalWidth,
@@ -95,6 +99,7 @@ export default function ScratchCanvas() {
     
     // Draw initial state using calculated object-cover dimensions
     ctx.drawImage(imageRef.current, x, y, width, height);
+    ctx.restore();
   };
 
   // Run initCanvas once isLoaded changes to true
@@ -123,7 +128,9 @@ export default function ScratchCanvas() {
     if (!canvas || !coords) return;
 
     const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
     ctx.save();
+    ctx.scale(dpr, dpr);
     ctx.translate(coords.x, coords.y);
     
     // Generate a random angle in radians
@@ -142,6 +149,7 @@ export default function ScratchCanvas() {
     if (!canvas || !imageRef.current) return;
 
     const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
     
     // Create offscreen canvas to capture current scratched state
     const offscreen = document.createElement('canvas');
@@ -169,16 +177,18 @@ export default function ScratchCanvas() {
       // Clear main canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+      ctx.save();
+      ctx.scale(dpr, dpr);
+
       // Draw original scratched state with fading alpha
       ctx.globalAlpha = 1 - progress;
-      ctx.drawImage(offscreen, 0, 0);
+      ctx.drawImage(offscreen, 0, 0, dimensions.width, dimensions.height);
 
       // Draw top image with rising alpha
       ctx.globalAlpha = progress;
       ctx.drawImage(imageRef.current, x, y, width, height);
 
-      // Reset alpha
-      ctx.globalAlpha = 1;
+      ctx.restore();
 
       if (progress < 1) {
         animRef.current = requestAnimationFrame(step);

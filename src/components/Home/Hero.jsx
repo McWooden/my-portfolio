@@ -293,7 +293,7 @@ export default function Hero() {
             cursor: isDragging ? 'grabbing' : 'grab',
             touchAction: 'none'
           }}
-          className="absolute top-[30px] left-5 bg-white text-bg-dark p-5 rounded-[24px] w-[280px] shadow-[0_20px_40px_rgba(0,0,0,0.4)] flex flex-col gap-4 z-30 select-none"
+          className="absolute top-[30px] left-5 bg-white text-bg-dark p-5 rounded-[24px] w-[280px] flex flex-col gap-4 z-30 select-none"
         >
           <p className="font-sans text-[0.95rem] leading-[1.4] text-[#1a1a1a] font-medium">
             "They captured our brand's personality instantly. Clients love the new look"

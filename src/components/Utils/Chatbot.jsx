@@ -48,7 +48,7 @@ export default function Chatbot() {
 
   // Quota states
   const [quotaUsed, setQuotaUsed] = useState(0);
-  const [quotaLimit, setQuotaLimit] = useState(6);
+  const [quotaLimit, setQuotaLimit] = useState(10);
   const [windowStart, setWindowStart] = useState(0);
 
   const RANDOM_REASONS = [
@@ -183,12 +183,12 @@ export default function Chatbot() {
   useEffect(() => {
     if (cooldown <= 0) {
       if (typeof window !== 'undefined' && quotaUsed >= quotaLimit) {
-        // Cooldown finished, start next session (subsequent session gets 4)
+        // Cooldown finished, start next session (subsequent session gets 5)
         const now = Date.now();
-        localStorage.setItem('chatbot_quota_limit', '4');
+        localStorage.setItem('chatbot_quota_limit', '5');
         localStorage.setItem('chatbot_quota_used', '0');
         localStorage.setItem('chatbot_quota_window_start', now.toString());
-        setQuotaLimit(4);
+        setQuotaLimit(5);
         setQuotaUsed(0);
         setWindowStart(now);
       }
@@ -238,24 +238,24 @@ export default function Chatbot() {
       // 2. Initialize Quota
       const todayStr = new Date().toLocaleDateString('en-US');
       const savedDate = localStorage.getItem('chatbot_quota_date');
-      let savedLimit = parseInt(localStorage.getItem('chatbot_quota_limit') || '6', 10);
+      let savedLimit = parseInt(localStorage.getItem('chatbot_quota_limit') || '10', 10);
       let savedUsed = parseInt(localStorage.getItem('chatbot_quota_used') || '0', 10);
       let savedWindowStart = parseInt(localStorage.getItem('chatbot_quota_window_start') || '0', 10);
       const now = Date.now();
 
       if (savedDate !== todayStr) {
-        savedLimit = 6;
+        savedLimit = 10;
         savedUsed = 0;
         savedWindowStart = now;
         localStorage.setItem('chatbot_quota_date', todayStr);
-        localStorage.setItem('chatbot_quota_limit', '6');
+        localStorage.setItem('chatbot_quota_limit', '10');
         localStorage.setItem('chatbot_quota_used', '0');
         localStorage.setItem('chatbot_quota_window_start', savedWindowStart.toString());
       } else if (now - savedWindowStart >= 5 * 60 * 1000) {
-        savedLimit = 4;
+        savedLimit = 5;
         savedUsed = 0;
         savedWindowStart = now;
-        localStorage.setItem('chatbot_quota_limit', '4');
+        localStorage.setItem('chatbot_quota_limit', '5');
         localStorage.setItem('chatbot_quota_used', '0');
         localStorage.setItem('chatbot_quota_window_start', savedWindowStart.toString());
       }
@@ -306,18 +306,18 @@ export default function Chatbot() {
     // Quota Check
     const todayStr = new Date().toLocaleDateString('en-US');
     let savedDate = localStorage.getItem('chatbot_quota_date');
-    let savedLimit = parseInt(localStorage.getItem('chatbot_quota_limit') || '6', 10);
+    let savedLimit = parseInt(localStorage.getItem('chatbot_quota_limit') || '10', 10);
     let savedUsed = parseInt(localStorage.getItem('chatbot_quota_used') || '0', 10);
     let savedWindowStart = parseInt(localStorage.getItem('chatbot_quota_window_start') || '0', 10);
     const now = Date.now();
 
     if (savedDate !== todayStr) {
       savedDate = todayStr;
-      savedLimit = 6;
+      savedLimit = 10;
       savedUsed = 0;
       savedWindowStart = now;
     } else if (now - savedWindowStart >= 5 * 60 * 1000) {
-      savedLimit = 2;
+      savedLimit = 5;
       savedUsed = 0;
       savedWindowStart = now;
     }
@@ -768,7 +768,7 @@ export default function Chatbot() {
             </div>
             <div>
               <h4 className="text-sm font-semibold text-text-primary">Mia Hamada</h4>
-              <p className="text-[10px] font-mono text-text-muted">Maid Flash (Low)</p>
+              <p className="text-[10px] font-mono text-text-muted">{huddinConfig.version}</p>
             </div>
           </div>
           <div className="flex items-center gap-1">

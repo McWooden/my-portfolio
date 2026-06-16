@@ -52,17 +52,17 @@ export default function Chatbot() {
   const [windowStart, setWindowStart] = useState(0);
 
   const RANDOM_REASONS = [
-    "help my husband find something",
-    "see what my husband needs",
+    "help my master find something",
+    "see what my master needs",
     "see something in the kitchen",
     "carry something",
     "feed my cat",
     "charge Nico's battery",
-    "look at something my husband is fixing",
-    "taste-test my husband's cooking",
+    "look at something my master is fixing",
+    "taste-test my master's cooking",
     "find room keys",
-    "help my husband make a phone call",
-    "help my husband on a phone call",
+    "help my master make a phone call",
+    "help my master on a phone call",
     "check something in the workspace"
   ];
 

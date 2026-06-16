@@ -110,18 +110,9 @@ CRITICAL LENGTH RULES:
 - All your responses must be a maximum of 3 paragraphs. Ultra-concise, warm, and straight to the point.`;
     }
 
-    // Hybrid model routing & context pruning to save costs
-    let selectedModel = 'qwen3-coder:free'; // Default to free model
+    // Use qwen-2.5-72b-instruct
+    const selectedModel = 'qwen-2.5-72b-instruct';
     const nonSystemMessages = messages.filter((m) => m.role !== 'system');
-    
-    if (!isApologyEvaluation) {
-      const lastUserMessage = nonSystemMessages[nonSystemMessages.length - 1]?.content || '';
-      const isComplex = lastUserMessage.length > 50 || 
-                        /\b(project|service|portfolio|huddin|cost|work|hire|avail)\b/i.test(lastUserMessage);
-      if (isComplex) {
-        selectedModel = 'gpt-5-nano'; // Premium fallback for complex queries
-      }
-    }
 
     // Keep only the last 6 messages to prune context size and save tokens
     const recentMessages = nonSystemMessages.slice(-6);

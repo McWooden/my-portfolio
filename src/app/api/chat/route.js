@@ -110,8 +110,8 @@ CRITICAL LENGTH RULES:
 - All your responses must be a maximum of 3 paragraphs. Ultra-concise, warm, and straight to the point.`;
     }
 
-    // Use qwen-2.5-72b-instruct
-    const selectedModel = 'qwen-2.5-72b-instruct';
+    // Use ministral-3b-2512
+    const selectedModel = 'ministral-3b-2512';
     const nonSystemMessages = messages.filter((m) => m.role !== 'system');
 
     // Keep only the last 6 messages to prune context size and save tokens

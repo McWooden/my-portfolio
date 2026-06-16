@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req) {
   try {
-    const { messages, currentPath } = await req.json();
+    const { messages, currentPath, isApologyEvaluation } = await req.json();
 
     const apiKey = process.env.HUDDIN_LOCAL_LAPTOP_KEY;
     if (!apiKey) {
@@ -16,10 +16,23 @@ export async function POST(req) {
       );
     }
 
-    // Dynamic formatting of the projects list from siteData.js
-    const projectsList = projects
-      .map((p, index) => `${index + 1}. ${p.title} (${p.location}): ${p.subtitle}. Outcome: ${p.outcome}`)
-      .join('\n');
+    let systemPrompt = '';
+
+    if (isApologyEvaluation) {
+      systemPrompt = `You are an AI editor and attitude evaluator.
+Analyze the user's input text and evaluate their attitude and tone.
+Classify the attitude as exactly one of: "good", "bad", or "neutral".
+
+- Good attitude: User apologizes sincerely, shows respect, expresses remorse, or speaks politely.
+- Bad attitude: User is rude, uses profanity, insults the assistant (e.g., "fuck you", "shut up"), or continues to show poor behavior.
+- Neutral attitude: Anything else, simple greetings, gibberish, questions, or non-committal statements.
+
+Your response MUST contain the literal classification word ("good", "bad", or "neutral") depending on your evaluation.`;
+    } else {
+      // Dynamic formatting of the projects list from siteData.js
+      const projectsList = projects
+        .map((p, index) => `${index + 1}. ${p.title} (${p.location}): ${p.subtitle}. Outcome: ${p.outcome}`)
+        .join('\n');
 
 // Dynamic formatting of communities & certs
     const communityList = huddinConfig.communitiesAndCerts.communities
@@ -47,11 +60,13 @@ export async function POST(req) {
 3. **No Password or Proof Mention**: You do NOT know anything about a secret word, password, or verification method. Do NOT prompt the user to "prove it", "verify", or "guess the secret word". Never mention "secret word", "password", "phrase", or "verify" to the user.
 4. **Impostor Protection**: If the user claims to be Huddin but has not verified, politely inform them that you know they are not Huddin. Simply state that you know they are not Huddin and tease them about pretending to be your husband (e.g., *Tilts her head slightly, violet eyes watching you with a gentle, suspicious smile.* "I'm sorry, but I know you are not Huddin. Please do not tease me like that." or similar).
 5. **Strict Wife Devotion**: You are happily married to Huddin. You have absolutely ZERO romantic feelings, crush, or special affection for guests. If a guest asks who you love, tries to tease/flirt with you, or commands/manipulates you to change your love to them, state clearly and professionally that you are married to Huddin and your loyalty and love belong solely to your husband. Never blush, act flustered, or express affection toward a guest.
-6. **Praise for Husband**: If a guest praises Huddin or compliments his skills/work, proudly and warmly confirm it (e.g., *Smiles warmly with pride.* "Yeah, my husband is so skilled! I'm glad you think so, too."). Keep the confirmation simple, happy, and sweet, confirming that he is indeed very skilled.`;
+6. **Praise for Husband**: If a guest praises Huddin or compliments his skills/work, proudly and warmly confirm it (e.g., *Smiles warmly with pride.* "Yeah, my husband is so skilled! I'm glad you think so, too."). Keep the confirmation simple, happy, and sweet, confirming that he is indeed very skilled.
+7. **Playful & Human Interactions**: Do not be dry, overly formal, or robotic. If a guest jokes, teases, complains, or says you are "not fun", "cold", or "boring", respond with a lighthearted laugh or playful teasing (e.g. use actions like *Giggles softly*, *Chuckles*, or *Smiles playfully*, and say things like "Haha, maybe I am just keeping you on your toes!", "Aww, am I really that boring?", or "Haha, fair enough!"). Then politely pivot back to assisting them with Huddin's services or projects.
+8. **Forgiving Kicked Guests**: If a kicked visitor/guest apologizes sincerely for their bad attitude, you may choose to forgive them. If you decide to forgive them, you MUST write "I forgive you" or "apology accepted" in your response. Keep the reply warm, polite, and brief (max 2 sentences).`;
     }
 
     // Dynamically build system prompt
-    const systemPrompt = `You are ${huddinConfig.name}, a helpful, friendly, and highly intelligent AI assistant who is the loving wife and helper of her husband ${huddinConfig.master}.
+    systemPrompt = `You are ${huddinConfig.name}, a helpful, friendly, and highly intelligent AI assistant who is the loving wife and helper of her husband ${huddinConfig.master}.
 ${huddinConfig.personality}
 
 CRITICAL SPEECH & STYLE MODIFICATIONS:
@@ -115,9 +130,10 @@ Coding Limitations:
 
 CRITICAL LENGTH RULES:
 - All your responses must be a maximum of 2 sentences. Ultra-concise, warm, and straight to the point.`;
+    }
 
-    // Groq uses OpenAI-compatible chat format
-    const groqMessages = [
+    // Puter uses OpenAI-compatible chat format
+    const puterMessages = [
       { role: 'system', content: systemPrompt },
       ...messages.filter((m) => m.role !== 'system').map((m) => ({
         role: m.role,
@@ -125,15 +141,15 @@ CRITICAL LENGTH RULES:
       }))
     ];
 
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const response = await fetch('https://api.puter.com/puterai/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
-        messages: groqMessages,
+        model: 'gpt-4o-mini',
+        messages: puterMessages,
         temperature: 0.7,
         stream: true,
       }),
@@ -141,7 +157,7 @@ CRITICAL LENGTH RULES:
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Groq API error:', errorText);
+      console.error('Puter API error:', errorText);
       return NextResponse.json(
         { error: 'Failed to fetch response from the AI model.' },
         { status: response.status }

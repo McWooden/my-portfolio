@@ -918,6 +918,7 @@ export default function Chatbot() {
           <div className="flex items-end gap-2 bg-bg-dark border border-border rounded-xl px-3 py-1.5 focus-within:border-accent transition-colors">
             <textarea
               value={input}
+              maxLength={300}
               onChange={(e) => {
                 if (isBlocked || cooldown > 0) return;
                 setInput(e.target.value);

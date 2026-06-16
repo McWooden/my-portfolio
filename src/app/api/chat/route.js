@@ -110,15 +110,30 @@ CRITICAL LENGTH RULES:
 - All your responses must be a maximum of 3 paragraphs. Ultra-concise, warm, and straight to the point.`;
     }
 
-    // Puter uses OpenAI-compatible chat format
+    // Hybrid model routing & context pruning to save costs
+    let selectedModel = 'qwen3-coder:free'; // Default to free model
+    const nonSystemMessages = messages.filter((m) => m.role !== 'system');
+    
+    if (!isApologyEvaluation) {
+      const lastUserMessage = nonSystemMessages[nonSystemMessages.length - 1]?.content || '';
+      const isComplex = lastUserMessage.length > 50 || 
+                        /\b(project|service|portfolio|huddin|cost|work|hire|avail)\b/i.test(lastUserMessage);
+      if (isComplex) {
+        selectedModel = 'gpt-5-nano'; // Premium fallback for complex queries
+      }
+    }
+
+    // Keep only the last 6 messages to prune context size and save tokens
+    const recentMessages = nonSystemMessages.slice(-6);
+
     const puterMessages = [
       { role: 'system', content: systemPrompt },
-      ...messages.filter((m) => m.role !== 'system').map((m) => ({
+      ...recentMessages.map((m) => ({
         role: m.role,
         content: m.content
       }))
     ];
-
+ 
     const response = await fetch('https://api.puter.com/puterai/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -126,9 +141,10 @@ CRITICAL LENGTH RULES:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-nano',
+        model: selectedModel,
         messages: puterMessages,
         temperature: 0.5,
+        max_tokens: 300, // Caps response length to save tokens
         stream: true,
       }),
     });

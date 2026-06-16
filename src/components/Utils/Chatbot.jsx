@@ -41,6 +41,24 @@ export default function Chatbot() {
   const [isLoading, setIsLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
 
+  // Quota states
+  const [quotaUsed, setQuotaUsed] = useState(0);
+  const [quotaLimit, setQuotaLimit] = useState(6);
+  const [windowStart, setWindowStart] = useState(0);
+
+  const RANDOM_REASONS = [
+    "greet another guest",
+    "help my husband",
+    "do some household chores",
+    "check on something important in the kitchen",
+    "water the flowers in the garden",
+    "feed the cat",
+    "tidy up the living room",
+    "prepare dinner",
+    "do some laundry",
+    "clean the windows"
+  ];
+
   // Ban Overlay states
   const [banTimeLeft, setBanTimeLeft] = useState(180);
   const [lastWords, setLastWords] = useState('');
@@ -126,14 +144,26 @@ export default function Chatbot() {
     }
   }, [isOpen, isBlocked]);
 
-  // Handle countdown timer
+  // Handle countdown timer & quota window reset
   useEffect(() => {
-    if (cooldown <= 0) return;
+    if (cooldown <= 0) {
+      if (typeof window !== 'undefined' && quotaUsed >= quotaLimit) {
+        // Cooldown finished, start next session (subsequent session gets 4)
+        const now = Date.now();
+        localStorage.setItem('chatbot_quota_limit', '4');
+        localStorage.setItem('chatbot_quota_used', '0');
+        localStorage.setItem('chatbot_quota_window_start', now.toString());
+        setQuotaLimit(4);
+        setQuotaUsed(0);
+        setWindowStart(now);
+      }
+      return;
+    }
     const timer = setInterval(() => {
       setCooldown(prev => prev - 1);
     }, 1000);
     return () => clearInterval(timer);
-  }, [cooldown]);
+  }, [cooldown, quotaUsed, quotaLimit]);
 
   // Auto-scroll to bottom of messages
   useEffect(() => {
@@ -149,9 +179,10 @@ export default function Chatbot() {
     }
   }, [banHistory]);
 
-  // Check persistent block status on load
+  // Check persistent block status and initialize chatbot quota on load
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      // 1. Check persistent ban
       const blockedTimeStr = localStorage.getItem('mia_blocked_time');
       if (blockedTimeStr) {
         const blockedTime = parseInt(blockedTimeStr, 10);
@@ -163,11 +194,45 @@ export default function Chatbot() {
           setMessages([
             { role: 'assistant', sender: 'nico', content: 'Nico detected bad attitude. You are kicked from the chat.\n\n*"When you are in someone\'s home, please check your attitude."*' }
           ]);
-          // Play door closing sound safely
           playKickSound();
         } else {
-          // Expiration passed, clear block
           localStorage.removeItem('mia_blocked_time');
+        }
+      }
+
+      // 2. Initialize Quota
+      const todayStr = new Date().toLocaleDateString('en-US');
+      const savedDate = localStorage.getItem('chatbot_quota_date');
+      let savedLimit = parseInt(localStorage.getItem('chatbot_quota_limit') || '6', 10);
+      let savedUsed = parseInt(localStorage.getItem('chatbot_quota_used') || '0', 10);
+      let savedWindowStart = parseInt(localStorage.getItem('chatbot_quota_window_start') || '0', 10);
+      const now = Date.now();
+
+      if (savedDate !== todayStr) {
+        savedLimit = 6;
+        savedUsed = 0;
+        savedWindowStart = now;
+        localStorage.setItem('chatbot_quota_date', todayStr);
+        localStorage.setItem('chatbot_quota_limit', '6');
+        localStorage.setItem('chatbot_quota_used', '0');
+        localStorage.setItem('chatbot_quota_window_start', savedWindowStart.toString());
+      } else if (now - savedWindowStart >= 5 * 60 * 1000) {
+        savedLimit = 4;
+        savedUsed = 0;
+        savedWindowStart = now;
+        localStorage.setItem('chatbot_quota_limit', '4');
+        localStorage.setItem('chatbot_quota_used', '0');
+        localStorage.setItem('chatbot_quota_window_start', savedWindowStart.toString());
+      }
+
+      setQuotaUsed(savedUsed);
+      setQuotaLimit(savedLimit);
+      setWindowStart(savedWindowStart);
+
+      if (savedUsed >= savedLimit && now - savedWindowStart < 5 * 60 * 1000) {
+        const secondsLeft = Math.ceil(((savedWindowStart + 5 * 60 * 1000) - now) / 1000);
+        if (secondsLeft > 0) {
+          setCooldown(secondsLeft);
         }
       }
     }
@@ -203,6 +268,45 @@ export default function Chatbot() {
     const text = textToSend || input.trim();
     if (!text) return;
 
+    // Quota Check
+    const todayStr = new Date().toLocaleDateString('en-US');
+    let savedDate = localStorage.getItem('chatbot_quota_date');
+    let savedLimit = parseInt(localStorage.getItem('chatbot_quota_limit') || '6', 10);
+    let savedUsed = parseInt(localStorage.getItem('chatbot_quota_used') || '0', 10);
+    let savedWindowStart = parseInt(localStorage.getItem('chatbot_quota_window_start') || '0', 10);
+    const now = Date.now();
+
+    if (savedDate !== todayStr) {
+      savedDate = todayStr;
+      savedLimit = 6;
+      savedUsed = 0;
+      savedWindowStart = now;
+    } else if (now - savedWindowStart >= 5 * 60 * 1000) {
+      savedLimit = 4;
+      savedUsed = 0;
+      savedWindowStart = now;
+    }
+
+    if (savedUsed >= savedLimit) {
+      const secondsLeft = Math.ceil(((savedWindowStart + 5 * 60 * 1000) - now) / 1000);
+      if (secondsLeft > 0) {
+        setCooldown(secondsLeft);
+      }
+      return;
+    }
+
+    const newUsed = savedUsed + 1;
+    localStorage.setItem('chatbot_quota_date', savedDate);
+    localStorage.setItem('chatbot_quota_limit', savedLimit.toString());
+    localStorage.setItem('chatbot_quota_used', newUsed.toString());
+    localStorage.setItem('chatbot_quota_window_start', savedWindowStart.toString());
+
+    setQuotaUsed(newUsed);
+    setQuotaLimit(savedLimit);
+    setWindowStart(savedWindowStart);
+
+    const isOneRemaining = (savedLimit - newUsed) === 1;
+
     if (!textToSend) {
       setInput('');
     }
@@ -219,7 +323,6 @@ export default function Chatbot() {
       setIsBlocked(true);
       if (typeof window !== 'undefined') {
         localStorage.setItem('mia_blocked_time', Date.now().toString());
-        // Play door closing sound safely
         playKickSound();
       }
       return;
@@ -276,6 +379,28 @@ export default function Chatbot() {
           }
           return updated;
         });
+      }
+
+      // If one remaining, append custom suffix
+      if (isOneRemaining) {
+        const randomReason = RANDOM_REASONS[Math.floor(Math.random() * RANDOM_REASONS.length)];
+        const suffix = `\n\n*(Any question again? I have to ${randomReason}.)*`;
+        assistantReply += suffix;
+        setMessages(prev => {
+          const updated = [...prev];
+          if (updated.length > 0 && updated[updated.length - 1].role === 'assistant') {
+            updated[updated.length - 1].content = assistantReply;
+          }
+          return updated;
+        });
+      }
+
+      // If session limit reached, activate cooldown
+      if (newUsed >= savedLimit) {
+        const secondsLeft = Math.ceil(((savedWindowStart + 5 * 60 * 1000) - Date.now()) / 1000);
+        if (secondsLeft > 0) {
+          setCooldown(secondsLeft);
+        }
       }
     } catch (error) {
       console.error('Chat error:', error);
@@ -351,7 +476,7 @@ export default function Chatbot() {
         // Good attitude -> Forgive
         setBanHistory(prev => [
           ...prev,
-          { sender: 'mia', content: 'I forgive you... but Nico is still very angry!' },
+          { sender: 'mia', content: 'I forgive you... but Nico is still mad' },
           { sender: 'system', content: '*Nico drop and locks you in.*' }
         ]);
 
@@ -372,11 +497,17 @@ export default function Chatbot() {
         setBanInputHidden(true);
         setBanTimeLeft(7); // Jump the countdown visual timer to 7s
       } else {
-        // Neutral attitude -> Will not respond anything (no state transitions, user can try again)
+        // Neutral attitude -> Reduce timer by 50% and hide input to limit requests
         setBanHistory(prev => [
           ...prev,
-          { sender: 'nico', content: '...' }
+          { sender: 'nico', content: '...' },
+          { sender: 'system', content: '*Nico stares at you. Attitude is neutral/acceptable, but the door remains locked.*' }
         ]);
+
+        // Halve the countdown timer
+        setBanTimeLeft(prev => Math.max(1, Math.floor(prev / 2)));
+        setIsForgivenButNicoNot(true);
+        setBanInputHidden(true);
       }
     } catch (err) {
       console.error(err);
@@ -479,10 +610,10 @@ export default function Chatbot() {
                 >
                   <div
                     className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed ${isUser
-                        ? `${userBgClass} text-white rounded-tr-none font-medium text-right`
-                        : (isMia || isNicoWhite)
-                          ? 'bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-tl-none text-left'
-                          : `bg-zinc-800 border border-zinc-700 ${nicoTextClass} rounded-tl-none text-left`
+                      ? `${userBgClass} text-white rounded-tr-none font-medium text-right`
+                      : (isMia || isNicoWhite)
+                        ? 'bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-tl-none text-left'
+                        : `bg-zinc-800 border border-zinc-700 ${nicoTextClass} rounded-tl-none text-left`
                       }`}
                   >
                     {isUser ? (
@@ -566,7 +697,7 @@ export default function Chatbot() {
             </div>
             <div>
               <h4 className="text-sm font-semibold text-text-primary">Mia</h4>
-              <p className="text-[10px] font-mono text-text-muted">Maid GPT-4o-Mini</p>
+              <p className="text-[10px] font-mono text-text-muted">Maid Flash (Low)</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
@@ -605,8 +736,8 @@ export default function Chatbot() {
             >
               <div
                 className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[0.95rem] ${message.role === 'user'
-                    ? 'bg-accent text-bg-dark rounded-tr-none font-medium'
-                    : 'bg-bg-dark border border-border text-text-primary rounded-tl-none'
+                  ? 'bg-accent text-bg-dark rounded-tr-none font-medium'
+                  : 'bg-bg-dark border border-border text-text-primary rounded-tl-none'
                   }`}
               >
                 {message.role === 'user' ? (

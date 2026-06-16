@@ -1,0 +1,15 @@
+{
+  "title": "Design Notes",
+  "category": "Principles",
+  "date": "May 19, 2025",
+  "subtitle": "Why spacing is more emotional than you think",
+  "coverImage": null,
+  "paragraphs": [
+    "Design isn't just about how something looks — it's about how it feels. And nothing affects feeling more quietly (and more dramatically) than spacing. You can show someone two layouts with identical typography and color — and they'll tell you one \"feels calmer\" or \"feels sharper.\"",
+    "It's not magic. It's spacing.",
+    "The more space you give a headline, the more important it feels. Tight layout says: \"Here's everything right now.\" Wide layout says: \"Pause. Look at this.\" White space isn't empty — it's loaded with mood.",
+    "Note 1: Padding creates tone\n\nNot everything has to be perfectly symmetrical. In fact, small shifts — like slightly tighter spacing between a title and subtitle, or more margin under a paragraph than above — can make your design feel less robotic.",
+    "Note 2: Uneven beats feel human\n\nBalanced ≠ equal. Sometimes the numbers lie. You can have two perfectly measured objects that look misaligned. Train your eye — and trust it more than your layout grid when it comes to visual weight. It's not cheating. It's good design.",
+    "Note 3: Don't trust rulers, trust your eye\n\nThese aren't rules. Just observations — from one layout to the next. Every project has its own rhythm, but spacing is always part of the music."
+  ]
+}

@@ -1,231 +1,255 @@
 export const projects = [
   {
-    slug: "onyx-skincare",
-    title: "Onyx Skincare",
-    subtitle: "Onyx is a minimalist skincare brand focused on clean formulations and bold self-expression",
-    date: "May 23, 2025",
-    location: "Madrid, Spain",
-    industry: "Beauty & Wellness",
-    testimonial: {
-      quote: "Our rebrand finally feels like us. Clients noticed immediately",
-      author: "Alina",
-      company: "Onyx Skincare"
+    "slug": "onyx-skincare",
+    "title": "Onyx Skincare",
+    "subtitle": "Onyx is a minimalist skincare brand focused on clean formulations and bold self-expression",
+    "date": "May 23, 2025",
+    "location": "Madrid, Spain",
+    "industry": "Beauty & Wellness",
+    "testimonial": {
+      "quote": "Our rebrand finally feels like us. Clients noticed immediately",
+      "author": "Alina",
+      "company": "Onyx Skincare"
     },
-    challenge: "The market was saturated with either ultra-clinical or hyper-feminine skincare branding. Onyx needed to cut through the noise with a modern, minimal aesthetic that felt premium — but still expressive.",
-    solution: "We developed a high-contrast visual identity focused on confidence through simplicity:",
-    solutionDetails: [
+    "challenge": "The market was saturated with either ultra-clinical or hyper-feminine skincare branding. Onyx needed to cut through the noise with a modern, minimal aesthetic that felt premium — but still expressive.",
+    "solution": "We developed a high-contrast visual identity focused on confidence through simplicity:",
+    "solutionDetails": [
       "Custom wordmark (ONYX) using strong, round-letter typography;",
       "Color palette with deep berry red, warm neutrals, and white space;",
       "Secondary type system that feels editorial and direct."
     ],
-    imageCaps: [
-      "Soft matte tubes with vertical logotype — clean, modern, and shelf-ready",
-      "Minimal back-of-pack layout with clear product info and tactile structure",
-      "Branded shipping tape with ‘Glow. Hydrate. Repeat.’ — unboxing with attitude"
-    ],
-    outcome: "The identity gave Onyx a launch-ready look in under 3 weeks.",
-    outcomeDetails: [
+    "outcome": "The identity gave Onyx a launch-ready look in under 3 weeks.",
+    "outcomeDetails": [
       "2,000+ signups in the pre-launch waitlist",
       "6.8% landing page conversion",
       "70% of purchases included more than 1 product",
       "Instagram saved posts increased by 3.2x during launch week."
     ],
-    featured: true,
-    coverImage: "https://framerusercontent.com/images/XHEChVekS6RzYRttHyDfrU.png?width=1536&height=768",
-    images: [
-      "https://framerusercontent.com/images/tuaWaeYvMrVUFQ3zYlXxYRBz57c.png",
-      "https://framerusercontent.com/images/bpPz4YMTN8BLoho6St2Rnoy8G7M.png",
-      "https://framerusercontent.com/images/0MWl6VuxhwgbIMnVSZqXZddJw.jpg"
+    "featured": true,
+    "coverImage": "https://framerusercontent.com/images/XHEChVekS6RzYRttHyDfrU.png?width=1536&height=768",
+    "gallery": [
+      {
+        "image": "https://framerusercontent.com/images/tuaWaeYvMrVUFQ3zYlXxYRBz57c.png",
+        "caption": "Soft matte tubes with vertical logotype — clean, modern, and shelf-ready"
+      },
+      {
+        "image": "https://framerusercontent.com/images/bpPz4YMTN8BLoho6St2Rnoy8G7M.png",
+        "caption": "Minimal back-of-pack layout with clear product info and tactile structure"
+      },
+      {
+        "image": "https://framerusercontent.com/images/0MWl6VuxhwgbIMnVSZqXZddJw.jpg",
+        "caption": "Branded shipping tape with ‘Glow. Hydrate. Repeat.’ — unboxing with attitude"
+      }
     ]
   },
   {
-    slug: "nova",
-    title: "Nova",
-    subtitle: "Nova is a next-gen recruiting platform helping startups and scaleups hire top tech talent across Europe",
-    date: "May 22, 2025",
-    location: "Berlin, Germany",
-    industry: "SaaS",
-    testimonial: {
-      quote: "Every founder we talk to gets the brand instantly",
-      author: "Max Ritter",
-      company: "Nova"
+    "slug": "nova",
+    "title": "Nova",
+    "subtitle": "Nova is a next-gen recruiting platform helping startups and scaleups hire top tech talent across Europe",
+    "date": "May 22, 2025",
+    "location": "Berlin, Germany",
+    "industry": "SaaS",
+    "testimonial": {
+      "quote": "Every founder we talk to gets the brand instantly",
+      "author": "Max Ritter",
+      "company": "Nova"
     },
-    challenge: "Nova was growing fast, but their visual identity didn’t reflect their energy or precision. Their site felt generic, their logo lacked edge, and none of their materials stood out in a competitive, high-velocity space. They needed a bolder system that spoke to both tech founders and high-caliber candidates.",
-    solution: "We built a brand rooted in clarity and speed. The wordmark was reworked for sharpness, and the new color palette blends dark neutrals with electric accents — a nod to Nova’s name and pace. Typography leans modern and tech-forward, with consistent grid use across formats. We also redesigned the website with crisp, frictionless flows for two audiences: founders and candidates. Motion and microinteractions were added to key sections, making the digital experience feel light and responsive.",
-    solutionDetails: [
+    "challenge": "Nova was growing fast, but their visual identity didn’t reflect their energy or precision. Their site felt generic, their logo lacked edge, and none of their materials stood out in a competitive, high-velocity space. They needed a bolder system that spoke to both tech founders and high-caliber candidates.",
+    "solution": "We built a brand rooted in clarity and speed. The wordmark was reworked for sharpness, and the new color palette blends dark neutrals with electric accents — a nod to Nova’s name and pace. Typography leans modern and tech-forward, with consistent grid use across formats. We also redesigned the website with crisp, frictionless flows for two audiences: founders and candidates. Motion and microinteractions were added to key sections, making the digital experience feel light and responsive.",
+    "solutionDetails": [
       "Redesigned the website with frictionless splits for founders and candidates",
       "Created dynamic recruitment layouts and brand materials",
       "Integrated microinteractions and motion styling for interactive components"
     ],
-    imageCaps: [
-      "Angular, modern, and designed to scale across digital and print",
-      "Fast-loading, split-audience layout with scroll-based animations",
-      "Used for both fundraising and hiring — built to convert"
-    ],
-    outcome: "Nova’s rebrand helped position them as a serious player in the tech hiring space. The new system boosted conversion across founder demos and candidate sign-ups — and gave their team the tools to communicate with speed and clarity.",
-    outcomeDetails: [
+    "outcome": "Nova’s rebrand helped position them as a serious player in the tech hiring space. The new system boosted conversion across founder demos and candidate sign-ups — and gave their team the tools to communicate with speed and clarity.",
+    "outcomeDetails": [
       "35% increase in founder demo bookings",
       "Sleek and unified asset pack exported to recruitment dashboards",
       "Significantly elevated branding featured in design circles"
     ],
-    featured: true,
-    coverImage: "https://framerusercontent.com/images/prADa1IjoRBMAk5VcwnCnemeG4.png",
-    images: [
-      "https://framerusercontent.com/images/uEz9dCltMLP4KTajvtu99EP2ck.png",
-      "https://framerusercontent.com/images/ZjwRUmKHfNUConryEH3JLOt0kU.png",
-      "https://framerusercontent.com/images/DM010pau3UaxhIWKzCSZ6meKY.png"
+    "featured": true,
+    "coverImage": "https://framerusercontent.com/images/prADa1IjoRBMAk5VcwnCnemeG4.png",
+    "gallery": [
+      {
+        "image": "https://framerusercontent.com/images/uEz9dCltMLP4KTajvtu99EP2ck.png",
+        "caption": "Angular, modern, and designed to scale across digital and print"
+      },
+      {
+        "image": "https://framerusercontent.com/images/ZjwRUmKHfNUConryEH3JLOt0kU.png",
+        "caption": "Fast-loading, split-audience layout with scroll-based animations"
+      },
+      {
+        "image": "https://framerusercontent.com/images/DM010pau3UaxhIWKzCSZ6meKY.png",
+        "caption": "Used for both fundraising and hiring — built to convert"
+      }
     ]
   },
   {
-    slug: "fieldtype",
-    title: "Fieldtype",
-    subtitle: "Fieldtype is a boutique product design studio working at the intersection of tech and craft",
-    date: "May 21, 2025",
-    location: "Stockholm, Sweden",
-    industry: "Agency",
-    testimonial: {
-      quote: "We just wanted something that made people pause",
-      author: "E. Visser",
-      company: "Fieldtype"
+    "slug": "fieldtype",
+    "title": "Fieldtype",
+    "subtitle": "Fieldtype is a boutique product design studio working at the intersection of tech and craft",
+    "date": "May 21, 2025",
+    "location": "Stockholm, Sweden",
+    "industry": "Agency",
+    "testimonial": {
+      "quote": "We just wanted something that made people pause",
+      "author": "E. Visser",
+      "company": "Fieldtype"
     },
-    challenge: "Though Fieldtype had an impressive track record, their brand lacked cohesion. The website was minimal but too bare, and the identity didn’t reflect their structured, detail-driven approach to design. They needed a visual system that felt precise, calm, and quietly confident.",
-    solution: "We developed a brand language rooted in grids, spacing, and clarity. The logo is built with monospaced rhythm and modularity in mind. The color palette blends soft neutrals with deep slate and cobalt accents — reflecting both logic and focus. The site was designed to feel like a product in itself: smooth scroll, live demos, and documentation-style layouts. Subtle motion helps convey Fieldtype’s process-first mentality, without overwhelming the content.",
-    solutionDetails: [
+    "challenge": "Though Fieldtype had an impressive track record, their brand lacked cohesion. The website was minimal but too bare, and the identity didn’t reflect their structured, detail-driven approach to design. They needed a visual system that felt precise, calm, and quietly confident.",
+    "solution": "We developed a brand language rooted in grids, spacing, and clarity. The logo is built with monospaced rhythm and modularity in mind. The color palette blends soft neutrals with deep slate and cobalt accents — reflecting both logic and focus. The site was designed to feel like a product in itself: smooth scroll, live demos, and documentation-style layouts. Subtle motion helps convey Fieldtype’s process-first mentality, without overwhelming the content.",
+    "solutionDetails": [
       "Grid-oriented visual system showing structural precision",
       "Documentation-style page layout emphasizing direct, clear messaging",
       "Modular components designed with monospaced aesthetics"
     ],
-    imageCaps: [
-      "Geometry meets subtle personality — structure without rigidity",
-      "Documentation-inspired layout with live hover previews",
-      "Focused storytelling with logic-first visual hierarchy"
-    ],
-    outcome: "With the new brand in place, Fieldtype launched a fully redesigned site and case study library. The refreshed system has helped the team attract higher-tier projects, collaborate with tech startups across Europe, and scale their visual storytelling with ease.",
-    outcomeDetails: [
+    "outcome": "With the new brand in place, Fieldtype launched a fully redesigned site and case study library. The refreshed system has helped the team attract higher-tier projects, collaborate with tech startups across Europe, and scale their visual storytelling with ease.",
+    "outcomeDetails": [
       "Successful launch of updated case libraries",
       "Improved visual credibility resulting in multiple enterprise inquiries",
       "Smooth visual handoff system optimized for developers"
     ],
-    featured: true,
-    coverImage: "https://framerusercontent.com/images/uEz9dCltMLP4KTajvtu99EP2ck.png",
-    images: [
-      "https://framerusercontent.com/images/prADa1IjoRBMAk5VcwnCnemeG4.png",
-      "https://framerusercontent.com/images/ZjwRUmKHfNUConryEH3JLOt0kU.png",
-      "https://framerusercontent.com/images/DM010pau3UaxhIWKzCSZ6meKY.png"
+    "featured": true,
+    "coverImage": "https://framerusercontent.com/images/uEz9dCltMLP4KTajvtu99EP2ck.png",
+    "gallery": [
+      {
+        "image": "https://framerusercontent.com/images/prADa1IjoRBMAk5VcwnCnemeG4.png",
+        "caption": "Geometry meets subtle personality — structure without rigidity"
+      },
+      {
+        "image": "https://framerusercontent.com/images/ZjwRUmKHfNUConryEH3JLOt0kU.png",
+        "caption": "Documentation-inspired layout with live hover previews"
+      },
+      {
+        "image": "https://framerusercontent.com/images/DM010pau3UaxhIWKzCSZ6meKY.png",
+        "caption": "Focused storytelling with logic-first visual hierarchy"
+      }
     ]
   },
   {
-    slug: "alder-co",
-    title: "Alder & Co",
-    subtitle: "Alder & Co crafts everyday goods designed to last — from linen homeware to recycled leather accessories",
-    date: "May 20, 2025",
-    location: "London, UK",
-    industry: "Agency",
-    testimonial: {
-      quote: "Our customers loved our products — now they love the brand too",
-      author: "Thomas Mikkelsen",
-      company: "Alder & Co"
+    "slug": "alder-co",
+    "title": "Alder & Co",
+    "subtitle": "Alder & Co crafts everyday goods designed to last — from linen homeware to recycled leather accessories",
+    "date": "May 20, 2025",
+    "location": "London, UK",
+    "industry": "Agency",
+    "testimonial": {
+      "quote": "Our customers loved our products — now they love the brand too",
+      "author": "Thomas Mikkelsen",
+      "company": "Alder & Co"
     },
-    challenge: "Though the products spoke for themselves, Alder & Co’s visual identity felt outdated and inconsistent. The logo lacked warmth, the packaging was generic, and their online presence didn’t reflect the care put into each item. They needed a brand system that felt both elevated and grounded — premium, but personal.",
-    solution: "We designed a refined brand identity built around natural textures, soft typography, and flexible layouts. The new logo features a custom serif logotype with subtle imperfections, adding warmth and character. We developed a neutral, earthy color palette and introduced soft photography direction to showcase materials and craft. Packaging was simplified, using recycled materials with letterpress-inspired labeling. The Shopify storefront was redesigned to feel editorial and calm, mirroring the in-store experience.",
-    solutionDetails: [
+    "challenge": "Though the products spoke for themselves, Alder & Co’s visual identity felt outdated and inconsistent. The logo lacked warmth, the packaging was generic, and their online presence didn’t reflect the care put into each item. They needed a brand system that felt both elevated and grounded — premium, but personal.",
+    "solution": "We designed a refined brand identity built around natural textures, soft typography, and flexible layouts. The new logo features a custom serif logotype with subtle imperfections, adding warmth and character. We developed a neutral, earthy color palette and introduced soft photography direction to showcase materials and craft. Packaging was simplified, using recycled materials with letterpress-inspired labeling. The Shopify storefront was redesigned to feel editorial and calm, mirroring the in-store experience.",
+    "solutionDetails": [
       "Custom imperfect serif logo bringing organic warmth",
       "Simplified packaging utilizing recycled stocks and stamp aesthetics",
       "Clean Shopify storefront design with grid layout mirroring retail storefronts"
     ],
-    imageCaps: [
-      "Minimalist recycled paper wraps with custom stamps",
-      "Natural light, real homes, and materials in focus",
-      "Organic elegance with a timeless serif approach"
-    ],
-    outcome: "Alder & Co’s rebrand helped reposition them as a conscious premium label. Sales increased after the launch of the new site and packaging, and the updated visuals were featured in several design publications. Most importantly, the brand now feels like an extension of their values.",
-    outcomeDetails: [
+    "outcome": "Alder & Co’s rebrand helped reposition them as a conscious premium label. Sales increased after the launch of the new site and packaging, and the updated visuals were featured in several design publications. Most importantly, the brand now feels like an extension of their values.",
+    "outcomeDetails": [
       "Noticeable lift in e-commerce conversion post-launch",
       "Features in design publications highlighting sustainable design",
       "Stronger brand identification among primary customer demographics"
     ],
-    featured: true,
-    coverImage: "https://framerusercontent.com/images/ZjwRUmKHfNUConryEH3JLOt0kU.png",
-    images: [
-      "https://framerusercontent.com/images/prADa1IjoRBMAk5VcwnCnemeG4.png",
-      "https://framerusercontent.com/images/uEz9dCltMLP4KTajvtu99EP2ck.png",
-      "https://framerusercontent.com/images/DM010pau3UaxhIWKzCSZ6meKY.png"
+    "featured": true,
+    "coverImage": "https://framerusercontent.com/images/ZjwRUmKHfNUConryEH3JLOt0kU.png",
+    "gallery": [
+      {
+        "image": "https://framerusercontent.com/images/prADa1IjoRBMAk5VcwnCnemeG4.png",
+        "caption": "Minimalist recycled paper wraps with custom stamps"
+      },
+      {
+        "image": "https://framerusercontent.com/images/uEz9dCltMLP4KTajvtu99EP2ck.png",
+        "caption": "Natural light, real homes, and materials in focus"
+      },
+      {
+        "image": "https://framerusercontent.com/images/DM010pau3UaxhIWKzCSZ6meKY.png",
+        "caption": "Organic elegance with a timeless serif approach"
+      }
     ]
   },
   {
-    slug: "studio-terra",
-    title: "Studio Terra",
-    subtitle: "Studio Terra is a boutique interior design firm known for its earthy color palettes, natural textures, and quiet luxury",
-    date: "May 16, 2025",
-    location: "Lisbon, Portugal",
-    industry: "Lifestyle",
-    testimonial: {
-      quote: "Calm, thoughtful, and beautifully detailed",
-      author: "I. Costa",
-      company: "Studio Terra"
+    "slug": "studio-terra",
+    "title": "Studio Terra",
+    "subtitle": "Studio Terra is a boutique interior design firm known for its earthy color palettes, natural textures, and quiet luxury",
+    "date": "May 16, 2025",
+    "location": "Lisbon, Portugal",
+    "industry": "Lifestyle",
+    "testimonial": {
+      "quote": "Calm, thoughtful, and beautifully detailed",
+      "author": "I. Costa",
+      "company": "Studio Terra"
     },
-    challenge: "Studio Terra had a strong visual aesthetic in their work but lacked a cohesive digital presence. Their old site didn’t reflect their values or showcase their projects in the way they deserved. They needed a brand system and online portfolio that felt as elevated and tactile as the spaces they design.",
-    solution: "We created a full visual identity inspired by nature and materiality — from a muted, organic palette to soft editorial typography. The website was designed as a quiet backdrop: airy, neutral, image-first. Layouts highlight the beauty of negative space, and subtle animations reflect the studio’s calm, confident rhythm. We also developed social media templates and brand guidelines to help maintain consistency across touchpoints.",
-    solutionDetails: [
+    "challenge": "Studio Terra had a strong visual aesthetic in their work but lacked a cohesive digital presence. Their old site didn’t reflect their values or showcase their projects in the way they deserved. They needed a brand system and online portfolio that felt as elevated and tactile as the spaces they design.",
+    "solution": "We created a full visual identity inspired by nature and materiality — from a muted, organic palette to soft editorial typography. The website was designed as a quiet backdrop: airy, neutral, image-first. Layouts highlight the beauty of negative space, and subtle animations reflect the studio’s calm, confident rhythm. We also developed social media templates and brand guidelines to help maintain consistency across touchpoints.",
+    "solutionDetails": [
       "Textural visual language that supports rather than overrides work",
       "Airy grid layouts reflecting Portuguese and minimal design roots",
       "Social media guidelines and template layouts ensuring aesthetic alignment"
     ],
-    imageCaps: [
-      "Understated and textural — a visual language that blends into the background and lets the work speak",
-      "Minimal grid layout, slow transitions, and generous white space",
-      "Full-screen visuals with custom hover states and soft scroll"
-    ],
-    outcome: "Studio Terra launched their new site and identity ahead of a major press feature — receiving praise for how “aligned” the brand felt. The system now helps them present proposals, pitch to clients, and share new projects with visual confidence.",
-    outcomeDetails: [
+    "outcome": "Studio Terra launched their new site and identity ahead of a major press feature — receiving praise for how “aligned” the brand felt. The system now helps them present proposals, pitch to clients, and share new projects with visual confidence.",
+    "outcomeDetails": [
       "Launched ahead of press spotlight",
       "Received design community features for minimal layout design",
       "Dramatically increased visual confidence during project pitches"
     ],
-    featured: false,
-    coverImage: "https://framerusercontent.com/images/qnJUn7qEREZxiKpS76AX9oZEbKM.png",
-    images: [
-      "https://framerusercontent.com/images/tuaWaeYvMrVUFQ3zYlXxYRBz57c.png",
-      "https://framerusercontent.com/images/bpPz4YMTN8BLoho6St2Rnoy8G7M.png",
-      "https://framerusercontent.com/images/0MWl6VuxhwgbIMnVSZqXZddJw.jpg"
+    "featured": false,
+    "coverImage": "https://framerusercontent.com/images/qnJUn7qEREZxiKpS76AX9oZEbKM.png",
+    "gallery": [
+      {
+        "image": "https://framerusercontent.com/images/tuaWaeYvMrVUFQ3zYlXxYRBz57c.png",
+        "caption": "Understated and textural — a visual language that blends into the background and lets the work speak"
+      },
+      {
+        "image": "https://framerusercontent.com/images/bpPz4YMTN8BLoho6St2Rnoy8G7M.png",
+        "caption": "Minimal grid layout, slow transitions, and generous white space"
+      },
+      {
+        "image": "https://framerusercontent.com/images/0MWl6VuxhwgbIMnVSZqXZddJw.jpg",
+        "caption": "Full-screen visuals with custom hover states and soft scroll"
+      }
     ]
   },
   {
-    slug: "kairo",
-    title: "Kairo",
-    subtitle: "Kairo is a SaaS platform that helps creative teams build moodboards, presentations, and internal assets",
-    date: "May 15, 2025",
-    location: "Amsterdam, Netherlands",
-    industry: "SaaS",
-    testimonial: {
-      quote: "It’s sharp, clean, and makes our decks look like they were built",
-      author: "Alan Vermeer",
-      company: "Kairo"
+    "slug": "kairo",
+    "title": "Kairo",
+    "subtitle": "Kairo is a SaaS platform that helps creative teams build moodboards, presentations, and internal assets",
+    "date": "May 15, 2025",
+    "location": "Amsterdam, Netherlands",
+    "industry": "SaaS",
+    "testimonial": {
+      "quote": "It’s sharp, clean, and makes our decks look like they were built",
+      "author": "Alan Vermeer",
+      "company": "Kairo"
     },
-    challenge: "Kairo was growing quickly but lacked a clear visual identity. Their product was expressive — but their brand felt generic. They needed a refresh that would reflect their creative audience while staying functional and scalable across use cases.",
-    solution: "I developed a bold, modular brand system with a focus on clarity, rhythm, and movement. The new logo uses a custom wordmark with wide spacing and confident balance. The color palette is limited but expressive, working well across dark and light modes. We also created a flexible slide system — used across internal decks, onboarding, and investor presentations — with layout styles that balance personality and precision.",
-    solutionDetails: [
+    "challenge": "Kairo was growing quickly but lacked a clear visual identity. Their product was expressive — but their brand felt generic. They needed a refresh that would reflect their creative audience while staying functional and scalable across use cases.",
+    "solution": "I developed a bold, modular brand system with a focus on clarity, rhythm, and movement. The new logo uses a custom wordmark with wide spacing and confident balance. The color palette is limited but expressive, working well across dark and light modes. We also created a flexible slide system — used across internal decks, onboarding, and investor presentations — with layout styles that balance personality and precision.",
+    "solutionDetails": [
       "Bold, modular brand guidelines supporting dark and light themes",
       "Custom wide-spaced wordmark bringing a balanced structural tone",
       "Highly adaptable presentation templates tailored for internal and public releases"
     ],
-    imageCaps: [
-      "Reusable slides with a visual rhythm — designed to scale across teams",
-      "Neutral background, bold typography, and just enough color to move",
-      "A clear hierarchy built for both storytelling and speed"
-    ],
-    outcome: "The new identity helped align Kairo’s brand with its product: creative, structured, and fast-moving. Their team now uses the system across product marketing, investor decks, and onboarding flows — with fewer decisions and stronger consistency.",
-    outcomeDetails: [
+    "outcome": "The new identity helped align Kairo’s brand with its product: creative, structured, and fast-moving. Their team now uses the system across product marketing, investor decks, and onboarding flows — with fewer decisions and stronger consistency.",
+    "outcomeDetails": [
       "Complete alignment between application UI and branding design",
       "Reduced time-to-output for product assets and decks",
       "Strong positive feedback from early onboarding cohorts"
     ],
-    featured: false,
-    coverImage: "https://framerusercontent.com/images/yXDKHUUyyqzKqK7Nc6Z3xj9D2s.jpeg",
-    images: [
-      "https://framerusercontent.com/images/tuaWaeYvMrVUFQ3zYlXxYRBz57c.png",
-      "https://framerusercontent.com/images/bpPz4YMTN8BLoho6St2Rnoy8G7M.png",
-      "https://framerusercontent.com/images/0MWl6VuxhwgbIMnVSZqXZddJw.jpg"
+    "featured": false,
+    "coverImage": "https://framerusercontent.com/images/yXDKHUUyyqzKqK7Nc6Z3xj9D2s.jpeg",
+    "gallery": [
+      {
+        "image": "https://framerusercontent.com/images/tuaWaeYvMrVUFQ3zYlXxYRBz57c.png",
+        "caption": "Reusable slides with a visual rhythm — designed to scale across teams"
+      },
+      {
+        "image": "https://framerusercontent.com/images/bpPz4YMTN8BLoho6St2Rnoy8G7M.png",
+        "caption": "Neutral background, bold typography, and just enough color to move"
+      },
+      {
+        "image": "https://framerusercontent.com/images/0MWl6VuxhwgbIMnVSZqXZddJw.jpg",
+        "caption": "A clear hierarchy built for both storytelling and speed"
+      }
     ]
   }
 ];

@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useRef, useEffect } from 'react';
 import SectionHeader from '../Utils/SectionHeader';
 import Section from '../Utils/Section';

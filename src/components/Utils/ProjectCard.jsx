@@ -1,9 +1,10 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
+import { getImageUrl } from '../../utils/image';
 
 export const ProjectCard = ({ project, className = '', style = {} }) => (
   <Link
-    to={`/portfolio/${project.slug}`}
+    href={`/portfolio/${project.slug}`}
     className="flex flex-col gap-4 group text-left w-full"
   >
     {/* Rounded cover image container with no border or background */}
@@ -11,11 +12,17 @@ export const ProjectCard = ({ project, className = '', style = {} }) => (
       className={`w-full aspect-[1.6] overflow-hidden rounded-[30px] ${className}`}
       style={style}
     >
-      <img
-        src={project.coverImage}
-        alt={project.title}
-        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.05]"
-      />
+      {getImageUrl(project.coverImage) ? (
+        <img
+          src={getImageUrl(project.coverImage)}
+          alt={project.title}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.05]"
+        />
+      ) : (
+        <div className="w-full h-full bg-[#1a1a1a] flex items-center justify-center text-text-muted text-sm font-mono">
+          No image
+        </div>
+      )}
     </div>
     
     {/* Info area aligned cleanly under the image */}

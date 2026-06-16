@@ -1,11 +1,12 @@
+"use client";
 import React from 'react';
-import { projects } from '../../data/siteData';
+import { projects as staticProjects } from '../../data/siteData';
 import ProjectCard from '../Utils/ProjectCard';
 import SectionHeader from '../Utils/SectionHeader';
 import Section from '../Utils/Section';
 import { useScrollReveal } from '../../hooks/useScrollReveal';
 
-export default function PortfolioSection() {
+export default function PortfolioSection({ projects = staticProjects }) {
   const featuredProjects = projects.filter(p => p.featured);
   const [gridRef, isRevealed] = useScrollReveal(0.05);
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 
 /**
  * Reusable Button Component
@@ -26,7 +26,7 @@ export default function Button({
 
   if (to) {
     return (
-      <Link to={to} className={finalClass} {...props}>
+      <Link href={to} className={finalClass} {...props}>
         {children}
       </Link>
     );

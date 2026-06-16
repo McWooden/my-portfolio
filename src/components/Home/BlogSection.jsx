@@ -1,11 +1,12 @@
+"use client";
 import React from 'react';
-import { blogPosts } from '../../data/siteData';
+import { blogPosts as staticBlogPosts } from '../../data/siteData';
 import BlogCard from '../Utils/BlogCard';
 import SectionHeader from '../Utils/SectionHeader';
 import Section from '../Utils/Section';
 import { useScrollReveal } from '../../hooks/useScrollReveal';
 
-export default function BlogSection() {
+export default function BlogSection({ posts = staticBlogPosts }) {
   const [gridRef, isRevealed] = useScrollReveal(0.05);
 
   return (
@@ -21,7 +22,7 @@ export default function BlogSection() {
         ref={gridRef}
         className="grid grid-cols-1 md:grid-cols-2 gap-[30px] w-full max-w-[1600px]"
       >
-        {blogPosts.map((post, index) => (
+        {posts.map((post, index) => (
           <BlogCard 
             key={post.slug} 
             post={post} 

@@ -1,0 +1,41 @@
+{
+  "title": "Fieldtype",
+  "subtitle": "Fieldtype is a boutique product design studio working at the intersection of tech and craft",
+  "date": "May 21, 2025",
+  "location": "Stockholm, Sweden",
+  "industry": "Agency",
+  "testimonial": {
+    "quote": "We just wanted something that made people pause",
+    "author": "E. Visser",
+    "company": "Fieldtype"
+  },
+  "challenge": "Though Fieldtype had an impressive track record, their brand lacked cohesion. The website was minimal but too bare, and the identity didn't reflect their structured, detail-driven approach to design. They needed a visual system that felt precise, calm, and quietly confident.",
+  "solution": "We developed a brand language rooted in grids, spacing, and clarity. The logo is built with monospaced rhythm and modularity in mind. The color palette blends soft neutrals with deep slate and cobalt accents — reflecting both logic and focus. The site was designed to feel like a product in itself: smooth scroll, live demos, and documentation-style layouts. Subtle motion helps convey Fieldtype's process-first mentality, without overwhelming the content.",
+  "solutionDetails": [
+    "Grid-oriented visual system showing structural precision",
+    "Documentation-style page layout emphasizing direct, clear messaging",
+    "Modular components designed with monospaced aesthetics"
+  ],
+  "outcome": "With the new brand in place, Fieldtype launched a fully redesigned site and case study library. The refreshed system has helped the team attract higher-tier projects, collaborate with tech startups across Europe, and scale their visual storytelling with ease.",
+  "outcomeDetails": [
+    "Successful launch of updated case libraries",
+    "Improved visual credibility resulting in multiple enterprise inquiries",
+    "Smooth visual handoff system optimized for developers"
+  ],
+  "featured": true,
+  "coverImage": null,
+  "gallery": [
+    {
+      "image": null,
+      "caption": "Geometry meets subtle personality — structure without rigidity"
+    },
+    {
+      "image": null,
+      "caption": "Documentation-inspired layout with live hover previews"
+    },
+    {
+      "image": null,
+      "caption": "Focused storytelling with logic-first visual hierarchy"
+    }
+  ]
+}

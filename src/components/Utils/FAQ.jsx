@@ -1,9 +1,10 @@
+"use client";
 import React, { useState, useRef } from 'react';
-import { faqs } from '../../data/siteData';
+import { faqs as staticFaqs } from '../../data/siteData';
 import SectionHeader from './SectionHeader';
 import Section from './Section';
 
-export default function FAQ({ labelIndex = "05" }) {
+export default function FAQ({ faqs = staticFaqs, labelIndex = "05" }) {
   const [activeFaq, setActiveFaq] = useState(null);
   const answerRefs = useRef([]);
 

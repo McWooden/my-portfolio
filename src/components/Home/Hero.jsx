@@ -1,9 +1,9 @@
+"use client";
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import Button from '../Utils/Button';
-import ScratchCanvas from './ScratchCanvas';
+import HeroVisual from './HeroVisual';
 
-export default function Hero() {
+export default function Hero({ homepageData, testimonialCard }) {
   const contentRef = useRef(null);
   const [contentHeight, setContentHeight] = useState(null);
 
@@ -49,69 +49,6 @@ export default function Hero() {
     }
   };
 
-  // Drag state for visual panel's floating card
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [canFloat, setCanFloat] = useState(true);
-  const dragStartRef = useRef({ x: 0, y: 0 });
-
-  const handleDragStart = (e) => {
-    // Only drag with left click or touch
-    if (e.button !== undefined && e.button !== 0) return;
-    
-    // Prevent default browser text selection or link dragging
-    e.preventDefault();
-    
-    setIsDragging(true);
-    setCanFloat(false);
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    dragStartRef.current = {
-      x: clientX - dragOffset.x,
-      y: clientY - dragOffset.y
-    };
-  };
-
-  const handleDragMove = (e) => {
-    if (!isDragging) return;
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    setDragOffset({
-      x: clientX - dragStartRef.current.x,
-      y: clientY - dragStartRef.current.y
-    });
-  };
-
-  const handleDragEnd = () => {
-    setIsDragging(false);
-    setDragOffset({ x: 0, y: 0 });
-    // Delay float animation until snap-back transition completes (600ms)
-    setTimeout(() => {
-      setCanFloat(true);
-    }, 600);
-  };
-
-  useEffect(() => {
-    if (isDragging) {
-      const onMove = (e) => {
-        if (e.cancelable) e.preventDefault();
-        handleDragMove(e);
-      };
-      const onEnd = () => handleDragEnd();
-
-      window.addEventListener('mousemove', onMove);
-      window.addEventListener('mouseup', onEnd);
-      window.addEventListener('touchmove', onMove, { passive: false });
-      window.addEventListener('touchend', onEnd);
-
-      return () => {
-        window.removeEventListener('mousemove', onMove);
-        window.removeEventListener('mouseup', onEnd);
-        window.removeEventListener('touchmove', onMove);
-        window.removeEventListener('touchend', onEnd);
-      };
-    }
-  }, [isDragging]);
 
 
 
@@ -277,55 +214,7 @@ export default function Hero() {
       </div>
 
       {/* Visual panel */}
-      <div 
-        style={contentHeight ? { height: `${contentHeight}px` } : {}}
-        className="w-full xl:w-1/2 relative rounded-[30px] overflow-visible bg-bg-card border-8 border-border -rotate-[1deg]"
-      >
-        <ScratchCanvas />
-
-        {/* Floating testimonial card */}
-        <div
-          onMouseDown={handleDragStart}
-          onTouchStart={handleDragStart}
-          style={{
-            transform: `translate3d(${dragOffset.x}px, ${dragOffset.y}px, 0)`,
-            transition: isDragging ? 'none' : 'transform 600ms cubic-bezier(0.25, 1, 0.5, 1)',
-            cursor: isDragging ? 'grabbing' : 'grab',
-            touchAction: 'none'
-          }}
-          className="absolute top-[30px] left-5 bg-white text-bg-dark p-5 rounded-[24px] w-[280px] flex flex-col gap-4 z-30 select-none"
-        >
-          <p className="font-sans text-[0.95rem] leading-[1.4] text-[#1a1a1a] font-medium">
-            "They captured our brand's personality instantly. Clients love the new look"
-          </p>
-          <div className="flex items-center gap-[10px]">
-            <img
-              src="https://framerusercontent.com/images/v4L6r5bO1P0gFP6z0HYvFxRmcYw.png?scale-down-to=512&width=1024&height=1024"
-              alt="Alina"
-              className="w-8 h-8 rounded-full object-cover"
-            />
-            <span className="text-[0.9rem] text-text-muted font-medium">Alina, Onyx Skincare</span>
-          </div>
-          <Link 
-            to="/portfolio/onyx-skincare"
-            onMouseDown={(e) => e.stopPropagation()}
-            onTouchStart={(e) => e.stopPropagation()}
-            className="absolute right-5 bottom-5 text-bg-dark hover:scale-110 transition-transform duration-200 cursor-pointer"
-          >
-            <svg viewBox="0 0 36 36" className="w-6 h-6">
-              <path d="M10 26 L24 12 M24 12 L14 12 M24 12 L24 22" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-            </svg>
-          </Link>
-        </div>
-
-        {/* Floating slots badge */}
-        <div className="absolute bottom-5 right-5 bg-[#222222]/95 border border-border px-6 py-3 rounded-[20px] flex items-center gap-[10px] z-30">
-          <span className="pulse-dot"></span>
-          <span className="font-mono text-[0.95rem] font-medium uppercase text-text-primary tracking-[-0.02em]">
-            3 Open slots
-          </span>
-        </div>
-      </div>
+      <HeroVisual contentHeight={contentHeight} homepageData={homepageData} testimonialCard={testimonialCard} />
     </section>
   );
 }

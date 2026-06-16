@@ -1,4 +1,5 @@
 import React from 'react';
+import { getImageUrl } from '../../utils/image';
 
 // Predefined fallback avatar URLs using code asset images
 const AVATARS = {
@@ -10,7 +11,7 @@ const AVATARS = {
 };
 
 export default function ReviewCard({ review, className = "" }) {
-  const avatarUrl = AVATARS[review.author] || "https://framerusercontent.com/images/XeylT9Ic2cwthJBQFpH03b3XEo.png?width=1024&height=1024";
+  const avatarUrl = getImageUrl(review.avatarImage) || AVATARS[review.author] || "https://framerusercontent.com/images/XeylT9Ic2cwthJBQFpH03b3XEo.png?width=1024&height=1024";
   const displayRating = review.rating.includes('.') ? `${review.rating}/5` : `${review.rating}.0/5`;
 
   return (

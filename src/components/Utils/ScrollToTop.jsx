@@ -1,12 +1,13 @@
+"use client";
 import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { usePathname } from 'next/navigation';
 
 /**
  * ScrollToTop component
  * Automatically scrolls the window to the top smoothly whenever the route pathname changes.
  */
 export default function ScrollToTop() {
-  const { pathname } = useLocation();
+  const pathname = usePathname();
 
   useEffect(() => {
     window.scrollTo({

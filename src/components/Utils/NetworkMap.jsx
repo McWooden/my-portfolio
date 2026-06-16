@@ -1,10 +1,12 @@
+"use client";
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { FiExternalLink, FiLinkedin, FiTwitter, FiGithub, FiUser, FiPlus, FiX, FiTrash2, FiMove } from 'react-icons/fi';
+import { FiPlus, FiX, FiTrash2, FiMove } from 'react-icons/fi';
 import { networkPeople, centerNode } from '../../data/networkData';
 import NodeModal from './NodeModal';
+import NodeDetailCard from './NodeDetailCard';
 
-const IS_DEV = import.meta.env.DEV;
+const IS_DEV = process.env.NODE_ENV === 'development';
 
 const BOARD_WIDTH = 1400;
 const BOARD_HEIGHT = 900;
@@ -311,16 +313,8 @@ export default function NetworkMap() {
     }
   };
 
-  const getSocialIcon = (type) => {
-    switch (type) {
-      case 'linkedin': return <FiLinkedin className="w-4 h-4" />;
-      case 'twitter': return <FiTwitter className="w-4 h-4" />;
-      case 'github': return <FiGithub className="w-4 h-4" />;
-      default: return <FiUser className="w-4 h-4" />;
-    }
-  };
-
   const getCardStyle = (node) => {
+
     if (!node) return {};
     const cardWidth = 300;
     const cardHeight = 390;
@@ -484,85 +478,12 @@ export default function NetworkMap() {
 
         {/* Absolute Detail Profile Card Overlay next to node on canvas */}
         {selectedNode && toolbarMode === MODE.VIEW && (
-          <div 
-            className="absolute bg-bg-dark border border-border rounded-[24px] flex flex-col shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden z-50 transition-all duration-300 animate-fade-in"
-            style={getCardStyle(selectedNode)}
-          >
-            {/* Avatar & Top Section */}
-            <div className="relative w-full h-[240px]">
-              <img
-                src={selectedNode.avatar}
-                alt={selectedNode.name}
-                className="w-full h-full object-cover"
-                draggable={false}
-              />
-              
-              {/* Fade Overlay */}
-              <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-bg-dark via-bg-dark/80 to-transparent pointer-events-none" />
-
-              {/* Dev Edit Button */}
-              {IS_DEV && (
-                <button
-                  onClick={() => handleStartEdit(selectedNode)}
-                  className="absolute top-4 left-4 w-8 h-8 bg-black/40 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white/80 hover:text-accent hover:bg-black/60 cursor-pointer select-none focus:outline-none transition-colors z-10"
-                  title="Edit Node Info"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                  </svg>
-                </button>
-              )}
-
-              {/* Close Button */}
-              <button
-                onClick={() => setSelectedNode(null)}
-                className="absolute top-4 right-4 w-8 h-8 bg-black/40 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-black/60 cursor-pointer select-none focus:outline-none transition-colors z-10"
-                aria-label="Close Profile"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-
-              {/* Text overlay at the bottom of the avatar */}
-              <div className="absolute bottom-0 left-0 right-0 px-5 pb-2 flex flex-col gap-1 z-10">
-                <h3 className="text-[1.4rem] font-semibold text-white tracking-tight leading-none text-left">
-                  {selectedNode.name}
-                </h3>
-                <p className="text-[0.85rem] text-[#E0FF6F] font-mono uppercase tracking-wide text-left">
-                  {selectedNode.role}
-                </p>
-              </div>
-            </div>
-
-            {/* Information & Action buttons */}
-            <div className="flex flex-col px-5 pb-5 pt-3 bg-bg-dark w-full">
-              <p className="text-[0.85rem] text-text-secondary leading-relaxed mb-4 text-left">
-                Part of my professional network. Connected on collaborative projects and design workflows.
-              </p>
-
-              <div className="flex flex-row gap-2.5 w-full mt-auto">
-                <a
-                  href={selectedNode.social}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 bg-[#2a2a2a] text-white border border-border py-2.5 rounded-[12px] font-sans font-medium text-[0.9rem] hover:bg-[#333333] transition-colors duration-200 flex items-center justify-center gap-2"
-                >
-                  {getSocialIcon(selectedNode.socialType)}
-                  <span>Follow</span>
-                </a>
-                <a
-                  href={selectedNode.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-[44px] h-[44px] bg-[#E0FF6F] text-bg-dark rounded-[12px] flex items-center justify-center hover:opacity-90 transition-opacity duration-200 flex-shrink-0"
-                  title="Visit Portfolio"
-                >
-                  <FiExternalLink className="w-5 h-5" />
-                </a>
-              </div>
-            </div>
-          </div>
+          <NodeDetailCard
+            node={selectedNode}
+            cardStyle={getCardStyle(selectedNode)}
+            onClose={() => setSelectedNode(null)}
+            onStartEdit={handleStartEdit}
+          />
         )}
       </div>
 

@@ -1,0 +1,168 @@
+@import "tailwindcss";
+
+/* ── Design Tokens ── */
+@theme {
+  /* Colors */
+  --color-bg-dark:        #1a1a1a;
+  --color-bg-card:        #262626;
+  --color-bg-card-hover:  #333333;
+  --color-text-primary:   #eaeaea;
+  --color-text-secondary: #bdbdbd;
+  --color-text-muted:     #888888;
+  --color-accent:         #e0ff6f;
+  --color-accent-muted:   rgba(224, 255, 111, 0.5);
+  --color-border:         rgba(234, 234, 234, 0.1);
+  --color-border-focus:   rgba(234, 234, 234, 0.3);
+  --color-online-green:   #1eff00;
+
+  /* Fonts */
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: var(--font-dm-mono), monospace;
+  --font-sedgwick: var(--font-sedgwick-ave), cursive;
+
+  /* Animations */
+  --animate-ticker:        ticker 60s linear infinite;
+  --animate-float:         float 6s ease-in-out infinite;
+  --animate-float-delayed: float-delayed 8s ease-in-out infinite 2s;
+
+  /* Keyframes */
+  @keyframes ticker {
+    0%   { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-50%, 0, 0); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50%       { transform: translate3d(0, -8px, 0); }
+  }
+
+  @keyframes float-delayed {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50%       { transform: translate3d(0, -6px, 0); }
+  }
+
+  @keyframes pulse-ring {
+    0%       { transform: scale(0.95); opacity: 0.8; }
+    80%, 100% { transform: scale(2.5); opacity: 0; }
+  }
+}
+
+/* ── Base Reset ── */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html, body {
+    background-color: theme(--color-bg-dark);
+    color: theme(--color-text-primary);
+    font-family: theme(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+    transition: opacity 0.2s ease, color 0.2s ease;
+  }
+
+  button {
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  ul, ol {
+    list-style: none;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar       { width: 8px; }
+  ::-webkit-scrollbar-track { background: theme(--color-bg-dark); }
+  ::-webkit-scrollbar-thumb {
+    background: theme(--color-bg-card);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: theme(--color-text-muted); }
+}
+
+/* ── Custom Utilities ── */
+@layer utilities {
+  /* Pulse dot (online indicator) with high-performance halo ring */
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #1eff00; /* Fallback: green */
+    border-radius: 50%;
+    display: inline-block;
+    position: relative;
+  }
+  .pulse-dot::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    background-color: #1eff00; /* Fallback: green */
+    animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    transform-origin: center;
+  }
+
+  /* Status overrides for pulse-dot color indicators */
+  .pulse-dot.status-available, .pulse-dot.status-available::after { background-color: #1eff00; }
+  .pulse-dot.status-working, .pulse-dot.status-working::after { background-color: #ffcc00; }
+  .pulse-dot.status-busy, .pulse-dot.status-busy::after { background-color: #ff3b30; }
+  .pulse-dot.status-holiday, .pulse-dot.status-holiday::after { background-color: #007aff; }
+
+  /* Float animations */
+  .animate-float         { animation: var(--animate-float); }
+  .animate-float-delayed { animation: var(--animate-float-delayed); }
+
+  /* Ticker animation with layer promotion */
+  .animate-ticker { 
+    animation: var(--animate-ticker); 
+    will-change: transform;
+  }
+
+  /* List item with accent bullet */
+  .accent-list-item {
+    position: relative;
+    padding-left: 24px;
+  }
+  .accent-list-item::before {
+    content: "✦";
+    position: absolute;
+    left: 0;
+    color: theme(--color-accent);
+  }
+
+  /* Scroll Reveal Utilities */
+  .reveal-item {
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform, opacity;
+  }
+
+  .reveal-item.revealed {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

@@ -1,10 +1,12 @@
+"use client";
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { navigationMenu } from '../../data/siteData';
 
 export default function Footer() {
-  const location = useLocation();
-  const path = location.pathname;
+  const pathname = usePathname();
+  const path = pathname;
 
   let topBtnText = 'BACK TO TOP';
   let topBtnLink = '#';
@@ -75,7 +77,7 @@ export default function Footer() {
             </a>
           ) : (
             <Link
-              to={topBtnLink}
+              href={topBtnLink}
               className="font-sans text-[0.95rem] font-medium uppercase text-white hover:text-[#E0FF6F] transition-colors duration-200 flex items-center gap-1.5"
             >
               {topBtnText} <span>↗</span>
@@ -89,7 +91,7 @@ export default function Footer() {
           <ul className="flex flex-col gap-4 text-left list-none p-0 m-0">
             {navigationMenu.filter(item => item.path !== '/').map(item => (
               <li key={item.path}>
-                <Link to={item.path} className="font-sans text-[0.95rem] text-white hover:text-[#E0FF6F] transition-colors duration-200 uppercase">
+                <Link href={item.path} className="font-sans text-[0.95rem] text-white hover:text-[#E0FF6F] transition-colors duration-200 uppercase">
                   {item.label}
                 </Link>
               </li>

@@ -1,0 +1,41 @@
+{
+  "title": "Alder & Co",
+  "subtitle": "Alder & Co crafts everyday goods designed to last — from linen homeware to recycled leather accessories",
+  "date": "May 20, 2025",
+  "location": "London, UK",
+  "industry": "Agency",
+  "testimonial": {
+    "quote": "Our customers loved our products — now they love the brand too",
+    "author": "Thomas Mikkelsen",
+    "company": "Alder & Co"
+  },
+  "challenge": "Though the products spoke for themselves, Alder & Co's visual identity felt outdated and inconsistent. The logo lacked warmth, the packaging was generic, and their online presence didn't reflect the care put into each item. They needed a brand system that felt both elevated and grounded — premium, but personal.",
+  "solution": "We designed a refined brand identity built around natural textures, soft typography, and flexible layouts. The new logo features a custom serif logotype with subtle imperfections, adding warmth and character. We developed a neutral, earthy color palette and introduced soft photography direction to showcase materials and craft. Packaging was simplified, using recycled materials with letterpress-inspired labeling. The Shopify storefront was redesigned to feel editorial and calm, mirroring the in-store experience.",
+  "solutionDetails": [
+    "Custom imperfect serif logo bringing organic warmth",
+    "Simplified packaging utilizing recycled stocks and stamp aesthetics",
+    "Clean Shopify storefront design with grid layout mirroring retail storefronts"
+  ],
+  "gallery": [
+    {
+      "image": "/images/projects/alder-co/gallery/0/image.avif",
+      "caption": "Minimalist recycled paper wraps with custom stamps"
+    },
+    {
+      "image": "/images/projects/alder-co/gallery/1/image.avif",
+      "caption": "Natural light, real homes, and materials in focus"
+    },
+    {
+      "image": "/images/projects/alder-co/gallery/2/image.avif",
+      "caption": "Organic elegance with a timeless serif approach"
+    }
+  ],
+  "outcome": "Alder & Co's rebrand helped reposition them as a conscious premium label. Sales increased after the launch of the new site and packaging, and the updated visuals were featured in several design publications. Most importantly, the brand now feels like an extension of their values.",
+  "outcomeDetails": [
+    "Noticeable lift in e-commerce conversion post-launch",
+    "Features in design publications highlighting sustainable design",
+    "Stronger brand identification among primary customer demographics"
+  ],
+  "featured": true,
+  "coverImage": "/images/projects/alder-co/coverImage.avif"
+}

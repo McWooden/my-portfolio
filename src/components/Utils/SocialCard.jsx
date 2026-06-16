@@ -33,14 +33,12 @@ export default function SocialCard({ label, value, href, isEmail = false, isText
       <div className="bg-[#262626] rounded-[24px] p-8 flex flex-col items-center justify-center text-center w-full min-h-[160px] select-none font-sans">
         <div className="flex flex-col items-center relative mt-1">
           <span 
-            className="text-[2.2rem] leading-[1.1] text-white font-normal select-none"
-            style={{ fontFamily: "'Sedgwick Ave', cursive" }}
+            className="text-[2.2rem] leading-[1.1] text-white font-normal select-none font-sedgwick"
           >
             Halo
           </span>
           <span 
-            className="text-[2.2rem] leading-[1.1] text-white font-normal select-none mt-0.5"
-            style={{ fontFamily: "'Sedgwick Ave', cursive" }}
+            className="text-[2.2rem] leading-[1.1] text-white font-normal select-none mt-0.5 font-sedgwick"
           >
             Huddin
           </span>

@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { FiX } from 'react-icons/fi';
@@ -48,7 +49,7 @@ export default function NodeModal({ isOpen, onClose, onSubmit, title, submitLabe
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
-        className="relative w-full max-w-md bg-[#171717] border border-border rounded-[24px] shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden"
+        className="relative w-full max-w-md bg-[#171717] border border-border rounded-3xl shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden"
       >
         {/* Modal header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-border">

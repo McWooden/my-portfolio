@@ -1,0 +1,36 @@
+# AI Coding Agent Rules & Guidelines
+
+When working on the **my-portfolio** repository, all AI agents must adhere to the following development standards.
+
+---
+
+## 1. Code Duplication & Centralization
+* **Zero Duplicate Code**: Avoid repeating HTML markup, text constants, lists, or mapping logic.
+* **Centralized Data**: Static elements (such as navigation menus, lists of certifications, community directories, and project data) must be defined in `src/data/siteData.js` and dynamically imported.
+* **Component Reusability**: Extract forms, modals, or lists into reusable components under `src/components/Utils/` (e.g., `NodeModal.jsx`).
+
+---
+
+## 2. Spacing Grid & Tailwind Usage
+* **Adhere to the 8px/4px Spacing Grid**: All layout margins, padding, gaps, and sizes must be multiples of 4px or 8px (e.g., 4px, 8px, 12px, 16px, 20px, 24px, 32px, 40px, 48px, 64px, 80px, 96px).
+* **No Redundant Arbitrary Classes**: Avoid manual bracket values like `p-[40px]`, `gap-[10px]`, `rounded-[12px]`, or `w-[40px]`. Instead, use their native Tailwind equivalents:
+  * `p-[40px]` $\rightarrow$ `p-10`
+  * `gap-[10px]` $\rightarrow$ `gap-2.5`
+  * `rounded-[12px]` $\rightarrow$ `rounded-xl`
+  * `rounded-[24px]` $\rightarrow$ `rounded-3xl`
+  * `w-[40px] h-[40px]` $\rightarrow$ `w-10 h-10`
+* **Only Use Arbitrary Brackets for Breakpoints or Custom Units**: If an asset requires a non-standard length or an exact viewport offset (e.g., `max-[810px]`), brackets are permitted.
+
+---
+
+## 3. Component Size & Modularity
+* **Keep Files under ~200 Lines**: If a single component exceeds 200 lines, it must be split into dedicated sub-components.
+* **Isolate Gesture & Loop Physics**:
+  * Extract complex mouse/touch gestures (e.g., card dragging in `HeroVisual.jsx` or panning in `NetworkMap.jsx`) from structural layout views.
+  * Extract complex sliding loops or timeline animations (e.g., `ReviewsDesktopMarquee.jsx` or `ReviewsMobileCarousel.jsx`) into separate sub-components.
+
+---
+
+## 4. Quality & Build Standards
+* **Test Production Bundles**: Always run `npm run build` after styling or refactoring changes to verify code consistency.
+* **Responsive Styling**: Ensure all components degrade gracefully across Desktop, Tablet, and Mobile screens.

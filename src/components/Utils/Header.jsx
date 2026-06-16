@@ -1,12 +1,14 @@
+"use client";
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import Button from './Button';
 import { SiGithub, SiMedium } from 'react-icons/si';
 import { FaLinkedinIn } from "react-icons/fa";
 import { navigationMenu } from '../../data/siteData';
 
-export default function Header() {
-  const location = useLocation();
+export default function Header({ availabilityStatus = 'available' }) {
+  const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const headerRef = useRef(null);
 
@@ -51,10 +53,10 @@ export default function Header() {
           <div className="flex gap-6 max-md:hidden">
             {navigationMenu.filter(item => item.path !== '/').map(item => {
               const isActive = item.path === '/blog'
-                ? location.pathname.startsWith('/blog')
-                : location.pathname === item.path;
+                ? pathname.startsWith('/blog')
+                : pathname === item.path;
               return (
-                <Link key={item.path} to={item.path} className={navLinkClass(isActive)}>
+                <Link key={item.path} href={item.path} className={navLinkClass(isActive)}>
                   {item.label}
                 </Link>
               );
@@ -90,9 +92,9 @@ export default function Header() {
 
         {/* Center — Logo */}
         <div className="flex justify-center items-center max-md:hidden">
-          <Link to="/" className="flex items-center gap-2 font-mono text-[1.15rem] font-medium uppercase text-text-primary tracking-tight">
+          <Link href="/" className="flex items-center gap-2 font-mono text-[1.15rem] font-medium uppercase text-text-primary tracking-tight">
             <div className="w-4 h-4 flex justify-center items-center relative">
-              <span className="pulse-dot"></span>
+              <span className={`pulse-dot status-${availabilityStatus}`}></span>
             </div>
             <span className="max-md:hidden">Sholahuddin Ahmad</span>
           </Link>
@@ -148,13 +150,13 @@ export default function Header() {
         <div className="flex flex-col gap-6">
           {navigationMenu.map((item, idx) => {
             const isActive = item.path === '/blog'
-              ? location.pathname.startsWith('/blog')
-              : location.pathname === item.path;
+              ? pathname.startsWith('/blog')
+              : pathname === item.path;
             const delay = `${(idx + 1) * 50}ms`;
             return (
               <Link
                 key={item.path}
-                to={item.path}
+                href={item.path}
                 onClick={() => setIsMenuOpen(false)}
                 className={`${navLinkClass(isActive)} flex items-center gap-3.5`}
                 style={{

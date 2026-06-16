@@ -1,18 +1,21 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
+import { getImageUrl } from '../../utils/image';
 
 export const BlogCard = ({ post, className = '', style = {} }) => (
   <Link
-    to={`/blog/${post.slug}`}
+    href={`/blog/${post.slug}`}
     className={`relative block w-full aspect-[1.6] rounded-[30px] overflow-hidden group text-left ${className}`}
     style={style}
   >
     {/* Background Image */}
-    <img
-      src={post.coverImage}
-      alt={post.title}
-      className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.05]"
-    />
+    {getImageUrl(post.coverImage) && (
+      <img
+        src={getImageUrl(post.coverImage)}
+        alt={post.title}
+        className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.05]"
+      />
+    )}
 
     {/* Dark Gradient Overlay for readability */}
     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/50" />

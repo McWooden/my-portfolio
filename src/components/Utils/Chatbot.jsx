@@ -40,7 +40,7 @@ export default function Chatbot() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
-  
+
   // Ban Overlay states
   const [banTimeLeft, setBanTimeLeft] = useState(180);
   const [lastWords, setLastWords] = useState('');
@@ -92,7 +92,7 @@ export default function Chatbot() {
       ]);
       return;
     }
-    
+
     if (banTimeLeft <= 0) {
       if (typeof window !== 'undefined') {
         if (isForgivenButNicoNot) {
@@ -246,7 +246,7 @@ export default function Chatbot() {
         try {
           const errData = await response.json();
           errMsg = errData.error || errMsg;
-        } catch (_) {}
+        } catch (_) { }
         const error = new Error(errMsg);
         error.status = response.status;
         throw error;
@@ -282,7 +282,7 @@ export default function Chatbot() {
       setIsLoading(false);
 
       const isRateLimit = error.status === 429 || (error.message && (error.message.includes('429') || error.message.toLowerCase().includes('rate limit') || error.message.toLowerCase().includes('limit')));
-      
+
       if (isRateLimit) {
         setCooldown(60);
         const nicoMessage = {
@@ -352,9 +352,9 @@ export default function Chatbot() {
         setBanHistory(prev => [
           ...prev,
           { sender: 'mia', content: 'I forgive you... but Nico is still very angry!' },
-          { sender: 'system', content: '*Nico locks you in. Wait time is reduced by 50% from current remaining time.*' }
+          { sender: 'system', content: '*Nico drop and locks you in.*' }
         ]);
-        
+
         // Halve the countdown timer
         setBanTimeLeft(prev => Math.max(1, Math.floor(prev / 2)));
         setIsForgivenButNicoNot(true);
@@ -367,7 +367,7 @@ export default function Chatbot() {
           { sender: 'system', content: '*Nico grabs you by the neck and kicks you out!*' },
           { sender: 'system', content: 'When you make a mistake, please apologize sincerely first.' }
         ]);
-        
+
         setIsKickingOut(true);
         setBanInputHidden(true);
         setBanTimeLeft(7); // Jump the countdown visual timer to 7s
@@ -392,32 +392,32 @@ export default function Chatbot() {
     const borderClass = isForgivenButNicoNot ? 'border-blue-500' : isKickingOut ? 'border-red-500' : 'border-orange-500';
     const bgClass = isForgivenButNicoNot ? 'bg-blue-500' : isKickingOut ? 'bg-red-500' : 'bg-orange-500';
     const timerColorClass = isForgivenButNicoNot ? 'text-blue-400' : isKickingOut ? 'text-red-400' : 'text-orange-400';
-    const headerTitle = isForgivenButNicoNot 
-      ? 'Nico & Calm Mia' 
-      : isKickingOut 
-        ? 'Anger Nico & Mad Mia' 
+    const headerTitle = isForgivenButNicoNot
+      ? 'Nico & Calm Mia'
+      : isKickingOut
+        ? 'Anger Nico & Mad Mia'
         : 'Mad Nico & Mia';
 
     return (
       <div className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-lg flex flex-col items-center justify-center p-6 text-center font-sans select-none animate-in fade-in duration-500">
         <div className="w-[360px] h-[500px] max-w-[calc(100vw-32px)] max-h-[calc(100vh-100px)] bg-zinc-900/90 backdrop-blur-xl border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col font-sans">
-          
+
           {/* Header styled like chat but with Nico Mode details */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800 bg-zinc-900">
             <div className="flex items-center gap-2">
               <div className="relative">
                 <div className="flex -space-x-2.5">
                   <div className={`w-8 h-8 rounded-full overflow-hidden border ${borderClass} flex items-center justify-center bg-zinc-950 shrink-0 aspect-square z-10`}>
-                    <img 
-                      src="/nico.png" 
-                      alt="Nico Avatar" 
+                    <img
+                      src="/nico.png"
+                      alt="Nico Avatar"
                       className="w-full h-full object-cover aspect-square"
                     />
                   </div>
                   <div className={`w-8 h-8 rounded-full overflow-hidden border ${borderClass} flex items-center justify-center bg-zinc-950 shrink-0 aspect-square`}>
-                    <img 
-                      src="/mia.png" 
-                      alt="Mia Avatar" 
+                    <img
+                      src="/mia.png"
+                      alt="Mia Avatar"
                       className="w-full h-full object-cover aspect-square"
                     />
                   </div>
@@ -438,8 +438,8 @@ export default function Chatbot() {
               <span className={`${timerColorClass} font-semibold`}>{banTimeLeft}s</span>
             </div>
             <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden">
-              <div 
-                className={`h-full ${bgClass} transition-all duration-1000 ease-linear`} 
+              <div
+                className={`h-full ${bgClass} transition-all duration-1000 ease-linear`}
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -464,27 +464,26 @@ export default function Chatbot() {
                   </div>
                 );
               }
-              
+
               const isUser = item.sender === 'user';
               const isMia = item.sender === 'mia';
               const isNicoWhite = item.content.includes("We don't accept bad attitude") || item.content === '...';
-              
+
               const userBgClass = isForgivenButNicoNot ? 'bg-blue-600' : isKickingOut ? 'bg-red-600' : 'bg-orange-600';
               const nicoTextClass = isForgivenButNicoNot ? 'text-blue-400' : isKickingOut ? 'text-red-400' : 'text-orange-400';
 
               return (
-                <div 
-                  key={idx} 
+                <div
+                  key={idx}
                   className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div 
-                    className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed ${
-                      isUser 
-                        ? `${userBgClass} text-white rounded-tr-none font-medium text-right` 
+                  <div
+                    className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed ${isUser
+                        ? `${userBgClass} text-white rounded-tr-none font-medium text-right`
                         : (isMia || isNicoWhite)
                           ? 'bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-tl-none text-left'
                           : `bg-zinc-800 border border-zinc-700 ${nicoTextClass} rounded-tl-none text-left`
-                    }`}
+                      }`}
                   >
                     {isUser ? (
                       item.content
@@ -547,7 +546,7 @@ export default function Chatbot() {
     const posClass = position === 'left' ? 'left-6' : 'right-6';
 
     return (
-      <div 
+      <div
         ref={chatWindowRef}
         className={`fixed bottom-6 ${posClass} z-50 flex flex-col w-[360px] h-[500px] max-w-[calc(100vw-32px)] max-h-[calc(100vh-100px)] bg-bg-card/90 backdrop-blur-xl border border-border rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 font-sans`}
       >
@@ -556,11 +555,11 @@ export default function Chatbot() {
           <div className="flex items-center gap-2">
             <div className="relative">
               <div className="w-9 h-9 rounded-full overflow-hidden border border-accent flex items-center justify-center bg-bg-dark shrink-0 aspect-square">
-                <img 
-                  src="/mia.png" 
-                  alt="Mia Avatar" 
+                <img
+                  src="/mia.png"
+                  alt="Mia Avatar"
                   className="w-full h-full object-cover aspect-square"
-                  style={{ filter: 'drop-shadow(0px 0px 4px rgba(224, 255, 111, 0.4))' }} 
+                  style={{ filter: 'drop-shadow(0px 0px 4px rgba(224, 255, 111, 0.4))' }}
                 />
               </div>
               <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-online-green ring-1 ring-bg-dark" />
@@ -571,7 +570,7 @@ export default function Chatbot() {
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <button 
+            <button
               onClick={togglePosition}
               className="px-2 py-1 text-[10px] font-mono rounded bg-bg-dark border border-border text-text-secondary hover:text-accent hover:border-accent transition-colors"
               title="Switch Side"
@@ -579,7 +578,7 @@ export default function Chatbot() {
               ← Swipe →
             </button>
             {!isBlocked && (
-              <button 
+              <button
                 onClick={handleClose}
                 className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-card-hover transition-colors"
                 title="New Chat"
@@ -587,7 +586,7 @@ export default function Chatbot() {
                 <SquarePen className="w-4 h-4" />
               </button>
             )}
-            <button 
+            <button
               onClick={() => setIsOpen(false)}
               className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-card-hover transition-colors"
               title="Close"
@@ -600,22 +599,21 @@ export default function Chatbot() {
         {/* Message List */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin" style={{ overscrollBehavior: 'contain' }}>
           {messages.map((message, i) => (
-            <div 
-              key={i} 
+            <div
+              key={i}
               className={`flex items-start gap-2.5 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <div 
-                className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[0.95rem] ${
-                  message.role === 'user' 
-                    ? 'bg-accent text-bg-dark rounded-tr-none font-medium' 
+              <div
+                className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[0.95rem] ${message.role === 'user'
+                    ? 'bg-accent text-bg-dark rounded-tr-none font-medium'
                     : 'bg-bg-dark border border-border text-text-primary rounded-tl-none'
-                }`}
+                  }`}
               >
                 {message.role === 'user' ? (
                   <div style={{ whiteSpace: 'pre-wrap' }}>{message.content}</div>
                 ) : (
                   <div className="prose prose-invert max-w-none text-left">
-                    <ReactMarkdown 
+                    <ReactMarkdown
                       components={{
                         p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
                         ul: ({ children }) => <ul className="list-disc pl-4 mb-2 space-y-1">{children}</ul>,
@@ -626,7 +624,7 @@ export default function Chatbot() {
                         a: ({ href, children }) => {
                           const isInternal = href.startsWith('/') || href.startsWith('#');
                           const buttonStyle = "inline-flex items-center gap-1 bg-accent/10 hover:bg-accent text-accent hover:text-bg-dark border border-accent/30 rounded-lg px-2.5 py-1 text-xs font-mono transition-all duration-200 my-1 font-semibold";
-                          
+
                           if (isInternal) {
                             return (
                               <Link href={href} className={buttonStyle}>
@@ -703,10 +701,10 @@ export default function Chatbot() {
                 }
               }}
               placeholder={
-                isBlocked 
-                  ? "No permission." 
-                  : cooldown > 0 
-                    ? `Mia is busy... Locked for ${cooldown}s` 
+                isBlocked
+                  ? "No permission."
+                  : cooldown > 0
+                    ? `Mia is busy... Locked for ${cooldown}s`
                     : "Ask me something..."
               }
               rows={1}
@@ -736,12 +734,12 @@ export default function Chatbot() {
 
   // Floating trigger button
   const posClass = position === 'left' ? 'left-6' : 'right-6';
-  const triggerBtnClasses = isBlocked 
-    ? isForgivenButNicoNot 
-      ? 'bg-blue-500 hover:bg-blue-400 text-white' 
-      : isKickingOut 
-        ? 'bg-red-500 hover:bg-red-400 text-white' 
-        : 'bg-orange-500 hover:bg-orange-400 text-white' 
+  const triggerBtnClasses = isBlocked
+    ? isForgivenButNicoNot
+      ? 'bg-blue-500 hover:bg-blue-400 text-white'
+      : isKickingOut
+        ? 'bg-red-500 hover:bg-red-400 text-white'
+        : 'bg-orange-500 hover:bg-orange-400 text-white'
     : 'bg-accent hover:bg-white text-bg-dark';
 
   return (

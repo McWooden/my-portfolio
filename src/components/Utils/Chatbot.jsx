@@ -47,17 +47,17 @@ export default function Chatbot() {
   const [windowStart, setWindowStart] = useState(0);
 
   const RANDOM_REASONS = [
-    "greet another guest",
-    "help my husband",
-    "do some household chores",
-    "check on something important in the kitchen",
-    "water the flowers in the garden",
-    "feed the cat",
-    "tidy up the living room",
-    "prepare dinner",
-    "do some laundry",
-    "clean the windows"
+    "help him find something",
+    "see what he needs",
+    "see something in the kitchen",
+    "carry something",
+    "look at something he's fixing",
+    "taste-test his cooking",
+    "find his keys",
+    "help him with a phone call",
+    "check something in the garage"
   ];
+
 
   // Ban Overlay states
   const [banTimeLeft, setBanTimeLeft] = useState(180);
@@ -282,7 +282,7 @@ export default function Chatbot() {
       savedUsed = 0;
       savedWindowStart = now;
     } else if (now - savedWindowStart >= 5 * 60 * 1000) {
-      savedLimit = 4;
+      savedLimit = 2;
       savedUsed = 0;
       savedWindowStart = now;
     }
@@ -542,14 +542,20 @@ export default function Chatbot() {
                     <img
                       src="/nico.png"
                       alt="Nico Avatar"
-                      className="w-full h-full object-cover aspect-square"
+                      className="w-full h-full object-cover aspect-square select-none pointer-events-none"
+                      draggable="false"
+                      onContextMenu={(e) => e.preventDefault()}
+                      onMouseDown={(e) => e.preventDefault()}
                     />
                   </div>
                   <div className={`w-8 h-8 rounded-full overflow-hidden border ${borderClass} flex items-center justify-center bg-zinc-950 shrink-0 aspect-square`}>
                     <img
                       src="/mia.png"
                       alt="Mia Avatar"
-                      className="w-full h-full object-cover aspect-square"
+                      className="w-full h-full object-cover aspect-square select-none pointer-events-none"
+                      draggable="false"
+                      onContextMenu={(e) => e.preventDefault()}
+                      onMouseDown={(e) => e.preventDefault()}
                     />
                   </div>
                 </div>
@@ -689,8 +695,11 @@ export default function Chatbot() {
                 <img
                   src="/mia.png"
                   alt="Mia Avatar"
-                  className="w-full h-full object-cover aspect-square"
+                  className="w-full h-full object-cover aspect-square select-none pointer-events-none"
                   style={{ filter: 'drop-shadow(0px 0px 4px rgba(224, 255, 111, 0.4))' }}
+                  draggable="false"
+                  onContextMenu={(e) => e.preventDefault()}
+                  onMouseDown={(e) => e.preventDefault()}
                 />
               </div>
               <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-online-green ring-1 ring-bg-dark" />

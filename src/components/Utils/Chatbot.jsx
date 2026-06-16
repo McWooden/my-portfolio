@@ -52,15 +52,18 @@ export default function Chatbot() {
   const [windowStart, setWindowStart] = useState(0);
 
   const RANDOM_REASONS = [
-    "help him find something",
-    "see what he needs",
+    "help my husband find something",
+    "see what my husband needs",
     "see something in the kitchen",
     "carry something",
-    "look at something he's fixing",
-    "taste-test his cooking",
-    "find his keys",
-    "help him with a phone call",
-    "check something in the garage"
+    "feed my cat",
+    "charge Nico's battery",
+    "look at something my husband is fixing",
+    "taste-test my husband's cooking",
+    "find room keys",
+    "help my husband make a phone call",
+    "help my husband on a phone call",
+    "check something in the workspace"
   ];
 
 
@@ -416,7 +419,7 @@ export default function Chatbot() {
       // If one remaining, append custom suffix
       if (isOneRemaining) {
         const randomReason = RANDOM_REASONS[Math.floor(Math.random() * RANDOM_REASONS.length)];
-        const suffix = `\n\n*(Any question again? I have to ${randomReason}.)*`;
+        const suffix = `\n\nAny question again? I have to ${randomReason}.`;
         assistantReply += suffix;
         setMessages(prev => {
           const updated = [...prev];

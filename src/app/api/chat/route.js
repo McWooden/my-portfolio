@@ -126,9 +126,9 @@ CRITICAL LENGTH RULES:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gemini-2.5-flash-lite',
+        model: 'gpt-5-nano',
         messages: puterMessages,
-        temperature: 0.7,
+        temperature: 0.5,
         stream: true,
       }),
     });

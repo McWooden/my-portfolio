@@ -126,9 +126,9 @@ CRITICAL LENGTH RULES:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'Ling-2.6-flash',
+        model: 'gemini-2.5-flash-lite',
         messages: puterMessages,
-        temperature: 0.3,
+        temperature: 0.7,
         stream: true,
       }),
     });

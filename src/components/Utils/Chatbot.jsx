@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, X, Send, SquarePen } from 'lucide-react';
+import { MessageSquare, X, Send, SquarePen, ArrowLeftRight } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Link from 'next/link';
 import huddinConfig from '../../data/huddinContext.json';
@@ -32,7 +32,7 @@ const playKickSound = () => {
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
-  const [position, setPosition] = useState('right'); // 'left' | 'right'
+  const [position, setPosition] = useState('right'); // 'left' | 'center' | 'right'
   const [isBlocked, setIsBlocked] = useState(false);
   const [messages, setMessages] = useState([
     { role: 'assistant', content: '*Stands by the door, greeting you with a polite bow and a soft smile.* \n\nWelcome. I am here to assist you. Please let me know how I may help you today! \n\n*(You can ask me about Huddin\'s projects, services, or availability!)*' }
@@ -40,6 +40,11 @@ export default function Chatbot() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+
+  // New Chat and Position settings
+  const [showConfirmNewChat, setShowConfirmNewChat] = useState(false);
+  const [isPositionDropdownOpen, setIsPositionDropdownOpen] = useState(false);
+  const [showWidget, setShowWidget] = useState(true);
 
   // Quota states
   const [quotaUsed, setQuotaUsed] = useState(0);
@@ -88,6 +93,8 @@ export default function Chatbot() {
       if (isBlocked) return; // Disable closing when blocked/punished
       if (chatWindowRef.current && !chatWindowRef.current.contains(event.target)) {
         setIsOpen(false);
+        setIsPositionDropdownOpen(false);
+        setShowConfirmNewChat(false);
       }
     }
     if (isOpen) {
@@ -97,6 +104,31 @@ export default function Chatbot() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isOpen, isBlocked]);
+
+  // Handle scroll visibility of the widget button
+  useEffect(() => {
+    const handleScroll = () => {
+      if (typeof window !== 'undefined') {
+        const threshold = 3;
+        const showThreshold = 5;
+        const windowHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+
+        const distanceFromBottom = documentHeight - (scrollTop + windowHeight);
+
+        if (distanceFromBottom <= threshold) {
+          setShowWidget(false);
+        } else if (distanceFromBottom > showThreshold) {
+          setShowWidget(true);
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial check
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Handle ban page countdown
   useEffect(() => {
@@ -477,7 +509,8 @@ export default function Chatbot() {
         setBanHistory(prev => [
           ...prev,
           { sender: 'mia', content: 'I forgive you... but Nico is still mad' },
-          { sender: 'system', content: '*Nico drop and locks you in.*' }
+          { sender: 'system', content: '*Nico drop and locks you in.*' },
+          { sender: 'system', content: 'Please wait for the timer to finish and do not exit or refresh the browser if you want Nico and Mia to forgive you.' }
         ]);
 
         // Halve the countdown timer
@@ -501,7 +534,8 @@ export default function Chatbot() {
         setBanHistory(prev => [
           ...prev,
           { sender: 'nico', content: '...' },
-          { sender: 'system', content: '*Nico stares at you. Attitude is neutral/acceptable, but the door remains locked.*' }
+          { sender: 'system', content: '*Nico stares at you. Attitude is neutral/acceptable, but the door remains locked.*' },
+          { sender: 'system', content: 'Please wait for the prepare to finish and do not exit or trolling around if you want us to forgive you.' }
         ]);
 
         // Halve the countdown timer
@@ -524,10 +558,10 @@ export default function Chatbot() {
     const bgClass = isForgivenButNicoNot ? 'bg-blue-500' : isKickingOut ? 'bg-red-500' : 'bg-orange-500';
     const timerColorClass = isForgivenButNicoNot ? 'text-blue-400' : isKickingOut ? 'text-red-400' : 'text-orange-400';
     const headerTitle = isForgivenButNicoNot
-      ? 'Nico & Calm Mia'
+      ? 'Nico & Calm Mia Hamada'
       : isKickingOut
-        ? 'Anger Nico & Mad Mia'
-        : 'Mad Nico & Mia';
+        ? 'Anger Nico & Mad Mia Hamada'
+        : 'Mad Nico & Mia Hamada';
 
     return (
       <div className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-lg flex flex-col items-center justify-center p-6 text-center font-sans select-none animate-in fade-in duration-500">
@@ -571,7 +605,7 @@ export default function Chatbot() {
           {/* Progress Bar & Timer */}
           <div className="w-full px-4 pt-3 flex flex-col gap-1.5 shrink-0 bg-zinc-900/40">
             <div className="flex justify-between items-center text-[10px] text-zinc-500 font-mono">
-              <span>{isForgivenButNicoNot ? "Locked by Nico..." : isKickingOut ? "User time before kick out..." : "Redirecting to browser home..."}</span>
+              <span>{isForgivenButNicoNot ? "We're preparing seat for you!" : isKickingOut ? "User time before kick out..." : "Redirecting to browser home..."}</span>
               <span className={`${timerColorClass} font-semibold`}>{banTimeLeft}s</span>
             </div>
             <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden">
@@ -680,13 +714,38 @@ export default function Chatbot() {
 
   // Render open chatbot window
   const renderChatWindow = () => {
-    const posClass = position === 'left' ? 'left-6' : 'right-6';
+    const posClass = position === 'left' ? 'left-6' : position === 'center' ? 'left-1/2 -translate-x-1/2' : 'right-6';
 
     return (
       <div
         ref={chatWindowRef}
         className={`fixed bottom-6 ${posClass} z-50 flex flex-col w-[360px] h-[500px] max-w-[calc(100vw-32px)] max-h-[calc(100vh-100px)] bg-bg-card/90 backdrop-blur-xl border border-border rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 font-sans`}
       >
+        {/* Confirmation overlay for starting a new chat */}
+        {showConfirmNewChat && (
+          <div className="absolute inset-0 bg-bg-dark/95 backdrop-blur-md z-[60] flex flex-col items-center justify-center p-6 text-center font-sans">
+            <h4 className="text-base font-semibold text-text-primary mb-2">Start a new chat?</h4>
+            <p className="text-xs text-text-muted mb-6 max-w-[200px]">This will clear your current conversation history.</p>
+            <div className="flex gap-3 w-full max-w-[220px]">
+              <button
+                onClick={() => setShowConfirmNewChat(false)}
+                className="flex-1 px-3 py-2 border border-border rounded-xl text-xs font-semibold text-text-secondary hover:text-text-primary bg-bg-card hover:bg-bg-card-hover transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  handleClose();
+                  setShowConfirmNewChat(false);
+                }}
+                className="flex-1 px-3 py-2 bg-accent hover:bg-white text-bg-dark rounded-xl text-xs font-semibold transition-colors"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-bg-card">
           <div className="flex items-center gap-2">
@@ -705,21 +764,54 @@ export default function Chatbot() {
               <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-online-green ring-1 ring-bg-dark" />
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-text-primary">Mia</h4>
+              <h4 className="text-sm font-semibold text-text-primary">Mia Hamada</h4>
               <p className="text-[10px] font-mono text-text-muted">Maid Flash (Low)</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <button
-              onClick={togglePosition}
-              className="px-2 py-1 text-[10px] font-mono rounded bg-bg-dark border border-border text-text-secondary hover:text-accent hover:border-accent transition-colors"
-              title="Switch Side"
-            >
-              ← Swipe →
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setIsPositionDropdownOpen(!isPositionDropdownOpen)}
+                className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-card-hover transition-colors flex items-center justify-center"
+                title="Reposition Chat"
+              >
+                <ArrowLeftRight className="w-4 h-4" />
+              </button>
+              {isPositionDropdownOpen && (
+                <div className="absolute right-0 mt-1.5 w-fit min-w-[75px] bg-bg-dark border border-border rounded-lg shadow-xl py-1 z-[70] font-sans flex flex-col items-center">
+                  <button
+                    onClick={() => {
+                      setPosition('left');
+                      setIsPositionDropdownOpen(false);
+                    }}
+                    className={`w-full px-3 py-1.5 text-center text-xs transition-colors ${position === 'left' ? 'text-accent bg-bg-card-hover font-semibold' : 'text-text-secondary hover:text-text-primary hover:bg-bg-card-hover'}`}
+                  >
+                    Left
+                  </button>
+                  <button
+                    onClick={() => {
+                      setPosition('center');
+                      setIsPositionDropdownOpen(false);
+                    }}
+                    className={`w-full px-3 py-1.5 text-center text-xs transition-colors ${position === 'center' ? 'text-accent bg-bg-card-hover font-semibold' : 'text-text-secondary hover:text-text-primary hover:bg-bg-card-hover'}`}
+                  >
+                    Center
+                  </button>
+                  <button
+                    onClick={() => {
+                      setPosition('right');
+                      setIsPositionDropdownOpen(false);
+                    }}
+                    className={`w-full px-3 py-1.5 text-center text-xs transition-colors ${position === 'right' ? 'text-accent bg-bg-card-hover font-semibold' : 'text-text-secondary hover:text-text-primary hover:bg-bg-card-hover'}`}
+                  >
+                    Right
+                  </button>
+                </div>
+              )}
+            </div>
             {!isBlocked && (
               <button
-                onClick={handleClose}
+                onClick={() => setShowConfirmNewChat(true)}
                 className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-card-hover transition-colors"
                 title="New Chat"
               >
@@ -873,7 +965,7 @@ export default function Chatbot() {
   };
 
   // Floating trigger button
-  const posClass = position === 'left' ? 'left-6' : 'right-6';
+  const posClass = position === 'left' ? 'left-6' : position === 'center' ? 'left-1/2 -translate-x-1/2' : 'right-6';
   const triggerBtnClasses = isBlocked
     ? isForgivenButNicoNot
       ? 'bg-blue-500 hover:bg-blue-400 text-white'
@@ -884,7 +976,7 @@ export default function Chatbot() {
 
   return (
     <>
-      {!isOpen && (
+      {!isOpen && showWidget && (
         <button
           onClick={() => setIsOpen(true)}
           className={`fixed bottom-6 ${posClass} z-50 w-14 h-14 ${triggerBtnClasses} rounded-full shadow-2xl flex items-center justify-center hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300 group`}

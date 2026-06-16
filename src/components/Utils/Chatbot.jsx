@@ -124,7 +124,7 @@ export default function Chatbot() {
         } else if (isKickingOut) {
           window.location.href = 'https://www.google.com/search?q=How+to+apologize+sincerely';
         } else {
-          window.location.href = 'about:blank';
+          window.location.href = 'https://www.google.com/search?q=Why+do+people+get+mad+at+words';
         }
       }
       return;
@@ -258,7 +258,7 @@ export default function Chatbot() {
 
   // Blocklist for sexual keywords
   const isSensitiveInput = (text) => {
-    const keywords = ['horny', 'fuck', 'sex', 'fck', 'porn', 'nudity', 'naked', 'blowjob', 'dick', 'pussy', 'boobs', 'cunt', 'asshole', 'goon', 'jerk off', 'masturbat'];
+    const keywords = ['horny', 'fuck', 'sex', 'fck', 'porn', 'nudity', 'naked', 'blowjob', 'dick', 'pussy', 'boobs', 'cunt', 'asshole', 'goon', 'jerk off', 'masturbat', 'bitch'];
     const lower = text.toLowerCase();
     return keywords.some(kw => lower.includes(kw));
   };

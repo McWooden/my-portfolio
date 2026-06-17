@@ -1,13 +1,78 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, X, Send, SquarePen, ArrowLeftRight } from 'lucide-react';
+import { MessageSquare, X, Send, SquarePen, ArrowLeftRight, Compass, HelpCircle, Menu } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Link from 'next/link';
 import huddinConfig from '../../data/huddinContext.json';
 import { projects } from '../../data/siteData';
 
 let activeAudio = null;
+let activeVoiceAudio = null;
+
+const playVoiceSound = (text) => {
+  if (typeof window === 'undefined') return;
+
+  const lowerText = text.toLowerCase();
+  const categories = {
+    chuckle: ['chuckle.mp3', 'chuckle2.mp3'],
+    laugh: ['laughter.mp3', 'laughter2.mp3'],
+    sigh: ['sign.mp3', 'sign2.mp3'],
+    cough: ['cough.mp3', 'cough2.mp3'],
+    gasp: ['gasp.mp3', 'gasp2.mp3'],
+    shh: ['shh.mp3', 'shh2.mp3'],
+    clear: ['clear-throat.mp3', 'clear-throat2.mp3', 'clear-throat3.mp3'],
+    hmm: ['hmmm.mp3'],
+    um: ['um.mp3', 'um2.mp3']
+  };
+
+  let chosenFile = null;
+
+  if (lowerText.includes('chuckle') || lowerText.includes('giggle') || lowerText.includes('snicker')) {
+    chosenFile = categories.chuckle[Math.floor(Math.random() * categories.chuckle.length)];
+  } else if (lowerText.includes('laugh') || lowerText.includes('giggle') || lowerText.includes('haha')) {
+    chosenFile = categories.laugh[Math.floor(Math.random() * categories.laugh.length)];
+  } else if (lowerText.includes('gasp') || lowerText.includes('gasps')) {
+    chosenFile = categories.gasp[Math.floor(Math.random() * categories.gasp.length)];
+  } else if (lowerText.includes('sigh') || lowerText.includes('sighs')) {
+    chosenFile = categories.sigh[Math.floor(Math.random() * categories.sigh.length)];
+  } else if (lowerText.includes('cough') || lowerText.includes('coughs')) {
+    chosenFile = categories.cough[Math.floor(Math.random() * categories.cough.length)];
+  } else if (lowerText.includes('shh') || lowerText.includes('shhh') || lowerText.includes('whisper')) {
+    chosenFile = categories.shh[Math.floor(Math.random() * categories.shh.length)];
+  } else if (lowerText.includes('clear-throat') || lowerText.includes('clear throat')) {
+    chosenFile = categories.clear[Math.floor(Math.random() * categories.clear.length)];
+  } else if (lowerText.includes('hmmm') || lowerText.includes('hmm')) {
+    chosenFile = categories.hmm[Math.floor(Math.random() * categories.hmm.length)];
+  } else if (lowerText.includes('um') || lowerText.includes('uh') || lowerText.includes('well')) {
+    chosenFile = categories.um[Math.floor(Math.random() * categories.um.length)];
+  } else {
+    const fallbacks = ['hmmm.mp3', 'um.mp3', 'um2.mp3', 'clear-throat.mp3'];
+    chosenFile = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+  }
+
+  if (chosenFile) {
+    try {
+      if (activeVoiceAudio) {
+        activeVoiceAudio.pause();
+        activeVoiceAudio = null;
+      }
+      activeVoiceAudio = new Audio(`/sounds/mia-voices/${chosenFile}`);
+      activeVoiceAudio.volume = 0.2;
+      const playPromise = activeVoiceAudio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(e => {
+          if (e.name !== 'AbortError') {
+            console.warn("Voice playback issue:", e);
+          }
+        });
+      }
+    } catch (err) {
+      console.warn("Voice Audio init failed:", err);
+    }
+  }
+};
+
 const playKickSound = () => {
   if (typeof window !== 'undefined') {
     try {
@@ -30,6 +95,24 @@ const playKickSound = () => {
   }
 };
 
+const playBellSound = () => {
+  if (typeof window !== 'undefined') {
+    try {
+      const audio = new Audio('/sounds/dragon-studio-bell-ring.mp3');
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(e => {
+          if (e.name !== 'AbortError') {
+            console.warn("Audio playback issue:", e);
+          }
+        });
+      }
+    } catch (err) {
+      console.warn("Audio init failed:", err);
+    }
+  }
+};
+
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState('right'); // 'left' | 'center' | 'right'
@@ -40,11 +123,14 @@ export default function Chatbot() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const [cooldownDuration, setCooldownDuration] = useState(300);
 
   // New Chat and Position settings
   const [showConfirmNewChat, setShowConfirmNewChat] = useState(false);
   const [isPositionDropdownOpen, setIsPositionDropdownOpen] = useState(false);
   const [showWidget, setShowWidget] = useState(true);
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
+  const [showAutocomplete, setShowAutocomplete] = useState(false);
 
   // Quota states
   const [quotaUsed, setQuotaUsed] = useState(0);
@@ -83,6 +169,7 @@ export default function Chatbot() {
   const messagesEndRef = useRef(null);
   const banHistoryEndRef = useRef(null);
   const chatWindowRef = useRef(null);
+  const hasRungBellRef = useRef(false);
 
   const quickPrompts = [
     'What are Huddin\'s services?',
@@ -98,6 +185,7 @@ export default function Chatbot() {
         setIsOpen(false);
         setIsPositionDropdownOpen(false);
         setShowConfirmNewChat(false);
+        setShowAutocomplete(false);
       }
     }
     if (isOpen) {
@@ -183,14 +271,19 @@ export default function Chatbot() {
   useEffect(() => {
     if (cooldown <= 0) {
       if (typeof window !== 'undefined' && quotaUsed >= quotaLimit) {
-        // Cooldown finished, start next session (subsequent session gets 5)
+        // Cooldown finished, start next session (subsequent session gets 10)
         const now = Date.now();
         localStorage.setItem('chatbot_quota_limit', '10');
         localStorage.setItem('chatbot_quota_used', '0');
         localStorage.setItem('chatbot_quota_window_start', now.toString());
+        // generate a new random duration for the next cycle
+        const randomDurationMs = (Math.floor(Math.random() * (10 * 60 - 5 * 60 + 1)) + 5 * 60) * 1000;
+        localStorage.setItem('chatbot_quota_cooldown_duration', randomDurationMs.toString());
+        
         setQuotaLimit(10);
         setQuotaUsed(0);
         setWindowStart(now);
+        setCooldownDuration(Math.floor(randomDurationMs / 1000));
       }
       return;
     }
@@ -206,6 +299,8 @@ export default function Chatbot() {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, isLoading]);
+
+
 
   // Auto-scroll to bottom of ban history
   useEffect(() => {
@@ -241,31 +336,37 @@ export default function Chatbot() {
       let savedLimit = parseInt(localStorage.getItem('chatbot_quota_limit') || '15', 10);
       let savedUsed = parseInt(localStorage.getItem('chatbot_quota_used') || '0', 10);
       let savedWindowStart = parseInt(localStorage.getItem('chatbot_quota_window_start') || '0', 10);
+      let savedCooldownDuration = parseInt(localStorage.getItem('chatbot_quota_cooldown_duration') || '300000', 10);
       const now = Date.now();
 
       if (savedDate !== todayStr) {
         savedLimit = 15;
         savedUsed = 0;
         savedWindowStart = now;
+        savedCooldownDuration = 300000;
         localStorage.setItem('chatbot_quota_date', todayStr);
         localStorage.setItem('chatbot_quota_limit', '15');
         localStorage.setItem('chatbot_quota_used', '0');
         localStorage.setItem('chatbot_quota_window_start', savedWindowStart.toString());
-      } else if (now - savedWindowStart >= 5 * 60 * 1000) {
+        localStorage.setItem('chatbot_quota_cooldown_duration', savedCooldownDuration.toString());
+      } else if (now - savedWindowStart >= savedCooldownDuration) {
         savedLimit = 10;
         savedUsed = 0;
         savedWindowStart = now;
+        savedCooldownDuration = (Math.floor(Math.random() * (10 * 60 - 5 * 60 + 1)) + 5 * 60) * 1000;
         localStorage.setItem('chatbot_quota_limit', '10');
         localStorage.setItem('chatbot_quota_used', '0');
         localStorage.setItem('chatbot_quota_window_start', savedWindowStart.toString());
+        localStorage.setItem('chatbot_quota_cooldown_duration', savedCooldownDuration.toString());
       }
 
       setQuotaUsed(savedUsed);
       setQuotaLimit(savedLimit);
       setWindowStart(savedWindowStart);
+      setCooldownDuration(Math.floor(savedCooldownDuration / 1000));
 
-      if (savedUsed >= savedLimit && now - savedWindowStart < 5 * 60 * 1000) {
-        const secondsLeft = Math.ceil(((savedWindowStart + 5 * 60 * 1000) - now) / 1000);
+      if (savedUsed >= savedLimit && now - savedWindowStart < savedCooldownDuration) {
+        const secondsLeft = Math.ceil(((savedWindowStart + savedCooldownDuration) - now) / 1000);
         if (secondsLeft > 0) {
           setCooldown(secondsLeft);
         }
@@ -287,6 +388,19 @@ export default function Chatbot() {
     ]);
   };
 
+  const getCurrentTask = (currentCooldown, totalDuration) => {
+    const elapsedPercent = ((totalDuration - currentCooldown) / totalDuration) * 100;
+    if (elapsedPercent < 25) {
+      return "Looks like Mia is greeting another guest...";
+    } else if (elapsedPercent < 55) {
+      return "Looks like Mia is checking the kitchen...";
+    } else if (elapsedPercent < 80) {
+      return "Looks like Mia is cleaning the workspace...";
+    } else {
+      return "Looks like Mia is preparing to return...";
+    }
+  };
+
   const togglePosition = () => {
     setPosition(prev => prev === 'right' ? 'left' : 'right');
   };
@@ -298,10 +412,109 @@ export default function Chatbot() {
     return keywords.some(kw => lower.includes(kw));
   };
 
+  const getAutoCompleteItems = () => {
+    const text = input.toLowerCase().trim();
+    // If input is empty or doesn't start with /, and showAutocomplete is true, we treat it as if they typed /
+    const queryText = (input.startsWith('/') || input === '') ? text : '/' + text;
+
+    if (queryText === '' || queryText === '/') {
+      return [
+        { cmd: '/navigation', desc: 'Navigate homepage sections', action: () => { setInput('/navigation '); setShowAutocomplete(true); } },
+        { cmd: '/faq', desc: 'Browse frequently asked questions', action: () => { setInput('/faq '); setShowAutocomplete(true); } }
+      ];
+    }
+
+    if (queryText.startsWith('/navigation')) {
+      const subQuery = queryText.substring('/navigation'.length).trim().toLowerCase();
+      const sections = [
+        { label: 'Home', id: 'hero', cmd: '/navigation home' },
+        { label: 'Services', id: 'services', cmd: '/navigation services' },
+        { label: 'Portfolio', id: 'portfolio', cmd: '/navigation portfolio' },
+        { label: 'Reviews', id: 'reviews', cmd: '/navigation reviews' },
+        { label: 'Blog', id: 'blog', cmd: '/navigation blog' },
+        { label: 'FAQ', id: 'faq', cmd: '/navigation faq' },
+        { label: 'Contact', id: 'contact', cmd: '/navigation contact' }
+      ];
+
+      const filtered = sections.filter(s => s.cmd.toLowerCase().includes(queryText) || s.label.toLowerCase().includes(subQuery));
+      return filtered.map(s => ({
+        cmd: s.cmd,
+        desc: `Scroll to ${s.label}`,
+        action: () => {
+          const element = document.getElementById(s.id);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+            window.history.pushState(null, null, `#${s.id}`);
+          }
+          setInput('');
+          setShowAutocomplete(false);
+        }
+      }));
+    }
+
+    if (queryText.startsWith('/faq')) {
+      const subQuery = queryText.substring('/faq'.length).trim().toLowerCase();
+      const faqs = huddinConfig.faq.map((f, idx) => ({
+        cmd: `/faq q${idx + 1}`,
+        desc: f.question,
+        action: () => {
+          handleSendMessage(f.question);
+          setInput('');
+          setShowAutocomplete(false);
+        }
+      }));
+
+      const filtered = faqs.filter(f => f.cmd.toLowerCase().includes(queryText) || f.desc.toLowerCase().includes(subQuery));
+      return filtered;
+    }
+
+    const baseCommands = [
+      { cmd: '/navigation', desc: 'Navigate homepage sections', action: () => { setInput('/navigation '); setShowAutocomplete(true); } },
+      { cmd: '/faq', desc: 'Browse frequently asked questions', action: () => { setInput('/faq '); setShowAutocomplete(true); } }
+    ];
+    return baseCommands.filter(c => c.cmd.toLowerCase().startsWith(queryText));
+  };
+
   const handleSendMessage = async (textToSend) => {
     if (isBlocked) return;
     const text = textToSend || input.trim();
     if (!text) return;
+
+    setShowAutocomplete(false);
+
+    if (text.toLowerCase().startsWith('/navigation')) {
+      const parts = text.trim().split(/\s+/);
+      if (parts.length > 1) {
+        const sec = parts[1].toLowerCase();
+        const mapping = { home: 'hero', services: 'services', portfolio: 'portfolio', reviews: 'reviews', blog: 'blog', faq: 'faq', contact: 'contact' };
+        const id = mapping[sec];
+        if (id) {
+          const element = document.getElementById(id);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+            window.history.pushState(null, null, `#${id}`);
+          }
+        }
+      }
+      setInput('');
+      return;
+    }
+
+    if (text.toLowerCase().startsWith('/faq')) {
+      const parts = text.trim().split(/\s+/);
+      if (parts.length > 1) {
+        const match = parts[1].match(/q(\d+)/i);
+        if (match) {
+          const idx = parseInt(match[1], 10) - 1;
+          const faq = huddinConfig.faq[idx];
+          if (faq) {
+            handleSendMessage(faq.question);
+            setInput('');
+            return;
+          }
+        }
+      }
+    }
 
     // Quota Check
     const todayStr = new Date().toLocaleDateString('en-US');
@@ -309,6 +522,7 @@ export default function Chatbot() {
     let savedLimit = parseInt(localStorage.getItem('chatbot_quota_limit') || '15', 10);
     let savedUsed = parseInt(localStorage.getItem('chatbot_quota_used') || '0', 10);
     let savedWindowStart = parseInt(localStorage.getItem('chatbot_quota_window_start') || '0', 10);
+    let savedCooldownDuration = parseInt(localStorage.getItem('chatbot_quota_cooldown_duration') || '300000', 10);
     const now = Date.now();
 
     if (savedDate !== todayStr) {
@@ -316,14 +530,16 @@ export default function Chatbot() {
       savedLimit = 15;
       savedUsed = 0;
       savedWindowStart = now;
-    } else if (now - savedWindowStart >= 5 * 60 * 1000) {
+      savedCooldownDuration = 300000;
+    } else if (now - savedWindowStart >= savedCooldownDuration) {
       savedLimit = 10;
       savedUsed = 0;
       savedWindowStart = now;
+      savedCooldownDuration = (Math.floor(Math.random() * (10 * 60 - 5 * 60 + 1)) + 5 * 60) * 1000;
     }
 
     if (savedUsed >= savedLimit) {
-      const secondsLeft = Math.ceil(((savedWindowStart + 5 * 60 * 1000) - now) / 1000);
+      const secondsLeft = Math.ceil(((savedWindowStart + savedCooldownDuration) - now) / 1000);
       if (secondsLeft > 0) {
         setCooldown(secondsLeft);
       }
@@ -335,10 +551,12 @@ export default function Chatbot() {
     localStorage.setItem('chatbot_quota_limit', savedLimit.toString());
     localStorage.setItem('chatbot_quota_used', newUsed.toString());
     localStorage.setItem('chatbot_quota_window_start', savedWindowStart.toString());
+    localStorage.setItem('chatbot_quota_cooldown_duration', savedCooldownDuration.toString());
 
     setQuotaUsed(newUsed);
     setQuotaLimit(savedLimit);
     setWindowStart(savedWindowStart);
+    setCooldownDuration(Math.floor(savedCooldownDuration / 1000));
 
     const isOneRemaining = (savedLimit - newUsed) === 1;
 
@@ -368,6 +586,11 @@ export default function Chatbot() {
     setIsLoading(true);
 
     try {
+      let chosenReason = undefined;
+      if (isOneRemaining) {
+        chosenReason = RANDOM_REASONS[Math.floor(Math.random() * RANDOM_REASONS.length)];
+      }
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -375,7 +598,9 @@ export default function Chatbot() {
         },
         body: JSON.stringify({
           messages: newMessages.map(m => ({ role: m.role, content: m.content })),
-          currentPath: window.location.pathname
+          currentPath: window.location.pathname,
+          isLastRequest: isOneRemaining,
+          randomReason: chosenReason
         }),
       });
 
@@ -394,6 +619,7 @@ export default function Chatbot() {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let assistantReply = '';
+      let hasPlayedVoice = false;
 
       // Add placeholder assistant message
       setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
@@ -406,21 +632,12 @@ export default function Chatbot() {
         const chunk = decoder.decode(value, { stream: true });
         assistantReply += chunk;
 
-        // Update the last message in state
-        setMessages(prev => {
-          const updated = [...prev];
-          if (updated.length > 0 && updated[updated.length - 1].role === 'assistant') {
-            updated[updated.length - 1].content = assistantReply;
-          }
-          return updated;
-        });
-      }
+        if (!hasPlayedVoice && assistantReply.trim().length > 0) {
+          hasPlayedVoice = true;
+          playVoiceSound(assistantReply);
+        }
 
-      // If one remaining, append custom suffix
-      if (isOneRemaining) {
-        const randomReason = RANDOM_REASONS[Math.floor(Math.random() * RANDOM_REASONS.length)];
-        const suffix = `\n\nAny question again? I have to ${randomReason}.`;
-        assistantReply += suffix;
+        // Update the last message in state
         setMessages(prev => {
           const updated = [...prev];
           if (updated.length > 0 && updated[updated.length - 1].role === 'assistant') {
@@ -432,10 +649,14 @@ export default function Chatbot() {
 
       // If session limit reached, activate cooldown
       if (newUsed >= savedLimit) {
-        const secondsLeft = Math.ceil(((savedWindowStart + 5 * 60 * 1000) - Date.now()) / 1000);
-        if (secondsLeft > 0) {
-          setCooldown(secondsLeft);
-        }
+        const randomDurationSec = Math.floor(Math.random() * (10 * 60 - 5 * 60 + 1)) + 5 * 60;
+        const randomDurationMs = randomDurationSec * 1000;
+        
+        localStorage.setItem('chatbot_quota_cooldown_duration', randomDurationMs.toString());
+        localStorage.setItem('chatbot_quota_window_start', Date.now().toString());
+        
+        setCooldownDuration(randomDurationSec);
+        setCooldown(randomDurationSec);
       }
     } catch (error) {
       console.error('Chat error:', error);
@@ -740,6 +961,7 @@ export default function Chatbot() {
                 onClick={() => {
                   handleClose();
                   setShowConfirmNewChat(false);
+                  playBellSound();
                 }}
                 className="flex-1 px-3 py-2 bg-accent hover:bg-white text-bg-dark rounded-xl text-xs font-semibold transition-colors"
               >
@@ -832,54 +1054,81 @@ export default function Chatbot() {
         </div>
 
         {/* Message List */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin" style={{ overscrollBehavior: 'contain' }}>
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar" style={{ overscrollBehavior: 'contain' }}>
           {messages.map((message, i) => (
-            <div
-              key={i}
-              className={`flex items-start gap-2.5 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
+            <div key={i} className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'} gap-1.5`}>
               <div
-                className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[0.95rem] ${message.role === 'user'
-                  ? 'bg-accent text-bg-dark rounded-tr-none font-medium'
-                  : 'bg-bg-dark border border-border text-text-primary rounded-tl-none'
-                  }`}
+                className={`flex items-start gap-2.5 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                {message.role === 'user' ? (
-                  <div style={{ whiteSpace: 'pre-wrap' }}>{message.content}</div>
-                ) : (
-                  <div className="prose prose-invert max-w-none text-left">
-                    <ReactMarkdown
-                      components={{
-                        p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
-                        ul: ({ children }) => <ul className="list-disc pl-4 mb-2 space-y-1">{children}</ul>,
-                        ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 space-y-1">{children}</ol>,
-                        li: ({ children }) => <li className="text-[0.95rem]">{children}</li>,
-                        em: ({ children }) => <em className="text-text-muted opacity-70 italic font-normal">{children}</em>,
-                        strong: ({ children }) => <strong className="font-semibold text-accent">{children}</strong>,
-                        a: ({ href, children }) => {
-                          const isInternal = href.startsWith('/') || href.startsWith('#');
-                          const buttonStyle = "inline-flex items-center gap-1 bg-accent/10 hover:bg-accent text-accent hover:text-bg-dark border border-accent/30 rounded-lg px-2.5 py-1 text-xs font-mono transition-all duration-200 my-1 font-semibold";
+                <div
+                  className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[0.95rem] ${message.role === 'user'
+                    ? 'bg-accent text-bg-dark rounded-tr-none font-medium'
+                    : 'bg-bg-dark border border-border text-text-primary rounded-tl-none'
+                    }`}
+                >
+                  {message.role === 'user' ? (
+                    <div style={{ whiteSpace: 'pre-wrap' }}>{message.content}</div>
+                  ) : (
+                    <div className="prose prose-invert max-w-none text-left">
+                      <ReactMarkdown
+                        components={{
+                          p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
+                          ul: ({ children }) => <ul className="list-disc pl-4 mb-2 space-y-1">{children}</ul>,
+                          ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 space-y-1">{children}</ol>,
+                          li: ({ children }) => <li className="text-[0.95rem]">{children}</li>,
+                          em: ({ children }) => <em className="text-text-muted opacity-70 italic font-normal">{children}</em>,
+                          strong: ({ children }) => <strong className="font-semibold text-accent">{children}</strong>,
+                          a: ({ href, children }) => {
+                            const isInternal = href.startsWith('/') || href.startsWith('#');
+                            const buttonStyle = "inline-flex items-center gap-1 bg-accent text-bg-dark rounded-lg px-2.5 py-1 text-xs font-mono transition-all duration-200 mx-1 font-semibold shadow-sm hover:brightness-110";
 
-                          if (isInternal) {
+                            if (isInternal) {
+                              const handleClick = (e) => {
+                                if (href.startsWith('#')) {
+                                  const targetId = href.substring(1);
+                                  const element = document.getElementById(targetId);
+                                  if (element) {
+                                    e.preventDefault();
+                                    element.scrollIntoView({ behavior: 'smooth' });
+                                    window.history.pushState(null, null, href);
+                                  }
+                                }
+                              };
+                              return (
+                                <Link href={href} className={buttonStyle} onClick={handleClick}>
+                                  {children}
+                                </Link>
+                              );
+                            }
                             return (
-                              <Link href={href} className={buttonStyle}>
-                                {children}
-                              </Link>
+                              <a href={href} target="_blank" rel="noopener noreferrer" className={buttonStyle}>
+                                {children} ↗
+                              </a>
                             );
                           }
-                          return (
-                            <a href={href} target="_blank" rel="noopener noreferrer" className={buttonStyle}>
-                              {children} ↗
-                            </a>
-                          );
-                        }
-                      }}
-                    >
-                      {message.content}
-                    </ReactMarkdown>
-                  </div>
-                )}
+                        }}
+                      >
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
+                  )}
+                </div>
               </div>
+
+              {/* WhatsApp-style Suggested Questions right after the first chat bubble */}
+              {i === 0 && messages.length === 1 && !isLoading && (
+                <div className="flex flex-wrap gap-1.5 mt-1 animate-in fade-in duration-300 justify-start max-w-[85%] px-1">
+                  {quickPrompts.map((prompt, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleSendMessage(prompt)}
+                      className="text-xs bg-bg-dark border border-border hover:border-accent hover:bg-bg-card-hover text-text-secondary hover:text-text-primary px-2.5 py-1.5 rounded-lg transition-all text-left shadow-sm active:scale-95"
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
 
@@ -895,75 +1144,170 @@ export default function Chatbot() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Quick Prompts */}
-        {messages.length === 1 && !isLoading && (
-          <div className="px-4 pb-2 flex flex-col gap-1.5">
-            <span className="text-[10px] font-mono text-text-muted">Suggested questions:</span>
-            <div className="flex flex-wrap gap-1.5">
-              {quickPrompts.map((prompt, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleSendMessage(prompt)}
-                  className="text-xs bg-bg-dark border border-border hover:border-accent hover:bg-bg-card-hover text-text-secondary hover:text-text-primary px-2.5 py-1.5 rounded-lg transition-all text-left"
-                >
-                  {prompt}
-                </button>
-              ))}
+        {/* Input Form or Cooldown Status */}
+        {cooldown > 0 ? (
+          <div className="p-4 border-t border-border bg-bg-card/95 flex flex-col gap-2.5 animate-in fade-in duration-300 w-full shrink-0">
+            <div className="flex justify-between items-center text-xs font-medium text-text-muted">
+              <span>{getCurrentTask(cooldown, cooldownDuration)}</span>
+            </div>
+            <div className="w-full h-2 bg-bg-dark border border-border rounded-full overflow-hidden">
+              <div
+                className="h-full bg-accent transition-all duration-1000 ease-out"
+                style={{ width: `${Math.min(100, Math.max(0, ((cooldownDuration - cooldown) / cooldownDuration) * 100))}%` }}
+              />
             </div>
           </div>
-        )}
+        ) : (
+            <div className="p-3 bg-bg-card relative">
+              {/* Autocomplete Dropup */}
+              {showAutocomplete && (
+                (() => {
+                  const suggestions = getAutoCompleteItems();
+                  if (suggestions.length === 0) return null;
+                  return (
+                    <div className="absolute bottom-full left-3 right-3 mb-2 z-50 bg-bg-card border border-border rounded-xl shadow-2xl p-1.5 max-h-[180px] overflow-y-auto flex flex-col gap-0.5 custom-scrollbar">
+                      {suggestions.map((item, idx) => {
+                        const isFocused = idx === activeSuggestionIndex;
+                        const getCommandIcon = (cmd) => {
+                          if (cmd.startsWith('/navigation')) {
+                            return <Compass className="w-3.5 h-3.5 text-text-muted group-hover:text-text-primary shrink-0" />;
+                          }
+                          if (cmd.startsWith('/faq')) {
+                            return <HelpCircle className="w-3.5 h-3.5 text-text-muted group-hover:text-text-primary shrink-0" />;
+                          }
+                          return <Menu className="w-3.5 h-3.5 text-text-muted group-hover:text-text-primary shrink-0" />;
+                        };
+                        return (
+                          <button
+                            key={idx}
+                            onClick={() => {
+                              item.action();
+                              setActiveSuggestionIndex(0);
+                            }}
+                            onMouseEnter={() => setActiveSuggestionIndex(idx)}
+                            className={`w-full text-left px-3 py-1.5 rounded-lg text-xs transition-colors flex items-center gap-2 group min-w-0 ${
+                              isFocused
+                                ? 'bg-bg-card-hover text-text-primary'
+                                : 'text-text-secondary hover:bg-bg-card-hover hover:text-text-primary'
+                            }`}
+                          >
+                            {getCommandIcon(item.cmd)}
+                            <span className="font-mono text-xs whitespace-nowrap shrink-0">{item.cmd}</span>
+                            <span className="text-[11px] text-text-muted group-hover:text-text-muted/90 truncate min-w-0 flex-1">
+                              {item.desc}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                })()
+              )}
 
-        {/* Input Form */}
-        <div className="p-3 border-t border-border bg-bg-card">
-          <div className="flex items-end gap-2 bg-bg-dark border border-border rounded-xl px-3 py-1.5 focus-within:border-accent transition-colors">
-            <textarea
-              value={input}
-              maxLength={300}
-              onChange={(e) => {
-                if (isBlocked || cooldown > 0) return;
-                setInput(e.target.value);
-                // Auto-adjust height
-                e.target.style.height = 'auto';
-                e.target.style.height = `${Math.min(e.target.scrollHeight, 80)}px`; // Max 4 lines (20px * 4 = 80px)
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  if (!isBlocked && cooldown <= 0) {
-                    handleSendMessage();
-                  }
-                  // Reset height
-                  e.target.style.height = 'auto';
-                }
-              }}
-              placeholder={
-                isBlocked
-                  ? "No permission."
-                  : cooldown > 0
-                    ? `Mia is busy... Locked for ${cooldown}s`
-                    : "Ask me something..."
-              }
-              rows={1}
-              disabled={isBlocked || cooldown > 0}
-              className="flex-1 bg-transparent border-none outline-none text-text-primary placeholder:text-text-muted resize-none text-sm leading-5 py-1 focus:ring-0 overflow-y-auto disabled:opacity-50"
-              style={{ height: 'auto', maxHeight: '80px' }}
-            />
-            <button
-              onClick={(e) => {
-                if (!isBlocked && cooldown <= 0) {
-                  handleSendMessage();
-                }
-                // Find and reset sibling textarea height
-                const textarea = e.currentTarget.previousElementSibling;
-                if (textarea) textarea.style.height = 'auto';
-              }}
-              disabled={isLoading || !input.trim() || isBlocked || cooldown > 0}
-              className="p-1.5 rounded-lg text-accent hover:bg-bg-card disabled:opacity-40 disabled:hover:bg-transparent transition-all shrink-0 mb-0.5"
-            >
-              <Send className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowAutocomplete(!showAutocomplete)}
+                  disabled={isBlocked || cooldown > 0}
+                  className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 self-center transition-colors ${
+                    showAutocomplete
+                      ? 'text-accent border-accent bg-bg-dark'
+                      : 'text-text-muted border-border bg-bg-dark hover:text-text-primary hover:border-accent'
+                  }`}
+                  title="Toggle Commands Menu"
+                >
+                  <div className={`transition-transform duration-300 ${showAutocomplete ? 'rotate-90' : 'rotate-0'}`}>
+                    {showAutocomplete ? (
+                      <X className="w-5 h-5" />
+                    ) : (
+                      <Menu className="w-5 h-5" />
+                    )}
+                  </div>
+                </button>
+
+                <div className="flex-1 flex items-center gap-2 bg-bg-dark border border-border rounded-xl px-3 py-1.5 focus-within:border-accent transition-colors relative">
+                  <textarea
+                    value={input}
+                    maxLength={300}
+                    onChange={(e) => {
+                      if (isBlocked || cooldown > 0) return;
+                      const val = e.target.value;
+                      setInput(val);
+                      setActiveSuggestionIndex(0);
+                      // Auto-adjust height
+                      e.target.style.height = 'auto';
+                      e.target.style.height = `${Math.min(e.target.scrollHeight, 80)}px`; // Max 4 lines (20px * 4 = 80px)
+                    }}
+                    onKeyDown={(e) => {
+                      const suggestions = showAutocomplete ? getAutoCompleteItems() : [];
+                      const isAutocompleteOpen = showAutocomplete && suggestions.length > 0;
+
+                      if (isAutocompleteOpen) {
+                        if (e.key === 'ArrowDown') {
+                          e.preventDefault();
+                          setActiveSuggestionIndex((prev) => (prev + 1) % suggestions.length);
+                          return;
+                        }
+                        if (e.key === 'ArrowUp') {
+                          e.preventDefault();
+                          setActiveSuggestionIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length);
+                          return;
+                        }
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const selectedItem = suggestions[activeSuggestionIndex];
+                          if (selectedItem) {
+                            selectedItem.action();
+                          }
+                          setActiveSuggestionIndex(0);
+                          return;
+                        }
+                        if (e.key === 'Escape') {
+                          e.preventDefault();
+                          setShowAutocomplete(false);
+                          setActiveSuggestionIndex(0);
+                          return;
+                        }
+                      }
+
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        if (!isBlocked && cooldown <= 0) {
+                          handleSendMessage();
+                        }
+                        // Reset height
+                        e.target.style.height = 'auto';
+                      }
+                    }}
+                    placeholder={
+                      isBlocked
+                        ? "No permission."
+                        : "Ask me something..."
+                    }
+                    rows={1}
+                    disabled={isBlocked || cooldown > 0}
+                    className="flex-1 bg-transparent border-none outline-none text-text-primary placeholder:text-text-muted resize-none text-sm leading-5 py-1 focus:ring-0 overflow-y-auto disabled:opacity-50"
+                    style={{ height: 'auto', maxHeight: '80px' }}
+                  />
+                  {input.trim() && (
+                    <button
+                      onClick={(e) => {
+                        if (!isBlocked && cooldown <= 0) {
+                          handleSendMessage();
+                        }
+                        // Find and reset sibling textarea height
+                        const textarea = e.currentTarget.previousElementSibling;
+                        if (textarea) textarea.style.height = 'auto';
+                      }}
+                      disabled={isLoading || !input.trim() || isBlocked || cooldown > 0}
+                      className="p-1.5 rounded-lg text-accent hover:bg-bg-card disabled:opacity-40 disabled:hover:bg-transparent transition-all shrink-0"
+                    >
+                      <Send className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
       </div>
     );
   };
@@ -982,7 +1326,13 @@ export default function Chatbot() {
     <>
       {!isOpen && showWidget && (
         <button
-          onClick={() => setIsOpen(true)}
+          onClick={() => {
+            setIsOpen(true);
+            if (!hasRungBellRef.current) {
+              playBellSound();
+              hasRungBellRef.current = true;
+            }
+          }}
           className={`fixed bottom-6 ${posClass} z-50 w-14 h-14 ${triggerBtnClasses} rounded-full shadow-2xl flex items-center justify-center hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300 group`}
           aria-label="Open AI Assistant"
         >

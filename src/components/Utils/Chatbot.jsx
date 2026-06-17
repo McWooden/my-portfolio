@@ -118,7 +118,7 @@ export default function Chatbot() {
   const [position, setPosition] = useState('right'); // 'left' | 'center' | 'right'
   const [isBlocked, setIsBlocked] = useState(false);
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: '*Stands by the door, greeting you with a polite bow and a soft smile.* \n\nWelcome. I am here to assist you. Please let me know how I may help you today! \n\n*(You can ask me about Huddin\'s projects, services, or availability!)*' }
+    { role: 'assistant', content: `*Stands by the door, greeting you with a polite bow and a soft smile.* \n\nWelcome. I am here to assist you. Please let me know how I may help you today! \n\n*(You can ask me about ${huddinConfig.master}'s projects, services, or availability!)*` }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -698,8 +698,6 @@ export default function Chatbot() {
     setLastWords('');
 
     try {
-      const evaluationPrompt = `Please act as an expert editor. Evaluate this text and tell me if it is good, bad, or neutral. Provide specific feedback on its clarity, flow, and where I can improve it. Text: "${userWords}"`;
-
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -707,7 +705,7 @@ export default function Chatbot() {
         },
         body: JSON.stringify({
           messages: [
-            { role: 'user', content: evaluationPrompt }
+            { role: 'user', content: userWords }
           ],
           currentPath: window.location.pathname,
           isApologyEvaluation: true
@@ -1061,13 +1059,13 @@ export default function Chatbot() {
                 className={`flex items-start gap-2.5 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[0.95rem] ${message.role === 'user'
-                    ? 'bg-accent text-bg-dark rounded-tr-none font-medium'
+                  className={`max-w-[85%] w-fit rounded-2xl px-4 py-2.5 text-[0.95rem] ${message.role === 'user'
+                    ? 'bg-accent text-bg-dark rounded-tr-none font-medium text-right'
                     : 'bg-bg-dark border border-border text-text-primary rounded-tl-none'
                     }`}
                 >
                   {message.role === 'user' ? (
-                    <div style={{ whiteSpace: 'pre-wrap' }}>{message.content}</div>
+                    <p className="w-full whitespace-pre-wrap break-words text-left">{message.content}</p>
                   ) : (
                     <div className="prose prose-invert max-w-none text-left">
                       <ReactMarkdown

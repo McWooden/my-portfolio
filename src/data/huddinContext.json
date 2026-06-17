@@ -21,6 +21,10 @@
   },
   "faq": [
     {
+      "question": "What can you do?",
+      "answer": "I help Huddin find ideas, act as his coding assistant, write code drafts, serve as an advisor, and provide general assistance to support his design and development work."
+    },
+    {
       "question": "What kind of projects do you take on?",
       "answer": "Huddin does both code and design — websites, tools, apps, logos, posters, banners, or anything in between. If we can imagine it, I can build it."
     },

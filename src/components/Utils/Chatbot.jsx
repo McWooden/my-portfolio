@@ -457,30 +457,21 @@ export default function Chatbot() {
     }
   }, []);
 
-  // Dynamic Puter.js loading & auto temp-session creation
+  // Dynamic Puter.js loading — passively checks if already signed in
+  // Sign-in is lazy: only triggered when user explicitly requests it
   useEffect(() => {
     if (typeof window !== 'undefined') {
       import('@heyputer/puter.js')
-        .then(async (module) => {
+        .then((module) => {
           puterRef.current = module.default || module;
           try {
-            // Check if already signed in
             const alreadySignedIn = puterRef.current.auth.isSignedIn();
             if (alreadySignedIn) {
               setIsPuterSignedIn(true);
               setCooldown(0);
-              return;
-            }
-            // Auto-create a temporary session — no popup, no phone, no email needed
-            await puterRef.current.auth.signIn({ attempt_temp_user_creation: true });
-            const signedIn = puterRef.current.auth.isSignedIn();
-            setIsPuterSignedIn(signedIn);
-            if (signedIn) {
-              setCooldown(0);
             }
           } catch (e) {
-            // Silently ignore — temp user creation may not always be available
-            console.warn("Puter auto session init:", e);
+            console.warn("Puter auth state check:", e);
           }
         })
         .catch((err) => {

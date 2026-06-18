@@ -457,20 +457,30 @@ export default function Chatbot() {
     }
   }, []);
 
-  // Dynamic Puter.js loading & status check
+  // Dynamic Puter.js loading & auto temp-session creation
   useEffect(() => {
     if (typeof window !== 'undefined') {
       import('@heyputer/puter.js')
-        .then((module) => {
+        .then(async (module) => {
           puterRef.current = module.default || module;
           try {
+            // Check if already signed in
+            const alreadySignedIn = puterRef.current.auth.isSignedIn();
+            if (alreadySignedIn) {
+              setIsPuterSignedIn(true);
+              setCooldown(0);
+              return;
+            }
+            // Auto-create a temporary session — no popup, no phone, no email needed
+            await puterRef.current.auth.signIn({ attempt_temp_user_creation: true });
             const signedIn = puterRef.current.auth.isSignedIn();
             setIsPuterSignedIn(signedIn);
             if (signedIn) {
               setCooldown(0);
             }
           } catch (e) {
-            console.error("Failed to check Puter authentication state:", e);
+            // Silently ignore — temp user creation may not always be available
+            console.warn("Puter auto session init:", e);
           }
         })
         .catch((err) => {
@@ -482,7 +492,9 @@ export default function Chatbot() {
   const handlePuterSignIn = async () => {
     if (!puterRef.current) return;
     try {
-      await puterRef.current.auth.signIn();
+      // attempt_temp_user_creation: true creates a temporary free session
+      // without requiring phone verification or email sign-up
+      await puterRef.current.auth.signIn({ attempt_temp_user_creation: true });
       const signedIn = puterRef.current.auth.isSignedIn();
       setIsPuterSignedIn(signedIn);
       if (signedIn) {
@@ -507,7 +519,7 @@ export default function Chatbot() {
       if (err && typeof err === 'object' && Object.keys(err).length === 0) {
         console.log("Puter sign-in popup was closed or cancelled by the user.");
       } else {
-        console.error("Puter sign-in failed:", err);
+        console.warn("Puter sign-in:", err);
       }
     }
   };

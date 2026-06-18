@@ -966,125 +966,81 @@ CRITICAL LENGTH & CONCISENESS RULES:
     setIsLoading(true);
 
     try {
-      if (isPuterSignedIn && puterRef.current) {
-        const systemPrompt = getSystemPrompt(window.location.pathname);
-        const nonSystemMessages = newMessages.filter((m) => m.role !== 'system');
-        const recentMessages = nonSystemMessages.slice(-6);
-
-        const puterMessages = [
-          { role: 'system', content: systemPrompt },
-          ...recentMessages.map((m) => ({
-            role: m.role,
-            content: m.content
-          }))
-        ];
-
-        const response = await puterRef.current.ai.chat(puterMessages, {
-          model: 'gpt-4o-mini',
-          stream: true
-        });
-
-        // Add placeholder assistant message
-        setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
-        setIsLoading(false);
-
-        let assistantReply = '';
-        let hasPlayedVoice = false;
-
-        for await (const chunk of response) {
-          const text = (typeof chunk === 'string') ? chunk : (chunk?.text || '');
-          assistantReply += text;
-
-          if (!hasPlayedVoice && assistantReply.trim().length > 0) {
-            hasPlayedVoice = true;
-            playVoiceSound(assistantReply);
-          }
-
-          setMessages(prev => {
-            const updated = [...prev];
-            if (updated.length > 0 && updated[updated.length - 1].role === 'assistant') {
-              updated[updated.length - 1].content = assistantReply;
-            }
-            return updated;
-          });
+      const isOneRemaining = !isPuterSignedIn && (savedLimit - newUsed) === 1;
+      const isQuotaExhausted = !isPuterSignedIn && newUsed >= savedLimit;
+      let chosenReason = undefined;
+      if (isOneRemaining) {
+        chosenReason = RANDOM_REASONS[Math.floor(Math.random() * RANDOM_REASONS.length)];
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('chatbot_current_reason', chosenReason);
         }
-      } else {
-        const isOneRemaining = (savedLimit - newUsed) === 1;
-        const isQuotaExhausted = newUsed >= savedLimit;
-        let chosenReason = undefined;
-        if (isOneRemaining) {
+      } else if (isQuotaExhausted) {
+        if (typeof window !== 'undefined') {
+          chosenReason = localStorage.getItem('chatbot_current_reason');
+        }
+        if (!chosenReason) {
           chosenReason = RANDOM_REASONS[Math.floor(Math.random() * RANDOM_REASONS.length)];
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('chatbot_current_reason', chosenReason);
-          }
-        } else if (isQuotaExhausted) {
-          if (typeof window !== 'undefined') {
-            chosenReason = localStorage.getItem('chatbot_current_reason');
-          }
-          if (!chosenReason) {
-            chosenReason = RANDOM_REASONS[Math.floor(Math.random() * RANDOM_REASONS.length)];
-          }
-          if (typeof window !== 'undefined') {
-            localStorage.removeItem('chatbot_current_reason');
-          }
+        }
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('chatbot_current_reason');
+        }
+      }
+
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: newMessages.map(m => ({ role: m.role, content: m.content })),
+          currentPath: window.location.pathname,
+          isOneRemainingRequest: isOneRemaining,
+          isQuotaExhausted: isQuotaExhausted,
+          randomReason: chosenReason
+        }),
+      });
+
+      if (!response.ok) {
+        let errMsg = 'Failed to fetch response';
+        try {
+          const errData = await response.json();
+          errMsg = errData.error || errMsg;
+        } catch (_) { }
+        const error = new Error(errMsg);
+        error.status = response.status;
+        throw error;
+      }
+
+      // Read stream
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let assistantReply = '';
+      let hasPlayedVoice = false;
+
+      // Add placeholder assistant message
+      setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+      setIsLoading(false); // Stop loading animation since streaming has started
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        assistantReply += chunk;
+
+        if (!hasPlayedVoice && assistantReply.trim().length > 0) {
+          hasPlayedVoice = true;
+          playVoiceSound(assistantReply);
         }
 
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            messages: newMessages.map(m => ({ role: m.role, content: m.content })),
-            currentPath: window.location.pathname,
-            isOneRemainingRequest: isOneRemaining,
-            isQuotaExhausted: isQuotaExhausted,
-            randomReason: chosenReason
-          }),
+        // Update the last message in state
+        setMessages(prev => {
+          const updated = [...prev];
+          if (updated.length > 0 && updated[updated.length - 1].role === 'assistant') {
+            updated[updated.length - 1].content = assistantReply;
+          }
+          return updated;
         });
-
-        if (!response.ok) {
-          let errMsg = 'Failed to fetch response';
-          try {
-            const errData = await response.json();
-            errMsg = errData.error || errMsg;
-          } catch (_) { }
-          const error = new Error(errMsg);
-          error.status = response.status;
-          throw error;
-        }
-
-        // Read stream
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let assistantReply = '';
-        let hasPlayedVoice = false;
-
-        // Add placeholder assistant message
-        setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
-        setIsLoading(false); // Stop loading animation since streaming has started
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value, { stream: true });
-          assistantReply += chunk;
-
-          if (!hasPlayedVoice && assistantReply.trim().length > 0) {
-            hasPlayedVoice = true;
-            playVoiceSound(assistantReply);
-          }
-
-          // Update the last message in state
-          setMessages(prev => {
-            const updated = [...prev];
-            if (updated.length > 0 && updated[updated.length - 1].role === 'assistant') {
-              updated[updated.length - 1].content = assistantReply;
-            }
-            return updated;
-          });
-        }
       }
     } catch (error) {
       console.error('Chat error:', error);

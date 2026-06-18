@@ -8,8 +8,12 @@ export async function POST(req) {
   try {
     const { messages, currentPath, isApologyEvaluation, isOneRemainingRequest, isQuotaExhausted, randomReason } = await req.json();
 
-    const apiKey = process.env.HUDDIN_LOCAL_LAPTOP_KEY;
-    if (!apiKey) {
+    const apiKeys = [
+      process.env.HUDDIN_LOCAL_LAPTOP_KEY,
+      process.env.HUDDIN_BACKUP_KEY
+    ].filter(Boolean).sort(() => Math.random() - 0.5);
+
+    if (apiKeys.length === 0) {
       return NextResponse.json(
         { error: 'Local key configuration is missing on the server.' },
         { status: 500 }
@@ -149,27 +153,44 @@ CRITICAL LENGTH & CONCISENESS RULES:
       }))
     ];
 
-    const response = await fetch('https://api.puter.com/puterai/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: selectedModel,
-        messages: puterMessages,
-        temperature: 0.5,
-        max_tokens: 130, // Caps response length to save tokens
-        stream: true,
-      }),
-    });
+    let response;
+    let lastError = null;
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Puter API error:', errorText);
+    for (const apiKey of apiKeys) {
+      try {
+        response = await fetch('https://api.puter.com/puterai/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: selectedModel,
+            messages: puterMessages,
+            temperature: 0.5,
+            max_tokens: 130, // Caps response length to save tokens
+            stream: true,
+          }),
+        });
+
+        if (response.ok) {
+          lastError = null;
+          break; // Key worked! Exit loop and stream
+        } else {
+          const errorText = await response.text();
+          lastError = { status: response.status, text: errorText };
+          console.warn(`Puter API error with key ending in ...${apiKey.slice(-8)}:`, errorText);
+        }
+      } catch (err) {
+        lastError = { status: 500, text: err.message || err.toString() };
+        console.error(`Fetch error with key ending in ...${apiKey.slice(-8)}:`, err);
+      }
+    }
+
+    if (lastError || !response) {
       return NextResponse.json(
-        { error: 'Failed to fetch response from the AI model.' },
-        { status: response.status }
+        { error: `Failed to fetch response from the AI model: ${lastError?.text || 'Unknown error'}` },
+        { status: lastError?.status || 500 }
       );
     }
 

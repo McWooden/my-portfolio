@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, X, Send, SquarePen, ArrowLeftRight, Compass, HelpCircle, Menu } from 'lucide-react';
+import { MessageSquare, X, Send, SquarePen, ArrowLeftRight, Compass, HelpCircle, Menu, ArrowDown } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Link from 'next/link';
 import huddinConfig from '../../data/huddinContext.json';
@@ -136,6 +136,7 @@ export default function Chatbot() {
   const [quotaUsed, setQuotaUsed] = useState(0);
   const [quotaLimit, setQuotaLimit] = useState(15);
   const [windowStart, setWindowStart] = useState(0);
+  const [showScrollBottomBtn, setShowScrollBottomBtn] = useState(false);
 
   const RANDOM_REASONS = [
     "help my master find something",
@@ -170,6 +171,9 @@ export default function Chatbot() {
   const banHistoryEndRef = useRef(null);
   const chatWindowRef = useRef(null);
   const hasRungBellRef = useRef(false);
+  const autocompleteRef = useRef(null);
+  const toggleAutocompleteRef = useRef(null);
+  const textareaRef = useRef(null);
 
   const quickPrompts = [
     'What are Huddin\'s services?',
@@ -177,14 +181,25 @@ export default function Chatbot() {
     'What can you do?',
   ];
 
-  // Handle click outside to close chatbot
+  // Handle click outside to close chatbot or autocomplete dropdown
   useEffect(() => {
     function handleClickOutside(event) {
       if (isBlocked) return; // Disable closing when blocked/punished
+      
+      // Close chatbot if clicking outside the chat window
       if (chatWindowRef.current && !chatWindowRef.current.contains(event.target)) {
         setIsOpen(false);
         setIsPositionDropdownOpen(false);
         setShowConfirmNewChat(false);
+        setShowAutocomplete(false);
+        return;
+      }
+
+      // Close autocomplete menu if clicking outside of it and not on the toggle button or textarea
+      if (showAutocomplete && 
+          autocompleteRef.current && !autocompleteRef.current.contains(event.target) &&
+          toggleAutocompleteRef.current && !toggleAutocompleteRef.current.contains(event.target) &&
+          textareaRef.current && !textareaRef.current.contains(event.target)) {
         setShowAutocomplete(false);
       }
     }
@@ -194,7 +209,7 @@ export default function Chatbot() {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isOpen, isBlocked]);
+  }, [isOpen, isBlocked, showAutocomplete]);
 
   // Handle scroll visibility of the widget button
   useEffect(() => {
@@ -271,16 +286,16 @@ export default function Chatbot() {
   useEffect(() => {
     if (cooldown <= 0) {
       if (typeof window !== 'undefined' && quotaUsed >= quotaLimit) {
-        // Cooldown finished, start next session (subsequent session gets 10)
+        // Cooldown finished, start next session (subsequent session gets 3)
         const now = Date.now();
-        localStorage.setItem('chatbot_quota_limit', '10');
+        localStorage.setItem('chatbot_quota_limit', '3');
         localStorage.setItem('chatbot_quota_used', '0');
         localStorage.setItem('chatbot_quota_window_start', now.toString());
-        // generate a new random duration for the next cycle
-        const randomDurationMs = (Math.floor(Math.random() * (10 * 60 - 5 * 60 + 1)) + 5 * 60) * 1000;
+        const randomDurationMs = (Math.floor(Math.random() * (15 * 60 - 8 * 60 + 1)) + 8 * 60) * 1000;
         localStorage.setItem('chatbot_quota_cooldown_duration', randomDurationMs.toString());
+        localStorage.removeItem('chatbot_cooldown_steps');
         
-        setQuotaLimit(10);
+        setQuotaLimit(3);
         setQuotaUsed(0);
         setWindowStart(now);
         setCooldownDuration(Math.floor(randomDurationMs / 1000));
@@ -340,21 +355,21 @@ export default function Chatbot() {
       const now = Date.now();
 
       if (savedDate !== todayStr) {
-        savedLimit = 15;
+        savedLimit = 4;
         savedUsed = 0;
         savedWindowStart = now;
         savedCooldownDuration = 300000;
         localStorage.setItem('chatbot_quota_date', todayStr);
-        localStorage.setItem('chatbot_quota_limit', '15');
+        localStorage.setItem('chatbot_quota_limit', '4');
         localStorage.setItem('chatbot_quota_used', '0');
         localStorage.setItem('chatbot_quota_window_start', savedWindowStart.toString());
         localStorage.setItem('chatbot_quota_cooldown_duration', savedCooldownDuration.toString());
       } else if (now - savedWindowStart >= savedCooldownDuration) {
-        savedLimit = 10;
+        savedLimit = 3;
         savedUsed = 0;
         savedWindowStart = now;
-        savedCooldownDuration = (Math.floor(Math.random() * (10 * 60 - 5 * 60 + 1)) + 5 * 60) * 1000;
-        localStorage.setItem('chatbot_quota_limit', '10');
+        savedCooldownDuration = (Math.floor(Math.random() * (15 * 60 - 8 * 60 + 1)) + 8 * 60) * 1000;
+        localStorage.setItem('chatbot_quota_limit', '3');
         localStorage.setItem('chatbot_quota_used', '0');
         localStorage.setItem('chatbot_quota_window_start', savedWindowStart.toString());
         localStorage.setItem('chatbot_quota_cooldown_duration', savedCooldownDuration.toString());
@@ -388,17 +403,72 @@ export default function Chatbot() {
     ]);
   };
 
+  const getProgressiveReason = (reason) => {
+    const mapping = {
+      "help my master find something": "helping her master find something",
+      "see what my master needs": "seeing what her master needs",
+      "see something in the kitchen": "checking the kitchen",
+      "carry something": "carrying something",
+      "feed my cat": "feeding the cat",
+      "charge Nico's battery": "charging Nico's battery",
+      "look at something my master is fixing": "looking at what her master is fixing",
+      "taste-test my master's cooking": "taste-testing her master's cooking",
+      "find room keys": "finding room keys",
+      "help my master make a phone call": "helping her master make a phone call",
+      "help my master on a phone call": "helping her master on a phone call",
+      "check something in the workspace": "checking the workspace"
+    };
+    return mapping[reason] || "busy with tasks";
+  };
+
   const getCurrentTask = (currentCooldown, totalDuration) => {
+    let steps = [];
+    if (typeof window !== 'undefined') {
+      try {
+        const savedSteps = localStorage.getItem('chatbot_cooldown_steps');
+        if (savedSteps) {
+          steps = JSON.parse(savedSteps);
+        }
+      } catch (_) {}
+    }
+
+    if (!steps || steps.length < 3) {
+      let firstReason = undefined;
+      if (typeof window !== 'undefined') {
+        firstReason = localStorage.getItem('chatbot_current_reason');
+      }
+      const rest = RANDOM_REASONS.filter(r => r !== firstReason);
+      const shuffled = rest.sort(() => 0.5 - Math.random());
+      steps = [firstReason || shuffled[0], shuffled[1], shuffled[2]];
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('chatbot_cooldown_steps', JSON.stringify(steps));
+      }
+    }
+
     const elapsedPercent = ((totalDuration - currentCooldown) / totalDuration) * 100;
     if (elapsedPercent < 25) {
-      return "Looks like Mia is greeting another guest...";
+      return `Looks like Mia is ${getProgressiveReason(steps[0])}...`;
     } else if (elapsedPercent < 55) {
-      return "Looks like Mia is checking the kitchen...";
+      return `Looks like Mia is ${getProgressiveReason(steps[1])}...`;
     } else if (elapsedPercent < 80) {
-      return "Looks like Mia is cleaning the workspace...";
+      return `Looks like Mia is ${getProgressiveReason(steps[2])}...`;
     } else {
-      return "Looks like Mia is preparing to return...";
+      return "Mia is preparing to return...";
     }
+  };
+
+  const getSteppedProgress = (currentCooldown, totalDuration) => {
+    const elapsedPercent = ((totalDuration - currentCooldown) / totalDuration) * 100;
+    if (elapsedPercent < 25) return 20;
+    if (elapsedPercent < 55) return 45;
+    if (elapsedPercent < 80) return 70;
+    return 92;
+  };
+
+  const handleChatScroll = (e) => {
+    const container = e.currentTarget;
+    const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+    setShowScrollBottomBtn(distanceFromBottom > 100);
   };
 
   const togglePosition = () => {
@@ -480,6 +550,12 @@ export default function Chatbot() {
     const text = textToSend || input.trim();
     if (!text) return;
 
+    // Check if currently in cooldown and input is not a command or static FAQ
+    const isCommand = text.toLowerCase().startsWith('/') || huddinConfig.faq.some(f => f.question.toLowerCase().trim() === text.toLowerCase().trim());
+    if (cooldown > 0 && !isCommand) {
+      return;
+    }
+
     setShowAutocomplete(false);
 
     if (text.toLowerCase().startsWith('/navigation')) {
@@ -500,20 +576,57 @@ export default function Chatbot() {
       return;
     }
 
+    // Check if it's a /faq q<num> command or matches a static FAQ question exactly
+    let faqIdx = -1;
+    let userCommandText = text;
+
     if (text.toLowerCase().startsWith('/faq')) {
       const parts = text.trim().split(/\s+/);
       if (parts.length > 1) {
         const match = parts[1].match(/q(\d+)/i);
         if (match) {
-          const idx = parseInt(match[1], 10) - 1;
-          const faq = huddinConfig.faq[idx];
-          if (faq) {
-            handleSendMessage(faq.question);
-            setInput('');
-            return;
-          }
+          faqIdx = parseInt(match[1], 10) - 1;
         }
       }
+    } else {
+      // Check for exact matching question (case-insensitive)
+      faqIdx = huddinConfig.faq.findIndex(
+        f => f.question.toLowerCase().trim() === text.toLowerCase().trim()
+      );
+      if (faqIdx !== -1) {
+        // Normalize the message display to show the clean question
+        userCommandText = huddinConfig.faq[faqIdx].question;
+      }
+    }
+
+    if (faqIdx !== -1 && huddinConfig.faq[faqIdx]) {
+      const faq = huddinConfig.faq[faqIdx];
+      
+      const FAQ_TEMPLATES = [
+        (q) => `i see a bill board about faq at piece question '${q}' and its said`,
+        (q) => `that sticky one card '${q}' said`,
+        (q) => `glancing at the FAQ board for '${q}', it reads`,
+        (q) => `reading the FAQ card about '${q}', it says`,
+        (q) => `looking at the FAQ item '${q}', it notes`
+      ];
+
+      const templateFn = FAQ_TEMPLATES[Math.floor(Math.random() * FAQ_TEMPLATES.length)];
+      const userText = templateFn(faq.question);
+      const reply = `> ${faq.answer}`;
+
+      // Filter out any previous duplicate message for this FAQ index
+      setMessages(prev => {
+        const filtered = prev.filter(m => m.faqIdx !== faqIdx);
+        return [
+          ...filtered,
+          { role: 'user', content: userText, isAction: true, faqIdx },
+          { role: 'assistant', content: reply, faqIdx }
+        ];
+      });
+
+      playVoiceSound(faq.answer);
+      setInput('');
+      return;
     }
 
     // Quota Check
@@ -527,15 +640,15 @@ export default function Chatbot() {
 
     if (savedDate !== todayStr) {
       savedDate = todayStr;
-      savedLimit = 15;
+      savedLimit = 4;
       savedUsed = 0;
       savedWindowStart = now;
       savedCooldownDuration = 300000;
     } else if (now - savedWindowStart >= savedCooldownDuration) {
-      savedLimit = 10;
+      savedLimit = 3;
       savedUsed = 0;
       savedWindowStart = now;
-      savedCooldownDuration = (Math.floor(Math.random() * (10 * 60 - 5 * 60 + 1)) + 5 * 60) * 1000;
+      savedCooldownDuration = (Math.floor(Math.random() * (15 * 60 - 8 * 60 + 1)) + 8 * 60) * 1000;
     }
 
     if (savedUsed >= savedLimit) {
@@ -550,13 +663,29 @@ export default function Chatbot() {
     localStorage.setItem('chatbot_quota_date', savedDate);
     localStorage.setItem('chatbot_quota_limit', savedLimit.toString());
     localStorage.setItem('chatbot_quota_used', newUsed.toString());
-    localStorage.setItem('chatbot_quota_window_start', savedWindowStart.toString());
-    localStorage.setItem('chatbot_quota_cooldown_duration', savedCooldownDuration.toString());
+
+    if (newUsed >= savedLimit) {
+      const cooldownSec = Math.floor(Math.random() * (15 * 60 - 8 * 60 + 1)) + 8 * 60;
+      const cooldownMs = cooldownSec * 1000;
+      savedWindowStart = now;
+      savedCooldownDuration = cooldownMs;
+
+      localStorage.setItem('chatbot_quota_cooldown_duration', cooldownMs.toString());
+      localStorage.setItem('chatbot_quota_window_start', now.toString());
+
+      setCooldownDuration(cooldownSec);
+      setCooldown(cooldownSec);
+    } else {
+      localStorage.setItem('chatbot_quota_window_start', savedWindowStart.toString());
+      localStorage.setItem('chatbot_quota_cooldown_duration', savedCooldownDuration.toString());
+    }
 
     setQuotaUsed(newUsed);
     setQuotaLimit(savedLimit);
     setWindowStart(savedWindowStart);
-    setCooldownDuration(Math.floor(savedCooldownDuration / 1000));
+    if (newUsed < savedLimit) {
+      setCooldownDuration(Math.floor(savedCooldownDuration / 1000));
+    }
 
     const isOneRemaining = (savedLimit - newUsed) === 1;
 
@@ -586,9 +715,23 @@ export default function Chatbot() {
     setIsLoading(true);
 
     try {
+      const isQuotaExhausted = newUsed >= savedLimit;
       let chosenReason = undefined;
       if (isOneRemaining) {
         chosenReason = RANDOM_REASONS[Math.floor(Math.random() * RANDOM_REASONS.length)];
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('chatbot_current_reason', chosenReason);
+        }
+      } else if (isQuotaExhausted) {
+        if (typeof window !== 'undefined') {
+          chosenReason = localStorage.getItem('chatbot_current_reason');
+        }
+        if (!chosenReason) {
+          chosenReason = RANDOM_REASONS[Math.floor(Math.random() * RANDOM_REASONS.length)];
+        }
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('chatbot_current_reason');
+        }
       }
 
       const response = await fetch('/api/chat', {
@@ -599,7 +742,8 @@ export default function Chatbot() {
         body: JSON.stringify({
           messages: newMessages.map(m => ({ role: m.role, content: m.content })),
           currentPath: window.location.pathname,
-          isLastRequest: isOneRemaining,
+          isOneRemainingRequest: isOneRemaining,
+          isQuotaExhausted: isQuotaExhausted,
           randomReason: chosenReason
         }),
       });
@@ -647,17 +791,7 @@ export default function Chatbot() {
         });
       }
 
-      // If session limit reached, activate cooldown
-      if (newUsed >= savedLimit) {
-        const randomDurationSec = Math.floor(Math.random() * (10 * 60 - 5 * 60 + 1)) + 5 * 60;
-        const randomDurationMs = randomDurationSec * 1000;
-        
-        localStorage.setItem('chatbot_quota_cooldown_duration', randomDurationMs.toString());
-        localStorage.setItem('chatbot_quota_window_start', Date.now().toString());
-        
-        setCooldownDuration(randomDurationSec);
-        setCooldown(randomDurationSec);
-      }
+
     } catch (error) {
       console.error('Chat error:', error);
       setIsLoading(false);
@@ -1052,25 +1186,36 @@ export default function Chatbot() {
         </div>
 
         {/* Message List */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar" style={{ overscrollBehavior: 'contain' }}>
+        <div
+          onScroll={handleChatScroll}
+          className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar"
+          style={{ overscrollBehavior: 'contain' }}
+        >
           {messages.map((message, i) => (
-            <div key={i} className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'} gap-1.5`}>
+            <div key={i} className={`flex flex-col w-full ${message.role === 'user' ? 'items-end' : 'items-start'} gap-1.5`}>
               <div
-                className={`flex items-start gap-2.5 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`flex w-full items-start gap-2.5 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
                   className={`max-w-[85%] w-fit rounded-2xl px-4 py-2.5 text-[0.95rem] ${message.role === 'user'
-                    ? 'bg-accent text-bg-dark rounded-tr-none font-medium text-right'
+                    ? message.isAction
+                      ? 'bg-accent/15 border border-accent/20 text-accent rounded-tr-none italic opacity-85 text-right font-normal'
+                      : 'bg-accent text-bg-dark rounded-tr-none font-medium text-right'
                     : 'bg-bg-dark border border-border text-text-primary rounded-tl-none'
                     }`}
                 >
                   {message.role === 'user' ? (
-                    <p className="w-full whitespace-pre-wrap break-words text-left">{message.content}</p>
+                    <p className="whitespace-pre-wrap break-words text-left">{message.content}</p>
                   ) : (
                     <div className="prose prose-invert max-w-none text-left">
                       <ReactMarkdown
                         components={{
                           p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
+                          blockquote: ({ children }) => (
+                            <blockquote className="border-l-2 border-accent pl-3 text-text-secondary italic my-1">
+                              {children}
+                            </blockquote>
+                          ),
                           ul: ({ children }) => <ul className="list-disc pl-4 mb-2 space-y-1">{children}</ul>,
                           ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 space-y-1">{children}</ol>,
                           li: ({ children }) => <li className="text-[0.95rem]">{children}</li>,
@@ -1139,31 +1284,46 @@ export default function Chatbot() {
               </div>
             </div>
           )}
+          {cooldown > 0 && (
+            <div className="p-3 bg-bg-dark border border-border rounded-xl flex flex-col gap-2.5 my-2 animate-in fade-in duration-300 w-full shrink-0">
+              <div className="flex justify-between items-center text-xs font-medium text-text-muted">
+                <span>{getCurrentTask(cooldown, cooldownDuration)}</span>
+              </div>
+              <div className="w-full h-1.5 bg-bg-dark border border-border rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-accent transition-all duration-1000 ease-out"
+                  style={{ width: `${getSteppedProgress(cooldown, cooldownDuration)}%` }}
+                />
+              </div>
+            </div>
+          )}
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Form or Cooldown Status */}
-        {cooldown > 0 ? (
-          <div className="p-4 border-t border-border bg-bg-card/95 flex flex-col gap-2.5 animate-in fade-in duration-300 w-full shrink-0">
-            <div className="flex justify-between items-center text-xs font-medium text-text-muted">
-              <span>{getCurrentTask(cooldown, cooldownDuration)}</span>
-            </div>
-            <div className="w-full h-2 bg-bg-dark border border-border rounded-full overflow-hidden">
-              <div
-                className="h-full bg-accent transition-all duration-1000 ease-out"
-                style={{ width: `${Math.min(100, Math.max(0, ((cooldownDuration - cooldown) / cooldownDuration) * 100))}%` }}
-              />
-            </div>
-          </div>
-        ) : (
-            <div className="p-3 bg-bg-card relative">
+        {/* Scroll to Bottom Button */}
+        {showScrollBottomBtn && (
+          <button
+            onClick={() => {
+              if (messagesEndRef.current) {
+                messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+            className="absolute bottom-[76px] left-1/2 -translate-x-1/2 z-40 bg-accent text-bg-dark rounded-full p-2.5 shadow-lg border border-accent/20 transition-all"
+            title="Scroll to bottom"
+          >
+            <ArrowDown className="w-4 h-4" />
+          </button>
+        )}
+
+        {/* Input Form */}
+        <div className="px-3 pb-3 pt-1 bg-bg-card relative">
               {/* Autocomplete Dropup */}
               {showAutocomplete && (
                 (() => {
                   const suggestions = getAutoCompleteItems();
                   if (suggestions.length === 0) return null;
                   return (
-                    <div className="absolute bottom-full left-3 right-3 mb-2 z-50 bg-bg-card border border-border rounded-xl shadow-2xl p-1.5 max-h-[180px] overflow-y-auto flex flex-col gap-0.5 custom-scrollbar">
+                    <div ref={autocompleteRef} className="absolute bottom-full left-3 right-3 mb-2 z-50 bg-bg-card border border-border rounded-xl shadow-2xl p-1.5 max-h-[180px] overflow-y-auto flex flex-col gap-0.5 custom-scrollbar">
                       {suggestions.map((item, idx) => {
                         const isFocused = idx === activeSuggestionIndex;
                         const getCommandIcon = (cmd) => {
@@ -1204,8 +1364,9 @@ export default function Chatbot() {
 
               <div className="flex items-center gap-2">
                 <button
+                  ref={toggleAutocompleteRef}
                   onClick={() => setShowAutocomplete(!showAutocomplete)}
-                  disabled={isBlocked || cooldown > 0}
+                  disabled={isBlocked}
                   className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 self-center transition-colors ${
                     showAutocomplete
                       ? 'text-accent border-accent bg-bg-dark'
@@ -1224,10 +1385,11 @@ export default function Chatbot() {
 
                 <div className="flex-1 flex items-center gap-2 bg-bg-dark border border-border rounded-xl px-3 py-1.5 focus-within:border-accent transition-colors relative">
                   <textarea
+                    ref={textareaRef}
                     value={input}
                     maxLength={300}
                     onChange={(e) => {
-                      if (isBlocked || cooldown > 0) return;
+                      if (isBlocked) return;
                       const val = e.target.value;
                       setInput(val);
                       setActiveSuggestionIndex(0);
@@ -1269,7 +1431,7 @@ export default function Chatbot() {
 
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
-                        if (!isBlocked && cooldown <= 0) {
+                        if (!isBlocked) {
                           handleSendMessage();
                         }
                         // Reset height
@@ -1282,30 +1444,40 @@ export default function Chatbot() {
                         : "Ask me something..."
                     }
                     rows={1}
-                    disabled={isBlocked || cooldown > 0}
+                    disabled={isBlocked}
                     className="flex-1 bg-transparent border-none outline-none text-text-primary placeholder:text-text-muted resize-none text-sm leading-5 py-1 focus:ring-0 overflow-y-auto disabled:opacity-50"
                     style={{ height: 'auto', maxHeight: '80px' }}
                   />
                   {input.trim() && (
                     <button
                       onClick={(e) => {
-                        if (!isBlocked && cooldown <= 0) {
+                        if (!isBlocked) {
                           handleSendMessage();
                         }
                         // Find and reset sibling textarea height
                         const textarea = e.currentTarget.previousElementSibling;
                         if (textarea) textarea.style.height = 'auto';
                       }}
-                      disabled={isLoading || !input.trim() || isBlocked || cooldown > 0}
-                      className="p-1.5 rounded-lg text-accent hover:bg-bg-card disabled:opacity-40 disabled:hover:bg-transparent transition-all shrink-0"
+                      disabled={isLoading || !input.trim() || isBlocked || (cooldown > 0 && !input.trim().startsWith('/'))}
+                      className={`p-1.5 rounded-lg transition-all shrink-0 ${
+                        (cooldown > 0 && !input.trim().startsWith('/'))
+                          ? 'text-text-muted opacity-25 cursor-not-allowed'
+                          : 'text-accent hover:bg-bg-card disabled:opacity-40 disabled:hover:bg-transparent'
+                      }`}
                     >
-                      <Send className="w-4 h-4" />
+                      <div className="relative">
+                        <Send className="w-4 h-4" />
+                        {cooldown > 0 && !input.trim().startsWith('/') && (
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div className="w-[18px] h-[1.5px] bg-text-muted rotate-45 transform" />
+                          </div>
+                        )}
+                      </div>
                     </button>
                   )}
                 </div>
               </div>
             </div>
-          )}
       </div>
     );
   };

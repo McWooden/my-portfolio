@@ -10,7 +10,8 @@ export async function POST(req) {
 
     const apiKeys = [
       process.env.HUDDIN_LOCAL_LAPTOP_KEY,
-      process.env.HUDDIN_BACKUP_KEY
+      process.env.HUDDIN_BACKUP_KEY,
+      process.env.HUDDIN_BACKUP_KEY_2
     ].filter(Boolean).sort(() => Math.random() - 0.5);
 
     if (apiKeys.length === 0) {

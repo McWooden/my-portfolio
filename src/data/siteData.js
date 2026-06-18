@@ -405,7 +405,7 @@ export const services = {
       items: [
         {
           number: "1",
-          title: "Brand Identity",
+          title: "Brand Systems",
           description: "Visual systems that hold up everywhere — screen, print, or code. Logos, colors, type, and the logic behind them."
         },
         {
@@ -453,7 +453,7 @@ export const services = {
       items: [
         {
           number: "1",
-          title: "Brand Identity",
+          title: "Visual Identity",
           description: "Logos, colors, and typography systems that reflect who you are — and stick in people's minds."
         },
         {

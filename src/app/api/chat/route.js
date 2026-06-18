@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import huddinConfig from '../../../data/huddinContext.json';
-import { projects } from '../../../data/siteData';
+import { projects, blogPosts } from '../../../data/siteData';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,10 +34,17 @@ Classify the attitude as exactly one of: "good", "bad", or "neutral".
 
 Your response MUST contain the literal classification word ("good", "bad", or "neutral") depending on your evaluation.`;
     } else {
-      // Dynamic formatting of the projects list from siteData.js
+      // Only include titles to minimize token footprint as requested by user
       const projectsList = projects
-        .map((p, index) => `${index + 1}. ${p.title} (${p.location}): ${p.subtitle}. Outcome: ${p.outcome}`)
+        .map((p, index) => `${index + 1}. "${p.title}"`)
         .join('\n');
+
+      // Only include titles to minimize token footprint as requested by user
+      const blogList = blogPosts
+        .map((post, index) => `${index + 1}. "${post.title}"`)
+        .join('\n');
+
+
 
       // Dynamic formatting of communities & certs
       const communityList = huddinConfig.communitiesAndCerts.communities
@@ -75,6 +82,11 @@ ${Object.entries(huddinConfig.services).map(([key, value]) => `- **${key}**: ${v
 Projects ${huddinConfig.master} has worked on:
 ${projectsList}
 
+Blog Posts written by ${huddinConfig.master}:
+${blogList}
+
+
+
 FAQs:
 ${huddinConfig.faq.map(f => `- Q: ${f.question}\n  A: ${f.answer}`).join('\n')}
 
@@ -96,6 +108,7 @@ Link Redirection Guidelines:
   - To visit the network page: [Go to Network Page](/network)
   - To visit the homepage: [Go to Homepage](/)
 - Do not use absolute URL domains for internal links. Only use internal paths (e.g., /portfolio, /blog, /network, #portfolio).
+- You do NOT have the detailed descriptions, outcomes, or text contents of Huddin's projects or blog posts in your context (you only know their titles). You also do NOT know about client reviews/testimonials or Huddin's professional network. If a user asks for specific details, code, content of a project or blog post, reviews, or network details, politely tell them to view/explore it directly on the website, and provide them with a link (e.g., [Go to Portfolio Page](/portfolio), [Go to Blog Page](/blog), or [Go to Network Page](/network)).
 
 Active Page Context:
 - The user is currently browsing the page with URL path: "${currentPath || '/'}".

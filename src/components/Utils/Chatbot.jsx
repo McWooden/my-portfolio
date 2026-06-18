@@ -135,7 +135,7 @@ export default function Chatbot() {
 
   // Quota states
   const [quotaUsed, setQuotaUsed] = useState(0);
-  const [quotaLimit, setQuotaLimit] = useState(7);
+  const [quotaLimit, setQuotaLimit] = useState(3);
   const [windowStart, setWindowStart] = useState(0);
   const [showScrollBottomBtn, setShowScrollBottomBtn] = useState(false);
   const [isPuterSignedIn, setIsPuterSignedIn] = useState(false);
@@ -326,16 +326,16 @@ export default function Chatbot() {
         cooldownIntervalRef.current = null;
       }
       if (typeof window !== 'undefined' && quotaUsedRef.current >= quotaLimitRef.current) {
-        // Cooldown finished, start next session (subsequent session gets 7)
+        // Cooldown finished, start next session (subsequent session gets 3)
         const now = Date.now();
-        localStorage.setItem('chatbot_quota_limit', '7');
+        localStorage.setItem('chatbot_quota_limit', '3');
         localStorage.setItem('chatbot_quota_used', '0');
         localStorage.setItem('chatbot_quota_window_start', now.toString());
-        const randomDurationMs = (Math.floor(Math.random() * (30 * 60 - 25 * 60 + 1)) + 25 * 60) * 1000;
+        const randomDurationMs = (Math.floor(Math.random() * (30 * 60 - 15 * 60 + 1)) + 15 * 60) * 1000;
         localStorage.setItem('chatbot_quota_cooldown_duration', randomDurationMs.toString());
         localStorage.removeItem('chatbot_cooldown_steps');
 
-        setQuotaLimit(7);
+        setQuotaLimit(3);
         setQuotaUsed(0);
         setWindowStart(now);
         setCooldownDuration(Math.floor(randomDurationMs / 1000));
@@ -405,28 +405,31 @@ export default function Chatbot() {
       // 2. Initialize Quota
       const todayStr = new Date().toLocaleDateString('en-US');
       const savedDate = localStorage.getItem('chatbot_quota_date');
-      let savedLimit = parseInt(localStorage.getItem('chatbot_quota_limit') || '15', 10);
+      let savedLimit = parseInt(localStorage.getItem('chatbot_quota_limit') || '3', 10);
       let savedUsed = parseInt(localStorage.getItem('chatbot_quota_used') || '0', 10);
       let savedWindowStart = parseInt(localStorage.getItem('chatbot_quota_window_start') || '0', 10);
-      let savedCooldownDuration = parseInt(localStorage.getItem('chatbot_quota_cooldown_duration') || '300000', 10);
+      let savedCooldownDuration = parseInt(localStorage.getItem('chatbot_quota_cooldown_duration') || '900000', 10);
+      let dailyUsed = parseInt(localStorage.getItem('chatbot_daily_used') || '0', 10);
       const now = Date.now();
 
       if (savedDate !== todayStr) {
-        savedLimit = 7;
+        savedLimit = 3;
         savedUsed = 0;
+        dailyUsed = 0;
         savedWindowStart = now;
-        savedCooldownDuration = (Math.floor(Math.random() * (30 * 60 - 25 * 60 + 1)) + 25 * 60) * 1000;
+        savedCooldownDuration = (Math.floor(Math.random() * (30 * 60 - 15 * 60 + 1)) + 15 * 60) * 1000;
         localStorage.setItem('chatbot_quota_date', todayStr);
-        localStorage.setItem('chatbot_quota_limit', '7');
+        localStorage.setItem('chatbot_quota_limit', '3');
         localStorage.setItem('chatbot_quota_used', '0');
+        localStorage.setItem('chatbot_daily_used', '0');
         localStorage.setItem('chatbot_quota_window_start', savedWindowStart.toString());
         localStorage.setItem('chatbot_quota_cooldown_duration', savedCooldownDuration.toString());
       } else if (now - savedWindowStart >= savedCooldownDuration) {
-        savedLimit = 7;
+        savedLimit = 3;
         savedUsed = 0;
         savedWindowStart = now;
-        savedCooldownDuration = (Math.floor(Math.random() * (30 * 60 - 25 * 60 + 1)) + 25 * 60) * 1000;
-        localStorage.setItem('chatbot_quota_limit', '7');
+        savedCooldownDuration = (Math.floor(Math.random() * (30 * 60 - 15 * 60 + 1)) + 15 * 60) * 1000;
+        localStorage.setItem('chatbot_quota_limit', '3');
         localStorage.setItem('chatbot_quota_used', '0');
         localStorage.setItem('chatbot_quota_window_start', savedWindowStart.toString());
         localStorage.setItem('chatbot_quota_cooldown_duration', savedCooldownDuration.toString());
@@ -876,25 +879,42 @@ CRITICAL LENGTH & CONCISENESS RULES:
     if (!isPuterSignedIn) {
       const todayStr = new Date().toLocaleDateString('en-US');
       let savedDate = localStorage.getItem('chatbot_quota_date');
-      savedLimit = parseInt(localStorage.getItem('chatbot_quota_limit') || '15', 10);
+      savedLimit = parseInt(localStorage.getItem('chatbot_quota_limit') || '3', 10);
       savedUsed = parseInt(localStorage.getItem('chatbot_quota_used') || '0', 10);
       savedWindowStart = parseInt(localStorage.getItem('chatbot_quota_window_start') || '0', 10);
-      savedCooldownDuration = parseInt(localStorage.getItem('chatbot_quota_cooldown_duration') || '300000', 10);
+      savedCooldownDuration = parseInt(localStorage.getItem('chatbot_quota_cooldown_duration') || '900000', 10);
+      let dailyUsed = parseInt(localStorage.getItem('chatbot_daily_used') || '0', 10);
       const now = Date.now();
 
       if (savedDate !== todayStr) {
         savedDate = todayStr;
-        savedLimit = 4;
+        savedLimit = 3;
         savedUsed = 0;
+        dailyUsed = 0;
         savedWindowStart = now;
-        savedCooldownDuration = 300000;
+        savedCooldownDuration = (Math.floor(Math.random() * (30 * 60 - 15 * 60 + 1)) + 15 * 60) * 1000;
+        localStorage.setItem('chatbot_daily_used', '0');
       } else if (now - savedWindowStart >= savedCooldownDuration) {
         savedLimit = 3;
         savedUsed = 0;
         savedWindowStart = now;
-        savedCooldownDuration = (Math.floor(Math.random() * (15 * 60 - 8 * 60 + 1)) + 8 * 60) * 1000;
+        savedCooldownDuration = (Math.floor(Math.random() * (30 * 60 - 15 * 60 + 1)) + 15 * 60) * 1000;
       }
 
+      // Check daily limit first
+      if (dailyUsed >= 14) {
+        // Daily limit reached! Set cooldown until end of day (or next day)
+        const tomorrow = new Date();
+        tomorrow.setHours(24, 0, 0, 0);
+        const msUntilTomorrow = tomorrow.getTime() - now;
+        const secondsLeft = Math.ceil(msUntilTomorrow / 1000);
+        if (secondsLeft > 0) {
+          setCooldown(secondsLeft);
+        }
+        return;
+      }
+
+      // Check session limit
       if (savedUsed >= savedLimit) {
         const secondsLeft = Math.ceil(((savedWindowStart + savedCooldownDuration) - now) / 1000);
         if (secondsLeft > 0) {
@@ -904,12 +924,14 @@ CRITICAL LENGTH & CONCISENESS RULES:
       }
 
       newUsed = savedUsed + 1;
+      dailyUsed += 1;
       localStorage.setItem('chatbot_quota_date', savedDate);
       localStorage.setItem('chatbot_quota_limit', savedLimit.toString());
       localStorage.setItem('chatbot_quota_used', newUsed.toString());
+      localStorage.setItem('chatbot_daily_used', dailyUsed.toString());
 
       if (newUsed >= savedLimit) {
-        const cooldownSec = Math.floor(Math.random() * (15 * 60 - 8 * 60 + 1)) + 8 * 60;
+        const cooldownSec = Math.floor(Math.random() * (30 * 60 - 15 * 60 + 1)) + 15 * 60;
         const cooldownMs = cooldownSec * 1000;
         savedWindowStart = now;
         savedCooldownDuration = cooldownMs;

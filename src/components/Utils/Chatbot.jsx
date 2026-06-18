@@ -185,7 +185,7 @@ export default function Chatbot() {
   useEffect(() => {
     function handleClickOutside(event) {
       if (isBlocked) return; // Disable closing when blocked/punished
-      
+
       // Close chatbot if clicking outside the chat window
       if (chatWindowRef.current && !chatWindowRef.current.contains(event.target)) {
         setIsOpen(false);
@@ -196,10 +196,10 @@ export default function Chatbot() {
       }
 
       // Close autocomplete menu if clicking outside of it and not on the toggle button or textarea
-      if (showAutocomplete && 
-          autocompleteRef.current && !autocompleteRef.current.contains(event.target) &&
-          toggleAutocompleteRef.current && !toggleAutocompleteRef.current.contains(event.target) &&
-          textareaRef.current && !textareaRef.current.contains(event.target)) {
+      if (showAutocomplete &&
+        autocompleteRef.current && !autocompleteRef.current.contains(event.target) &&
+        toggleAutocompleteRef.current && !toggleAutocompleteRef.current.contains(event.target) &&
+        textareaRef.current && !textareaRef.current.contains(event.target)) {
         setShowAutocomplete(false);
       }
     }
@@ -294,7 +294,7 @@ export default function Chatbot() {
         const randomDurationMs = (Math.floor(Math.random() * (15 * 60 - 8 * 60 + 1)) + 8 * 60) * 1000;
         localStorage.setItem('chatbot_quota_cooldown_duration', randomDurationMs.toString());
         localStorage.removeItem('chatbot_cooldown_steps');
-        
+
         setQuotaLimit(3);
         setQuotaUsed(0);
         setWindowStart(now);
@@ -429,7 +429,7 @@ export default function Chatbot() {
         if (savedSteps) {
           steps = JSON.parse(savedSteps);
         }
-      } catch (_) {}
+      } catch (_) { }
     }
 
     if (!steps || steps.length < 3) {
@@ -601,7 +601,7 @@ export default function Chatbot() {
 
     if (faqIdx !== -1 && huddinConfig.faq[faqIdx]) {
       const faq = huddinConfig.faq[faqIdx];
-      
+
       const FAQ_TEMPLATES = [
         (q) => `i see a bill board about faq at piece question '${q}' and its said`,
         (q) => `that sticky one card '${q}' said`,
@@ -930,7 +930,7 @@ export default function Chatbot() {
                 <div className="flex -space-x-2.5">
                   <div className={`w-8 h-8 rounded-full overflow-hidden border ${borderClass} flex items-center justify-center bg-zinc-950 shrink-0 aspect-square z-10`}>
                     <img
-                      src="/nico.png"
+                      src="/nico.webp"
                       alt="Nico Avatar"
                       className="w-full h-full object-cover aspect-square select-none pointer-events-none"
                       draggable="false"
@@ -940,7 +940,7 @@ export default function Chatbot() {
                   </div>
                   <div className={`w-8 h-8 rounded-full overflow-hidden border ${borderClass} flex items-center justify-center bg-zinc-950 shrink-0 aspect-square`}>
                     <img
-                      src="/mia.png"
+                      src="/mia.webp"
                       alt="Mia Avatar"
                       className="w-full h-full object-cover aspect-square select-none pointer-events-none"
                       draggable="false"
@@ -1109,7 +1109,7 @@ export default function Chatbot() {
             <div className="relative">
               <div className="w-9 h-9 rounded-full overflow-hidden border border-accent flex items-center justify-center bg-bg-dark shrink-0 aspect-square">
                 <img
-                  src="/mia.png"
+                  src="/mia.webp"
                   alt="Mia Avatar"
                   className="w-full h-full object-cover aspect-square select-none pointer-events-none"
                   style={{ filter: 'drop-shadow(0px 0px 4px rgba(224, 255, 111, 0.4))' }}
@@ -1317,167 +1317,164 @@ export default function Chatbot() {
 
         {/* Input Form */}
         <div className="px-3 pb-3 pt-1 bg-bg-card relative">
-              {/* Autocomplete Dropup */}
-              {showAutocomplete && (
-                (() => {
-                  const suggestions = getAutoCompleteItems();
-                  if (suggestions.length === 0) return null;
-                  return (
-                    <div ref={autocompleteRef} className="absolute bottom-full left-3 right-3 mb-2 z-50 bg-bg-card border border-border rounded-xl shadow-2xl p-1.5 max-h-[180px] overflow-y-auto flex flex-col gap-0.5 custom-scrollbar">
-                      {suggestions.map((item, idx) => {
-                        const isFocused = idx === activeSuggestionIndex;
-                        const getCommandIcon = (cmd) => {
-                          if (cmd.startsWith('/navigation')) {
-                            return <Compass className="w-3.5 h-3.5 text-text-muted group-hover:text-text-primary shrink-0" />;
-                          }
-                          if (cmd.startsWith('/faq')) {
-                            return <HelpCircle className="w-3.5 h-3.5 text-text-muted group-hover:text-text-primary shrink-0" />;
-                          }
-                          return <Menu className="w-3.5 h-3.5 text-text-muted group-hover:text-text-primary shrink-0" />;
-                        };
-                        return (
-                          <button
-                            key={idx}
-                            onClick={() => {
-                              item.action();
-                              setActiveSuggestionIndex(0);
-                            }}
-                            onMouseEnter={() => setActiveSuggestionIndex(idx)}
-                            className={`w-full text-left px-3 py-1.5 rounded-lg text-xs transition-colors flex items-center gap-2 group min-w-0 ${
-                              isFocused
-                                ? 'bg-bg-card-hover text-text-primary'
-                                : 'text-text-secondary hover:bg-bg-card-hover hover:text-text-primary'
-                            }`}
-                          >
-                            {getCommandIcon(item.cmd)}
-                            <span className="font-mono text-xs whitespace-nowrap shrink-0">{item.cmd}</span>
-                            <span className="text-[11px] text-text-muted group-hover:text-text-muted/90 truncate min-w-0 flex-1">
-                              {item.desc}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  );
-                })()
-              )}
+          {/* Autocomplete Dropup */}
+          {showAutocomplete && (
+            (() => {
+              const suggestions = getAutoCompleteItems();
+              if (suggestions.length === 0) return null;
+              return (
+                <div ref={autocompleteRef} className="absolute bottom-full left-3 right-3 mb-2 z-50 bg-bg-card border border-border rounded-xl shadow-2xl p-1.5 max-h-[180px] overflow-y-auto flex flex-col gap-0.5 custom-scrollbar">
+                  {suggestions.map((item, idx) => {
+                    const isFocused = idx === activeSuggestionIndex;
+                    const getCommandIcon = (cmd) => {
+                      if (cmd.startsWith('/navigation')) {
+                        return <Compass className="w-3.5 h-3.5 text-text-muted group-hover:text-text-primary shrink-0" />;
+                      }
+                      if (cmd.startsWith('/faq')) {
+                        return <HelpCircle className="w-3.5 h-3.5 text-text-muted group-hover:text-text-primary shrink-0" />;
+                      }
+                      return <Menu className="w-3.5 h-3.5 text-text-muted group-hover:text-text-primary shrink-0" />;
+                    };
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          item.action();
+                          setActiveSuggestionIndex(0);
+                        }}
+                        onMouseEnter={() => setActiveSuggestionIndex(idx)}
+                        className={`w-full text-left px-3 py-1.5 rounded-lg text-xs transition-colors flex items-center gap-2 group min-w-0 ${isFocused
+                          ? 'bg-bg-card-hover text-text-primary'
+                          : 'text-text-secondary hover:bg-bg-card-hover hover:text-text-primary'
+                          }`}
+                      >
+                        {getCommandIcon(item.cmd)}
+                        <span className="font-mono text-xs whitespace-nowrap shrink-0">{item.cmd}</span>
+                        <span className="text-[11px] text-text-muted group-hover:text-text-muted/90 truncate min-w-0 flex-1">
+                          {item.desc}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })()
+          )}
 
-              <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
+            <button
+              ref={toggleAutocompleteRef}
+              onClick={() => setShowAutocomplete(!showAutocomplete)}
+              disabled={isBlocked}
+              className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 self-center transition-colors ${showAutocomplete
+                ? 'text-accent border-accent bg-bg-dark'
+                : 'text-text-muted border-border bg-bg-dark hover:text-text-primary hover:border-accent'
+                }`}
+              title="Toggle Commands Menu"
+            >
+              <div className={`transition-transform duration-300 ${showAutocomplete ? 'rotate-90' : 'rotate-0'}`}>
+                {showAutocomplete ? (
+                  <X className="w-5 h-5" />
+                ) : (
+                  <Menu className="w-5 h-5" />
+                )}
+              </div>
+            </button>
+
+            <div className="flex-1 flex items-center gap-2 bg-bg-dark border border-border rounded-xl px-3 py-1.5 focus-within:border-accent transition-colors relative">
+              <textarea
+                ref={textareaRef}
+                value={input}
+                maxLength={300}
+                onChange={(e) => {
+                  if (isBlocked) return;
+                  const val = e.target.value;
+                  setInput(val);
+                  setActiveSuggestionIndex(0);
+                  // Auto-adjust height
+                  e.target.style.height = 'auto';
+                  e.target.style.height = `${Math.min(e.target.scrollHeight, 80)}px`; // Max 4 lines (20px * 4 = 80px)
+                }}
+                onKeyDown={(e) => {
+                  const suggestions = showAutocomplete ? getAutoCompleteItems() : [];
+                  const isAutocompleteOpen = showAutocomplete && suggestions.length > 0;
+
+                  if (isAutocompleteOpen) {
+                    if (e.key === 'ArrowDown') {
+                      e.preventDefault();
+                      setActiveSuggestionIndex((prev) => (prev + 1) % suggestions.length);
+                      return;
+                    }
+                    if (e.key === 'ArrowUp') {
+                      e.preventDefault();
+                      setActiveSuggestionIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length);
+                      return;
+                    }
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      const selectedItem = suggestions[activeSuggestionIndex];
+                      if (selectedItem) {
+                        selectedItem.action();
+                      }
+                      setActiveSuggestionIndex(0);
+                      return;
+                    }
+                    if (e.key === 'Escape') {
+                      e.preventDefault();
+                      setShowAutocomplete(false);
+                      setActiveSuggestionIndex(0);
+                      return;
+                    }
+                  }
+
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    if (!isBlocked) {
+                      handleSendMessage();
+                    }
+                    // Reset height
+                    e.target.style.height = 'auto';
+                  }
+                }}
+                placeholder={
+                  isBlocked
+                    ? "No permission."
+                    : "Ask me something..."
+                }
+                rows={1}
+                disabled={isBlocked}
+                className="flex-1 bg-transparent border-none outline-none text-text-primary placeholder:text-text-muted resize-none text-sm leading-5 py-1 focus:ring-0 overflow-y-auto disabled:opacity-50"
+                style={{ height: 'auto', maxHeight: '80px' }}
+              />
+              {input.trim() && (
                 <button
-                  ref={toggleAutocompleteRef}
-                  onClick={() => setShowAutocomplete(!showAutocomplete)}
-                  disabled={isBlocked}
-                  className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 self-center transition-colors ${
-                    showAutocomplete
-                      ? 'text-accent border-accent bg-bg-dark'
-                      : 'text-text-muted border-border bg-bg-dark hover:text-text-primary hover:border-accent'
-                  }`}
-                  title="Toggle Commands Menu"
+                  onClick={(e) => {
+                    if (!isBlocked) {
+                      handleSendMessage();
+                    }
+                    // Find and reset sibling textarea height
+                    const textarea = e.currentTarget.previousElementSibling;
+                    if (textarea) textarea.style.height = 'auto';
+                  }}
+                  disabled={isLoading || !input.trim() || isBlocked || (cooldown > 0 && !input.trim().startsWith('/'))}
+                  className={`p-1.5 rounded-lg transition-all shrink-0 ${(cooldown > 0 && !input.trim().startsWith('/'))
+                    ? 'text-text-muted opacity-25 cursor-not-allowed'
+                    : 'text-accent hover:bg-bg-card disabled:opacity-40 disabled:hover:bg-transparent'
+                    }`}
                 >
-                  <div className={`transition-transform duration-300 ${showAutocomplete ? 'rotate-90' : 'rotate-0'}`}>
-                    {showAutocomplete ? (
-                      <X className="w-5 h-5" />
-                    ) : (
-                      <Menu className="w-5 h-5" />
+                  <div className="relative">
+                    <Send className="w-4 h-4" />
+                    {cooldown > 0 && !input.trim().startsWith('/') && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="w-[18px] h-[1.5px] bg-text-muted rotate-45 transform" />
+                      </div>
                     )}
                   </div>
                 </button>
-
-                <div className="flex-1 flex items-center gap-2 bg-bg-dark border border-border rounded-xl px-3 py-1.5 focus-within:border-accent transition-colors relative">
-                  <textarea
-                    ref={textareaRef}
-                    value={input}
-                    maxLength={300}
-                    onChange={(e) => {
-                      if (isBlocked) return;
-                      const val = e.target.value;
-                      setInput(val);
-                      setActiveSuggestionIndex(0);
-                      // Auto-adjust height
-                      e.target.style.height = 'auto';
-                      e.target.style.height = `${Math.min(e.target.scrollHeight, 80)}px`; // Max 4 lines (20px * 4 = 80px)
-                    }}
-                    onKeyDown={(e) => {
-                      const suggestions = showAutocomplete ? getAutoCompleteItems() : [];
-                      const isAutocompleteOpen = showAutocomplete && suggestions.length > 0;
-
-                      if (isAutocompleteOpen) {
-                        if (e.key === 'ArrowDown') {
-                          e.preventDefault();
-                          setActiveSuggestionIndex((prev) => (prev + 1) % suggestions.length);
-                          return;
-                        }
-                        if (e.key === 'ArrowUp') {
-                          e.preventDefault();
-                          setActiveSuggestionIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length);
-                          return;
-                        }
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          const selectedItem = suggestions[activeSuggestionIndex];
-                          if (selectedItem) {
-                            selectedItem.action();
-                          }
-                          setActiveSuggestionIndex(0);
-                          return;
-                        }
-                        if (e.key === 'Escape') {
-                          e.preventDefault();
-                          setShowAutocomplete(false);
-                          setActiveSuggestionIndex(0);
-                          return;
-                        }
-                      }
-
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        if (!isBlocked) {
-                          handleSendMessage();
-                        }
-                        // Reset height
-                        e.target.style.height = 'auto';
-                      }
-                    }}
-                    placeholder={
-                      isBlocked
-                        ? "No permission."
-                        : "Ask me something..."
-                    }
-                    rows={1}
-                    disabled={isBlocked}
-                    className="flex-1 bg-transparent border-none outline-none text-text-primary placeholder:text-text-muted resize-none text-sm leading-5 py-1 focus:ring-0 overflow-y-auto disabled:opacity-50"
-                    style={{ height: 'auto', maxHeight: '80px' }}
-                  />
-                  {input.trim() && (
-                    <button
-                      onClick={(e) => {
-                        if (!isBlocked) {
-                          handleSendMessage();
-                        }
-                        // Find and reset sibling textarea height
-                        const textarea = e.currentTarget.previousElementSibling;
-                        if (textarea) textarea.style.height = 'auto';
-                      }}
-                      disabled={isLoading || !input.trim() || isBlocked || (cooldown > 0 && !input.trim().startsWith('/'))}
-                      className={`p-1.5 rounded-lg transition-all shrink-0 ${
-                        (cooldown > 0 && !input.trim().startsWith('/'))
-                          ? 'text-text-muted opacity-25 cursor-not-allowed'
-                          : 'text-accent hover:bg-bg-card disabled:opacity-40 disabled:hover:bg-transparent'
-                      }`}
-                    >
-                      <div className="relative">
-                        <Send className="w-4 h-4" />
-                        {cooldown > 0 && !input.trim().startsWith('/') && (
-                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <div className="w-[18px] h-[1.5px] bg-text-muted rotate-45 transform" />
-                          </div>
-                        )}
-                      </div>
-                    </button>
-                  )}
-                </div>
-              </div>
+              )}
             </div>
+          </div>
+        </div>
       </div>
     );
   };

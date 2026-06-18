@@ -175,11 +175,7 @@ export default function Chatbot() {
   const toggleAutocompleteRef = useRef(null);
   const textareaRef = useRef(null);
 
-  const quickPrompts = [
-    'What are Huddin\'s services?',
-    'Show me Huddin\'s projects',
-    'What can you do?',
-  ];
+  const quickPrompts = huddinConfig.faq.map(f => f.question);
 
   // Handle click outside to close chatbot or autocomplete dropdown
   useEffect(() => {
@@ -1188,7 +1184,7 @@ export default function Chatbot() {
         {/* Message List */}
         <div
           onScroll={handleChatScroll}
-          className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar"
+          className="flex-1 overflow-y-auto pt-4 px-4 pb-0 space-y-4 custom-scrollbar"
           style={{ overscrollBehavior: 'contain' }}
         >
           {messages.map((message, i) => (
@@ -1275,6 +1271,41 @@ export default function Chatbot() {
             </div>
           ))}
 
+          {/* Quick command buttons after last chat */}
+          {!isLoading && cooldown <= 0 && !isBlocked && (
+            <div
+              className="sticky bottom-0 -mx-4 px-4 py-2 bg-bg-card/95 backdrop-blur-md border-t border-border/30 z-10 flex gap-2 overflow-x-auto shrink-0 justify-start w-[calc(100%+2rem)] animate-in fade-in duration-300 [&::-webkit-scrollbar]:hidden mb-0"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              <button
+                onClick={() => {
+                  setInput('/navigation ');
+                  setShowAutocomplete(true);
+                  if (textareaRef.current) {
+                    textareaRef.current.focus();
+                  }
+                }}
+                className="flex items-center gap-1.5 text-xs bg-bg-dark border border-border hover:border-accent hover:bg-bg-card-hover text-text-secondary hover:text-text-primary px-3 py-1.5 rounded-lg transition-all shadow-sm active:scale-95 shrink-0 group"
+              >
+                <Compass className="w-3.5 h-3.5 text-text-muted group-hover:text-accent transition-colors" />
+                <span>Navigation</span>
+              </button>
+              <button
+                onClick={() => {
+                  setInput('/faq ');
+                  setShowAutocomplete(true);
+                  if (textareaRef.current) {
+                    textareaRef.current.focus();
+                  }
+                }}
+                className="flex items-center gap-1.5 text-xs bg-bg-dark border border-border hover:border-accent hover:bg-bg-card-hover text-text-secondary hover:text-text-primary px-3 py-1.5 rounded-lg transition-all shadow-sm active:scale-95 shrink-0 group"
+              >
+                <HelpCircle className="w-3.5 h-3.5 text-text-muted group-hover:text-accent transition-colors" />
+                <span>FAQ</span>
+              </button>
+            </div>
+          )}
+
           {isLoading && (
             <div className="flex items-start gap-2.5">
               <div className="bg-bg-dark border border-border text-text-muted rounded-2xl rounded-tl-none px-4 py-2.5 flex items-center gap-1.5">
@@ -1297,7 +1328,12 @@ export default function Chatbot() {
               </div>
             </div>
           )}
-          <div ref={messagesEndRef} />
+
+          {/* Bottom spacer for padding when sticky buttons are not shown */}
+          {(isLoading || cooldown > 0) && (
+            <div className="h-4 shrink-0" />
+          )}
+          <div ref={messagesEndRef} className="!mt-0" />
         </div>
 
         {/* Scroll to Bottom Button */}
@@ -1323,7 +1359,7 @@ export default function Chatbot() {
               const suggestions = getAutoCompleteItems();
               if (suggestions.length === 0) return null;
               return (
-                <div ref={autocompleteRef} className="absolute bottom-full left-3 right-3 mb-2 z-50 bg-bg-card border border-border rounded-xl shadow-2xl p-1.5 max-h-[180px] overflow-y-auto flex flex-col gap-0.5 custom-scrollbar">
+                <div ref={autocompleteRef} className="absolute bottom-full left-3 right-3 z-50 bg-bg-card border border-border rounded-xl shadow-2xl p-1.5 max-h-[180px] overflow-y-auto flex flex-col gap-0.5 custom-scrollbar">
                   {suggestions.map((item, idx) => {
                     const isFocused = idx === activeSuggestionIndex;
                     const getCommandIcon = (cmd) => {

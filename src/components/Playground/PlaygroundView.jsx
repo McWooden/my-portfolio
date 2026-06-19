@@ -8,8 +8,6 @@ export default function PlaygroundView() {
   
   // Game states
   const [isDashing, setIsDashing] = useState(false);
-  const [coordinates, setCoordinates] = useState({ x: 250, y: 250 });
-  const [speedMultiplier, setSpeedMultiplier] = useState(1);
 
   // Key tracking
   const keysPressed = useRef({});
@@ -49,6 +47,12 @@ export default function PlaygroundView() {
       keysPressed.current[e.key] = true;
       keysPressed.current[key] = true;
       
+      if ([' ', 'shift'].includes(key)) {
+        if (!e.repeat) {
+          entity.current.dashRequested = true;
+        }
+      }
+      
       // Prevent scrolling when pressing game controls
       if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' ', 'shift'].includes(key)) {
         e.preventDefault();
@@ -77,12 +81,12 @@ export default function PlaygroundView() {
         }
       }
 
-      // Check for Dash activation (spammable — resets timer on every press)
-      const wantDash = keysPressed.current[' '] || keysPressed.current['shift'];
-      if (wantDash) {
+      // Check for Dash activation (spammable - consumes the press request immediately)
+      if (ent.dashRequested) {
         ent.dashActive = true;
         ent.dashTimer = ent.dashDuration;
         setIsDashing(true);
+        ent.dashRequested = false;
       }
 
       // 2. Movement direction calculation
@@ -102,7 +106,6 @@ export default function PlaygroundView() {
 
       // 3. Update velocity & position
       const currentSpeed = ent.dashActive ? ent.dashSpeed : ent.baseSpeed;
-      setSpeedMultiplier(ent.dashActive ? 3.0 : 1.0);
       ent.vx = dx * currentSpeed;
       ent.vy = dy * currentSpeed;
 
@@ -116,8 +119,6 @@ export default function PlaygroundView() {
       if (ent.x + R > canvas.width) ent.x = canvas.width - R;
       if (ent.y - R < 0) ent.y = R;
       if (ent.y + H > canvas.height) ent.y = canvas.height - H;
-
-      setCoordinates({ x: Math.round(ent.x), y: Math.round(ent.y) });
 
       // 5. Manage dash trail
       if (ent.dashActive) {
@@ -254,10 +255,10 @@ export default function PlaygroundView() {
       />
 
       {/* Main Game Card */}
-      <div className="relative p-6 md:p-8 bg-[#161619]/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl flex flex-col md:flex-row gap-8 items-center max-w-4xl w-full">
+      <div className="relative p-6 md:p-8 bg-[#161619]/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl flex flex-col gap-6 items-center max-w-lg w-full">
         
         {/* Aspect Ratio 1:1 Canvas */}
-        <div className="relative bg-[#0F0F11] border border-white/5 rounded-xl overflow-hidden aspect-square max-w-[420px] w-full flex-shrink-0 shadow-inner">
+        <div className="relative bg-[#0F0F11] border border-white/5 rounded-xl overflow-hidden aspect-square w-full max-w-[420px] shadow-inner">
           <canvas ref={canvasRef} className="w-full h-full block" />
           
           {/* Dash Overlay Indicator */}
@@ -268,55 +269,9 @@ export default function PlaygroundView() {
           )}
         </div>
 
-        {/* Dashboard / Controls Panel */}
-        <div className="flex-grow flex flex-col justify-between h-full w-full py-2">
-          <div>
-            <h3 className="text-lg font-bold font-mono text-white mb-4 uppercase tracking-wider border-b border-white/10 pb-2">
-              Diagnostics
-            </h3>
-            
-            <div className="space-y-4 mb-6">
-              <div className="flex justify-between items-center text-sm font-mono bg-[#0F0F11]/40 p-3 rounded-lg border border-white/5">
-                <span className="text-[#99999C]">Coordinates:</span>
-                <span className="text-[#E0FF6F] font-bold">X: {coordinates.x} | Y: {coordinates.y}</span>
-              </div>
-
-              <div className="flex justify-between items-center text-sm font-mono bg-[#0F0F11]/40 p-3 rounded-lg border border-white/5">
-                <span className="text-[#99999C]">Velocity multiplier:</span>
-                <span className="text-white font-bold">{speedMultiplier.toFixed(1)}x</span>
-              </div>
-
-              <div className="flex justify-between items-center text-sm font-mono bg-[#0F0F11]/40 p-3 rounded-lg border border-white/5">
-                <span className="text-[#99999C]">Bounds checking:</span>
-                <span className="text-emerald-400 font-bold">Active (1x1 Area)</span>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-bold font-mono text-white mb-3 uppercase tracking-wider">
-              Control Bindings
-            </h3>
-            <ul className="space-y-2 text-xs md:text-sm text-[#99999C] font-mono mb-6">
-              <li className="flex items-center gap-3">
-                <kbd className="bg-[#242429] px-2 py-1 rounded border border-white/10 text-white font-semibold shadow-sm text-xs">W, A, S, D</kbd>
-                <span>or</span>
-                <kbd className="bg-[#242429] px-2 py-1 rounded border border-white/10 text-white font-semibold shadow-sm text-xs">↑, ←, ↓, →</kbd>
-                <span>to move around</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <kbd className="bg-[#242429] px-4 py-1 rounded border border-white/10 text-white font-semibold shadow-sm text-xs">Space</kbd>
-                <span>or</span>
-                <kbd className="bg-[#242429] px-3 py-1 rounded border border-white/10 text-white font-semibold shadow-sm text-xs">Shift</kbd>
-                <span>to Dash & Speed up</span>
-              </li>
-            </ul>
-
-            <Link href="/" className="inline-flex items-center justify-center w-full px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition duration-200 text-sm font-semibold font-mono text-[#EFEFEE]">
-              &larr; Back to Portfolio
-            </Link>
-          </div>
-        </div>
+        <Link href="/" className="inline-flex items-center justify-center w-full px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition duration-200 text-sm font-semibold font-mono text-[#EFEFEE]">
+          &larr; Back to Portfolio
+        </Link>
 
       </div>
 

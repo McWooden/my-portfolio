@@ -14,7 +14,7 @@ export const playVoiceSound = (text) => {
     shh: ['shh.mp3', 'shh2.mp3'],
     clear: ['clear-throat.mp3', 'clear-throat2.mp3', 'clear-throat3.mp3'],
     hmm: ['hmmm.mp3'],
-    um: ['um.mp3', 'um2.mp3']
+    um: ['um.mp3']
   };
 
   let chosenFile = null;
@@ -38,7 +38,7 @@ export const playVoiceSound = (text) => {
   } else if (lowerText.includes('um') || lowerText.includes('uh') || lowerText.includes('well')) {
     chosenFile = categories.um[Math.floor(Math.random() * categories.um.length)];
   } else {
-    const fallbacks = ['hmmm.mp3', 'um.mp3', 'um2.mp3', 'clear-throat.mp3'];
+    const fallbacks = ['hmmm.mp3', 'um.mp3', 'clear-throat.mp3'];
     chosenFile = fallbacks[Math.floor(Math.random() * fallbacks.length)];
   }
 

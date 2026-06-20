@@ -3,6 +3,7 @@ import React, { useState, useRef } from 'react';
 import { faqs as staticFaqs } from '../../data/siteData';
 import SectionHeader from './SectionHeader';
 import Section from './Section';
+import Button from './Button';
 
 export default function FAQ({ faqs = staticFaqs, labelIndex = "05" }) {
   const [activeFaq, setActiveFaq] = useState(null);
@@ -73,6 +74,27 @@ export default function FAQ({ faqs = staticFaqs, labelIndex = "05" }) {
             </div>
           );
         })}
+      </div>
+
+      <div className="mt-10 flex justify-center w-full">
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent('open-chatbot'))}
+          className="flex items-center gap-3 bg-bg-dark border border-accent px-4 py-2 rounded-full text-[0.95rem] font-medium text-text-primary shrink-0 select-none cursor-pointer"
+        >
+          <span>Chat With Mia</span>
+          <div className="relative">
+            <div className="w-9 h-9 rounded-full overflow-hidden border border-accent flex items-center justify-center bg-bg-dark shrink-0 aspect-square">
+              <img
+                alt="Mia Avatar"
+                className="w-full h-full object-cover aspect-square select-none pointer-events-none"
+                draggable="false"
+                src="/mia.webp"
+                style={{ filter: "drop-shadow(rgba(224, 255, 111, 0.4) 0px 0px 4px)" }}
+              />
+            </div>
+            <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-online-green ring-1 ring-bg-dark"></span>
+          </div>
+        </button>
       </div>
     </Section>
   );

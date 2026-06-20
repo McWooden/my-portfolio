@@ -4,12 +4,15 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { MessageSquare, X, Send, SquarePen, ArrowLeftRight, Compass, HelpCircle, Menu, ArrowDown, LogIn, LogOut } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
 import huddinConfig from '../../data/huddinContext.json';
 import { projects } from '../../data/siteData';
 import { playVoiceSound, playKickSound, playBellSound } from '../../utils/audio';
 import BanOverlay from './BanOverlay';
 
 export default function Chatbot() {
+  const router = useRouter();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState('right'); // 'left' | 'center' | 'right'
   const [isBlocked, setIsBlocked] = useState(false);
@@ -75,6 +78,20 @@ export default function Chatbot() {
   const textareaRef = useRef(null);
 
   const quickPrompts = huddinConfig.faq.map(f => f.question);
+
+
+  // Listen for custom event to open the chatbot
+  useEffect(() => {
+    const handleOpenChat = () => {
+      setIsOpen(true);
+      if (!hasRungBellRef.current) {
+        playBellSound();
+        hasRungBellRef.current = true;
+      }
+    };
+    window.addEventListener('open-chatbot', handleOpenChat);
+    return () => window.removeEventListener('open-chatbot', handleOpenChat);
+  }, []);
 
   // Handle click outside to close chatbot or autocomplete dropdown
   useEffect(() => {
@@ -626,24 +643,39 @@ CRITICAL LENGTH & CONCISENESS RULES:
     if (queryText.startsWith('/navigation')) {
       const subQuery = queryText.substring('/navigation'.length).trim().toLowerCase();
       const sections = [
-        { label: 'Home', id: 'hero', cmd: '/navigation home' },
-        { label: 'Services', id: 'services', cmd: '/navigation services' },
-        { label: 'Portfolio', id: 'portfolio', cmd: '/navigation portfolio' },
-        { label: 'Reviews', id: 'reviews', cmd: '/navigation reviews' },
-        { label: 'Blog', id: 'blog', cmd: '/navigation blog' },
-        { label: 'FAQ', id: 'faq', cmd: '/navigation faq' },
-        { label: 'Contact', id: 'contact', cmd: '/navigation contact' }
+        { label: 'Home', id: 'hero', cmd: '/navigation home', isPage: false },
+        { label: 'Services', id: 'services', cmd: '/navigation services', isPage: false },
+        { label: 'Portfolio', id: 'portfolio', cmd: '/navigation portfolio', isPage: false },
+        { label: 'Reviews', id: 'reviews', cmd: '/navigation reviews', isPage: false },
+        { label: 'Blog', id: 'blog', cmd: '/navigation blog', isPage: false },
+        { label: 'FAQ', id: 'faq', cmd: '/navigation faq', isPage: false },
+        { label: 'Contact', id: 'contact', cmd: '/navigation contact', isPage: false },
+        { label: 'Network', id: 'network', cmd: '/navigation network', isPage: true }
       ];
 
       const filtered = sections.filter(s => s.cmd.toLowerCase().includes(queryText) || s.label.toLowerCase().includes(subQuery));
       return filtered.map(s => ({
         cmd: s.cmd,
-        desc: `Scroll to ${s.label}`,
+        desc: s.isPage ? `Navigate to ${s.label}` : `Scroll to ${s.label}`,
         action: () => {
-          const element = document.getElementById(s.id);
-          if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-            window.history.pushState(null, null, `#${s.id}`);
+          if (s.isPage) {
+            if (s.id === 'network') {
+              if (pathname !== '/network') {
+                window.dispatchEvent(new Event('page-loading-start'));
+                router.push('/network');
+              }
+            }
+          } else {
+            if (pathname !== '/') {
+              window.dispatchEvent(new Event('page-loading-start'));
+              router.push('/#' + s.id);
+            } else {
+              const element = document.getElementById(s.id);
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+                window.history.pushState(null, null, `#${s.id}`);
+              }
+            }
           }
           setInput('');
           setShowAutocomplete(false);
@@ -698,13 +730,25 @@ CRITICAL LENGTH & CONCISENESS RULES:
       const parts = text.trim().split(/\s+/);
       if (parts.length > 1) {
         const sec = parts[1].toLowerCase();
-        const mapping = { home: 'hero', services: 'services', portfolio: 'portfolio', reviews: 'reviews', blog: 'blog', faq: 'faq', contact: 'contact' };
-        const id = mapping[sec];
-        if (id) {
-          const element = document.getElementById(id);
-          if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-            window.history.pushState(null, null, `#${id}`);
+        if (sec === 'network') {
+          if (pathname !== '/network') {
+            window.dispatchEvent(new Event('page-loading-start'));
+            router.push('/network');
+          }
+        } else {
+          const mapping = { home: 'hero', services: 'services', portfolio: 'portfolio', reviews: 'reviews', blog: 'blog', faq: 'faq', contact: 'contact' };
+          const id = mapping[sec];
+          if (id) {
+            if (pathname !== '/') {
+              window.dispatchEvent(new Event('page-loading-start'));
+              router.push('/#' + id);
+            } else {
+              const element = document.getElementById(id);
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+                window.history.pushState(null, null, `#${id}`);
+              }
+            }
           }
         }
       }

@@ -3,6 +3,7 @@ import Header from '../components/Utils/Header';
 import Footer from '../components/Utils/Footer';
 import ScrollToTop from '../components/Utils/ScrollToTop';
 import Chatbot from '../components/Utils/Chatbot';
+import ProgressBar from '../components/Utils/ProgressBar';
 import { Inter, DM_Mono, Sedgwick_Ave } from 'next/font/google';
 import { createReader } from '@keystatic/core/reader';
 import keystaticConfig from '../../keystatic.config';
@@ -105,6 +106,7 @@ export default async function RootLayout({ children }) {
         />
       </head>
       <body>
+        <ProgressBar />
         <ScrollToTop />
         <Header availabilityStatus={status} />
         <main>{children}</main>

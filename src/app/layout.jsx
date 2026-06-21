@@ -106,7 +106,9 @@ export default async function RootLayout({ children }) {
         />
       </head>
       <body>
-        <ProgressBar />
+        <React.Suspense fallback={null}>
+          <ProgressBar />
+        </React.Suspense>
         <ScrollToTop />
         <Header availabilityStatus={status} />
         <main>{children}</main>

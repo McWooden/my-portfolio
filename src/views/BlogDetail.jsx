@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Contact from '../components/Utils/Contact';
 import BlogCard from '../components/Utils/BlogCard';
 import { getImageUrl } from '../utils/image';
+import { formatDate } from '../utils/date';
 
 export default function BlogDetail({ post, prevPost, nextPost, otherPosts = [] }) {
   useEffect(() => {
@@ -14,23 +15,6 @@ export default function BlogDetail({ post, prevPost, nextPost, otherPosts = [] }
     return null;
   }
 
-  const renderParagraph = (p, i) => {
-    const parts = p.split('\n\n');
-    if (parts.length > 1 && (p.startsWith('Note') || /^\d+\./.test(p))) {
-      return (
-        <div key={i}>
-          <h3 className="text-[1.4rem] font-medium text-white tracking-[-0.02em] mt-[30px] mb-[10px]">
-            {parts[0]}
-          </h3>
-          {parts.slice(1).map((part, j) => (
-            <p key={j}>{part}</p>
-          ))}
-        </div>
-      );
-    }
-    return <p key={i}>{p}</p>;
-  };
-
   return (
     <div className="pt-20 bg-bg-dark">
 
@@ -39,7 +23,7 @@ export default function BlogDetail({ post, prevPost, nextPost, otherPosts = [] }
         <div className="flex items-center gap-4 font-mono text-[0.95rem] mb-5">
           <span className="text-accent uppercase">{post.category}</span>
           <span className="text-text-muted">•</span>
-          <span className="text-text-muted">{post.date}</span>
+          <span className="text-text-muted">{formatDate(post.date)}</span>
         </div>
         <h1 className="text-[2.8rem] md:text-[3.6rem] font-medium text-white tracking-[-0.03em] leading-[1.15] mb-4">
           {post.title}
@@ -59,8 +43,13 @@ export default function BlogDetail({ post, prevPost, nextPost, otherPosts = [] }
       )}
 
       {/* Article body */}
-      <article className="max-w-[800px] mx-auto px-10 max-[810px]:px-5 pb-[80px] flex flex-col gap-6 text-[1.15rem] leading-[1.6] text-text-secondary">
-        {post.paragraphs.map((p, i) => renderParagraph(p, i))}
+      <article className="max-w-[800px] mx-auto px-10 max-[810px]:px-5 pb-[80px] flex flex-col gap-6 text-[1.15rem] leading-[1.6] text-text-secondary text-left">
+        {post.content && (
+          <div 
+            className="blog-document-content"
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
+        )}
       </article>
 
       {/* Prev / Next navigator */}

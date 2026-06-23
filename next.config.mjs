@@ -5,6 +5,15 @@ const nextConfig = {
     '/api/keystatic/[...params]': ['./src/content/**/*'],
     '/*': ['./src/content/**/*'],
   },
+  async redirects() {
+    return [
+      {
+        source: '/new-stories',
+        destination: '/new-story',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

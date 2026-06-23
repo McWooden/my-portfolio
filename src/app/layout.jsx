@@ -1,12 +1,5 @@
 import React from 'react';
-import Header from '../components/Utils/Header';
-import Footer from '../components/Utils/Footer';
-import ScrollToTop from '../components/Utils/ScrollToTop';
-import Chatbot from '../components/Utils/Chatbot';
-import ProgressBar from '../components/Utils/ProgressBar';
 import { Inter, DM_Mono, Sedgwick_Ave } from 'next/font/google';
-import { createReader } from '@keystatic/core/reader';
-import keystaticConfig from '../../keystatic.config';
 import './globals.css';
 
 const inter = Inter({
@@ -28,8 +21,6 @@ const sedgwickAve = Sedgwick_Ave({
   variable: '--font-sedgwick-ave',
   display: 'swap',
 });
-
-import huddinConfig from '../data/huddinContext.json';
 
 export const metadata = {
   title: {
@@ -55,67 +46,12 @@ export const metadata = {
   },
 };
 
-export default async function RootLayout({ children }) {
-  const reader = createReader(process.cwd(), keystaticConfig);
-  let status = 'available';
-  try {
-    const homepageData = await reader.singletons.homepage.read();
-    status = homepageData?.status || 'available';
-  } catch (e) {
-    console.error('Failed to read homepage status in layout:', e);
-  }
-
-  // Generate dynamic JSON-LD Structured Data
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    "name": huddinConfig.master || "Sholahuddin Ahmad",
-    "alternateName": "Huddin",
-    "url": "https://huddin.dev",
-    "image": "https://framerusercontent.com/images/NkL1zDB0ea9KmqIpMf80b6TCw.png",
-    "jobTitle": "Full-Stack Developer & UI/UX Designer",
-    "description": huddinConfig.aboutHuddin?.summary || "Developer and designer specializing in Brand Systems, UI/UX Design, App Development, and promotional visuals.",
-    "knowsAbout": [
-      "Brand Systems",
-      "UI & UX Design",
-      "App Development",
-      "Next.js",
-      "React",
-      "Figma",
-      "Tailwind CSS"
-    ],
-    "memberOf": huddinConfig.communitiesAndCerts?.communities?.map(c => ({
-      "@type": "Organization",
-      "name": c.name,
-      "description": c.description
-    })) || [],
-    "hasCredential": huddinConfig.communitiesAndCerts?.certifications?.map(c => ({
-      "@type": "EducationalOccupationalCredential",
-      "name": c.name,
-      "credentialCategory": "certification",
-      "description": c.description
-    })) || []
-  };
-
+export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${inter.variable} ${dmMono.variable} ${sedgwickAve.variable}`}>
-      <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      </head>
+    <html lang="en" className={`${inter.variable} ${dmMono.variable} ${sedgwickAve.variable}`} data-scroll-behavior="smooth">
       <body>
-        <React.Suspense fallback={null}>
-          <ProgressBar />
-        </React.Suspense>
-        <ScrollToTop />
-        <Header availabilityStatus={status} />
-        <main>{children}</main>
-        <Footer />
-        <Chatbot />
+        {children}
       </body>
     </html>
   );
 }
-

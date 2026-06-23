@@ -183,5 +183,161 @@
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #333333;
   }
+
+  /* Project Document Content HTML Styling */
+  .project-document-content h1 {
+    font-size: 42px;
+    font-weight: 500;
+    color: white;
+    letter-spacing: -0.03em;
+    margin-top: 40px;
+    margin-bottom: 0px;
+  }
+  .project-document-content h1:first-child {
+    margin-top: 0;
+  }
+  .project-document-content h2 {
+    font-size: 30px;
+    font-weight: 500;
+    color: white;
+    letter-spacing: -0.03em;
+    margin-top: 32px;
+    margin-bottom: 0px;
+  }
+  .project-document-content h2:first-child {
+    margin-top: 0;
+  }
+  .project-document-content h3 {
+    font-size: 1.7rem;
+    font-weight: 500;
+    color: white;
+    letter-spacing: -0.03em;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+  }
+  .project-document-content h4 {
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: white;
+    letter-spacing: -0.03em;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+  }
+  .project-document-content p {
+    font-size: 16px;
+    line-height: 1.65;
+    color: theme(--color-text-secondary);
+    margin-top: 20px;
+    margin-bottom: 0px;
+  }
+  .project-document-content ul, .project-document-content ol {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    list-style: none;
+  }
+  .project-document-content li {
+    position: relative;
+    padding-left: 24px;
+    font-size: 1.1rem;
+  }
+  .project-document-content li::before {
+    content: "✦";
+    position: absolute;
+    left: 0;
+    color: theme(--color-accent);
+  }
+  .project-document-content hr {
+    border: 0;
+    border-top: 1px solid theme(--color-border);
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+  }
+  .project-document-content a {
+    color: theme(--color-accent);
+  }
+  .project-document-content a:hover {
+    text-decoration: underline;
+  }
+ 
+  /* Blog Document Content HTML Styling */
+  .blog-document-content h1 {
+    font-size: 42px;
+    font-weight: 500;
+    color: white;
+    letter-spacing: -0.03em;
+    margin-top: 40px;
+    margin-bottom: 0px;
+  }
+  .blog-document-content h1:first-child {
+    margin-top: 0;
+  }
+  .blog-document-content h2 {
+    font-size: 30px;
+    font-weight: 500;
+    color: white;
+    letter-spacing: -0.03em;
+    margin-top: 32px;
+    margin-bottom: 0px;
+  }
+  .blog-document-content h2:first-child {
+    margin-top: 0;
+  }
+  .blog-document-content h3 {
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: white;
+    letter-spacing: -0.02em;
+    margin-top: 1.8rem;
+    margin-bottom: 0.6rem;
+  }
+  .blog-document-content h4 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: white;
+    letter-spacing: -0.02em;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .blog-document-content p {
+    font-size: 16px;
+    line-height: 1.65;
+    margin-top: 20px;
+    margin-bottom: 0px;
+  }
+  .blog-document-content ul, .blog-document-content ol {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    list-style: none;
+  }
+  .blog-document-content li {
+    position: relative;
+    padding-left: 24px;
+    font-size: 1.1rem;
+  }
+  .blog-document-content li::before {
+    content: "✦";
+    position: absolute;
+    left: 0;
+    color: theme(--color-accent);
+  }
+  .blog-document-content hr {
+    border: 0;
+    border-top: 1px solid theme(--color-border);
+    margin-top: 2.5rem;
+    margin-bottom: 2.5rem;
+  }
+  .blog-document-content a {
+    color: theme(--color-accent);
+  }
+  .blog-document-content a:hover {
+    text-decoration: underline;
+  }
 }
+
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { getImageUrl } from '../../utils/image';
+import { formatDate } from '../../utils/date';
 
 export const BlogCard = ({ post, className = '', style = {} }) => (
   <Link
@@ -28,7 +29,7 @@ export const BlogCard = ({ post, className = '', style = {} }) => (
           {post.category}
         </span>
         <span className="font-mono text-[12px] md:text-[13px] text-white/80 uppercase">
-          {post.date}
+          {formatDate(post.date)}
         </span>
       </div>
 

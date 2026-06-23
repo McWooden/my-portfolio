@@ -189,4 +189,13 @@
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #333333;
   }
+
+  /* Fix Keystatic Slate editor placeholder wrapping and overlapping */
+  [data-slate-placeholder="true"] {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+    display: inline-block !important;
+  }
 }

@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import Contact from '../components/Utils/Contact';
 import ProjectCard from '../components/Utils/ProjectCard';
 import { getImageUrl } from '../utils/image';
+import { formatDate } from '../utils/date';
 
 export default function ProjectDetail({ project, otherProjects = [] }) {
   useEffect(() => {
@@ -25,7 +26,7 @@ export default function ProjectDetail({ project, otherProjects = [] }) {
           {/* Left Column: Info */}
           <div className={`flex flex-col gap-8 ${coverImgUrl ? 'lg:w-[55%]' : 'w-full'}`}>
             <div className="flex flex-col gap-4 text-left">
-              <span className="font-mono text-[0.95rem] text-accent">{project.date}</span>
+              <span className="font-mono text-[0.95rem] text-accent">{formatDate(project.date)}</span>
               <h1 className="text-[3rem] md:text-[4rem] font-medium text-white tracking-[-0.04em] leading-[1.1]">
                 {project.title}
               </h1>
@@ -77,34 +78,14 @@ export default function ProjectDetail({ project, otherProjects = [] }) {
       </section>
 
       {/* Content body */}
-      <section className="py-[80px] px-10 max-[810px]:py-[60px] max-[810px]:px-5 max-w-[1200px] mx-auto flex flex-col gap-[80px]">
-
-        {/* Challenge */}
-        <div className="flex flex-col gap-5 md:flex-row md:justify-between">
-          <div className="md:w-[30%]">
-            <h2 className="text-[1.8rem] font-medium text-white tracking-[-0.03em]">The Challenge</h2>
-          </div>
-          <div className="text-[1.2rem] leading-[1.5] text-text-secondary flex flex-col gap-6 md:w-[65%]">
-            <p>{project.challenge}</p>
-          </div>
-        </div>
-
-        {/* Solution */}
-        <div className="flex flex-col gap-5 md:flex-row md:justify-between">
-          <div className="md:w-[30%]">
-            <h2 className="text-[1.8rem] font-medium text-white tracking-[-0.03em]">The Solution</h2>
-          </div>
-          <div className="text-[1.2rem] leading-[1.5] text-text-secondary flex flex-col gap-6 md:w-[65%]">
-            <p>{project.solution}</p>
-            <ul className="flex flex-col gap-4 mt-3">
-              {project.solutionDetails.map((detail, idx) => (
-                <li key={idx} className="accent-list-item text-[1.1rem]">
-                  {detail}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
+      <section className="py-[80px] px-10 max-[810px]:py-[60px] max-[810px]:px-5 max-w-[1200px] mx-auto flex flex-col gap-10">
+        
+        {project.content && (
+          <div 
+            className="project-document-content text-left max-w-[900px] mr-auto"
+            dangerouslySetInnerHTML={{ __html: project.content }}
+          />
+        )}
 
         {/* Gallery */}
         <div className="flex flex-col gap-[60px] my-10">
@@ -126,24 +107,6 @@ export default function ProjectDetail({ project, otherProjects = [] }) {
           })}
         </div>
 
-        {/* Outcome */}
-        <div className="flex flex-col gap-5 md:flex-row md:justify-between">
-          <div className="md:w-[30%]">
-            <h2 className="text-[1.8rem] font-medium text-white tracking-[-0.03em]">Outcome</h2>
-          </div>
-          <div className="text-[1.2rem] leading-[1.5] text-text-secondary flex flex-col gap-6 md:w-[65%]">
-            <p>{project.outcome}</p>
-            {project.outcomeDetails && project.outcomeDetails.length > 0 && (
-              <ul className="flex flex-col gap-4">
-                {project.outcomeDetails.map((outcome, idx) => (
-                  <li key={idx} className="accent-list-item text-[1.1rem]">
-                    {outcome}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
       </section>
 
       {/* Other projects */}

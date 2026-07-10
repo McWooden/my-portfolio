@@ -1,5 +1,35 @@
 @import "tailwindcss";
 
+/* 
+======================================================================
+DESIGN SYSTEM & CODING RULES (Keep styling consistent / No hallucinations)
+======================================================================
+1. Colors (Do NOT hardcode raw hex/rgba values in JSX/TSX):
+   - Screen BG: bg-bg-dark (#1a1a1a)
+   - Cards/lists/elements: bg-bg-card (#262626) / bg-bg-card-hover (#333333)
+   - Text hierarchy: text-text-primary (#eaeaea), text-text-secondary (#bdbdbd), text-text-muted (#888888)
+   - Brand Accent: text-accent / bg-accent (#e0ff6f), bg-accent-muted (rgba(224, 255, 111, 0.5))
+   - Dividers/Borders: border-border (rgba(234, 234, 234, 0.1)), border-border-focus (rgba(234, 234, 234, 0.3))
+
+2. Typography:
+   - Body/Forms: font-sans (Inter)
+   - Statuses/Stats/Details: font-mono (DM Mono)
+   - Accent/Decorative signatures: font-sedgwick (Sedgwick Ave)
+
+3. Fixed Header Layout Rules:
+   - Header is fixed: fixed top-0 left-0 w-full h-[100px] z-[1000]
+   - Content offset: Page containers must use pt-[100px] or pt-[140px] to clear the header.
+   - Screen height: Lock height using min-h-[calc(100vh-100px)] instead of min-h-screen.
+   - Absolute Floaters: Parent container MUST have 'relative overflow-hidden' to prevent layout leakage/scrolling.
+
+4. Built-in Utilities:
+   - Online dot: <span className="pulse-dot status-available"></span> (status: available, working, busy, holiday)
+   - Animations: animate-float, animate-float-delayed, animate-ticker
+   - Accent stars bullet list: accent-list-item (adds '✦')
+   - Scroll reveals: reveal-item / reveal-item.revealed
+======================================================================
+*/
+
 /* ── Design Tokens ── */
 @theme {
   /* Colors */
@@ -65,6 +95,18 @@
     line-height: 1.5;
     scroll-behavior: smooth;
     overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6, figcaption, .image-caption {
+    text-wrap: pretty;
+  }
+
+  p, li {
+    orphans: 2;
+  }
+
+  p *, li * {
+    text-wrap: inherit;
   }
 
   a {
@@ -153,6 +195,82 @@
     color: theme(--color-accent);
   }
 
+  /* Alignment overrides for centered and right-aligned list items */
+  .accent-list-item[style*="text-align: center" i],
+  .accent-list-item[style*="text-align:center" i],
+  .accent-list-item[style*="text-align: right" i],
+  .accent-list-item[style*="text-align:right" i],
+  .accent-list-item:has([style*="text-align: center" i]),
+  .accent-list-item:has([style*="text-align:center" i]),
+  .accent-list-item:has([style*="text-align: right" i]),
+  .accent-list-item:has([style*="text-align:right" i]),
+  .project-document-content ul li[style*="text-align: center" i],
+  .project-document-content ul li[style*="text-align:center" i],
+  .project-document-content ul li[style*="text-align: right" i],
+  .project-document-content ul li[style*="text-align:right" i],
+  .project-document-content ul li:has([style*="text-align: center" i]),
+  .project-document-content ul li:has([style*="text-align:center" i]),
+  .project-document-content ul li:has([style*="text-align: right" i]),
+  .project-document-content ul li:has([style*="text-align:right" i]),
+  .blog-document-content ul li[style*="text-align: center" i],
+  .blog-document-content ul li[style*="text-align:center" i],
+  .blog-document-content ul li[style*="text-align: right" i],
+  .blog-document-content ul li[style*="text-align:right" i],
+  .blog-document-content ul li:has([style*="text-align: center" i]),
+  .blog-document-content ul li:has([style*="text-align:center" i]),
+  .blog-document-content ul li:has([style*="text-align: right" i]),
+  .blog-document-content ul li:has([style*="text-align:right" i]) {
+    padding-left: 0 !important;
+  }
+  .accent-list-item[style*="text-align: center" i]::before,
+  .accent-list-item[style*="text-align:center" i]::before,
+  .accent-list-item[style*="text-align: right" i]::before,
+  .accent-list-item[style*="text-align:right" i]::before,
+  .accent-list-item:has([style*="text-align: center" i])::before,
+  .accent-list-item:has([style*="text-align:center" i])::before,
+  .accent-list-item:has([style*="text-align: right" i])::before,
+  .accent-list-item:has([style*="text-align:right" i])::before,
+  .project-document-content ul li[style*="text-align: center" i]::before,
+  .project-document-content ul li[style*="text-align:center" i]::before,
+  .project-document-content ul li[style*="text-align: right" i]::before,
+  .project-document-content ul li[style*="text-align:right" i]::before,
+  .project-document-content ul li:has([style*="text-align: center" i])::before,
+  .project-document-content ul li:has([style*="text-align:center" i])::before,
+  .project-document-content ul li:has([style*="text-align: right" i])::before,
+  .project-document-content ul li:has([style*="text-align:right" i])::before,
+  .blog-document-content ul li[style*="text-align: center" i]::before,
+  .blog-document-content ul li[style*="text-align:center" i]::before,
+  .blog-document-content ul li[style*="text-align: right" i]::before,
+  .blog-document-content ul li[style*="text-align:right" i]::before,
+  .blog-document-content ul li:has([style*="text-align: center" i])::before,
+  .blog-document-content ul li:has([style*="text-align:center" i])::before,
+  .blog-document-content ul li:has([style*="text-align: right" i])::before,
+  .blog-document-content ul li:has([style*="text-align:right" i])::before {
+    position: static !important;
+    margin-right: 8px;
+    display: inline-block;
+  }
+
+  /* Move ordered and default unordered list numbers/bullets inside if centered or right-aligned */
+  ol li[style*="text-align: center" i],
+  ol li[style*="text-align:center" i],
+  ol li[style*="text-align: right" i],
+  ol li[style*="text-align:right" i],
+  ol li:has([style*="text-align: center" i]),
+  ol li:has([style*="text-align:center" i]),
+  ol li:has([style*="text-align: right" i]),
+  ol li:has([style*="text-align:right" i]),
+  ul li[style*="text-align: center" i],
+  ul li[style*="text-align:center" i],
+  ul li[style*="text-align: right" i],
+  ul li[style*="text-align:right" i],
+  ul li:has([style*="text-align: center" i]),
+  ul li:has([style*="text-align:center" i]),
+  ul li:has([style*="text-align: right" i]),
+  ul li:has([style*="text-align:right" i]) {
+    list-style-position: inside !important;
+  }
+
   /* Scroll Reveal Utilities */
   .reveal-item {
     opacity: 0;
@@ -198,4 +316,282 @@
     max-width: 100% !important;
     display: inline-block !important;
   }
+
+  /* Project Document Content HTML Styling */
+  .project-document-content h1 {
+    font-size: 42px;
+    font-weight: 500;
+    color: white;
+    letter-spacing: -0.03em;
+    margin-top: 40px;
+    margin-bottom: 0px;
+  }
+  .project-document-content h1:first-child {
+    margin-top: 0;
+  }
+  .project-document-content h2 {
+    font-size: 30px;
+    font-weight: 500;
+    color: white;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    margin-top: 36px;
+    margin-bottom: 0px;
+  }
+  .project-document-content h2:first-child {
+    margin-top: 0;
+  }
+  .project-document-content h3 {
+    font-size: 22px;
+    font-weight: 500;
+    color: white;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    margin-top: 30px;
+    margin-bottom: 0px;
+  }
+  .project-document-content p {
+    font-size: 18px;
+    line-height: 1.65;
+    color: theme(--color-text-secondary);
+    margin-top: 28px;
+    margin-bottom: 0px;
+  }
+  .project-document-content h2 + p,
+  .project-document-content h3 + p,
+  .project-document-content h2 + ul,
+  .project-document-content h3 + ul,
+  .project-document-content h2 + ol,
+  .project-document-content h3 + ol {
+    margin-top: 8px;
+  }
+  .project-document-content ul, .project-document-content ol {
+    margin-top: 28px;
+    margin-bottom: 0px;
+    padding-left: 30px;
+  }
+  .project-document-content ul {
+    list-style: none;
+  }
+  .project-document-content ol {
+    list-style: decimal;
+  }
+  .project-document-content li {
+    font-size: 18px;
+    line-height: 1.65;
+    margin-bottom: 10px;
+    padding-left: 0;
+    margin-left: 0;
+  }
+  .project-document-content li:last-child {
+    margin-bottom: 0;
+  }
+  .project-document-content ul li {
+    position: relative;
+    padding-left: 0;
+    margin-left: 0;
+  }
+  .project-document-content ul li::before {
+    content: "✦";
+    position: absolute;
+    left: -20px;
+    top: 0;
+    color: theme(--color-accent);
+  }
+  /* When the li has any text-align style, pull bullet inline so it follows the text */
+  .project-document-content ul li[style*="text-align"] {
+    padding-left: 0 !important;
+  }
+  .project-document-content ul li[style*="text-align"]::before {
+    position: static !important;
+    left: unset !important;
+    top: unset !important;
+    display: inline-block !important;
+    margin-right: 8px !important;
+  }
+  .project-document-content hr {
+    border: 0;
+    border-top: 1px solid theme(--color-border);
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+  }
+  .project-document-content a {
+    color: theme(--color-accent);
+  }
+  .project-document-content a:hover {
+    text-decoration: underline;
+  }
+ 
+  /* Blog Document Content HTML Styling */
+  .blog-document-content h1 {
+    font-size: 42px;
+    font-weight: 500;
+    color: white;
+    letter-spacing: -0.03em;
+    margin-top: 40px;
+    margin-bottom: 0px;
+  }
+  .blog-document-content h1:first-child {
+    margin-top: 0;
+  }
+  .blog-document-content h2 {
+    font-size: 30px;
+    font-weight: 500;
+    color: white;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    margin-top: 36px;
+    margin-bottom: 0px;
+  }
+  .blog-document-content h2:first-child {
+    margin-top: 0;
+  }
+  .blog-document-content h3 {
+    font-size: 22px;
+    font-weight: 500;
+    color: white;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    margin-top: 30px;
+    margin-bottom: 0px;
+  }
+  .blog-document-content p {
+    font-size: 18px;
+    line-height: 1.65;
+    margin-top: 28px;
+    margin-bottom: 0px;
+  }
+  .blog-document-content h2 + p,
+  .blog-document-content h3 + p,
+  .blog-document-content h2 + ul,
+  .blog-document-content h3 + ul,
+  .blog-document-content h2 + ol,
+  .blog-document-content h3 + ol {
+    margin-top: 8px;
+  }
+  .blog-document-content ul, .blog-document-content ol {
+    margin-top: 28px;
+    margin-bottom: 0px;
+    padding-left: 30px;
+  }
+  .blog-document-content ul {
+    list-style: none;
+  }
+  .blog-document-content ol {
+    list-style: decimal;
+  }
+  .blog-document-content li {
+    font-size: 18px;
+    line-height: 1.65;
+    margin-bottom: 10px;
+    padding-left: 0;
+    margin-left: 0;
+  }
+  .blog-document-content li:last-child {
+    margin-bottom: 0;
+  }
+  .blog-document-content ul li {
+    position: relative;
+    padding-left: 0;
+    margin-left: 0;
+  }
+  .blog-document-content ul li::before {
+    content: "✦";
+    position: absolute;
+    left: -20px;
+    top: 0;
+    color: theme(--color-accent);
+  }
+  /* When the li has any text-align style, pull bullet inline so it follows the text */
+  .blog-document-content ul li[style*="text-align"] {
+    padding-left: 0 !important;
+  }
+  .blog-document-content ul li[style*="text-align"]::before {
+    position: static !important;
+    left: unset !important;
+    top: unset !important;
+    display: inline-block !important;
+    margin-right: 8px !important;
+  }
+  .blog-document-content hr {
+    border: 0;
+    border-top: 1px solid theme(--color-border);
+    margin-top: 2.5rem;
+    margin-bottom: 2.5rem;
+  }
+  .blog-document-content a {
+    color: theme(--color-accent);
+  }
+  .blog-document-content a:hover {
+    text-decoration: underline;
+  }
+}
+
+/* Code Block & Language Dropdown Styles */
+.code-block-wrapper {
+  position: relative;
+  margin-top: 24px;
+  margin-bottom: 24px;
+  background-color: #050505 !important;
+  border: 1px solid #171717 !important;
+  border-radius: 4px;
+  padding: 32px !important;
+}
+
+.code-block-wrapper pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  background-color: transparent !important;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #d4d4d4;
+  overflow-x: auto;
+  width: 100%;
+  outline: none;
+  white-space: pre-wrap !important;
+  word-break: break-all !important;
+}
+
+.code-block-wrapper pre code {
+  color: inherit !important;
+}
+
+/* Train effect for adjacent code blocks */
+
+/* 1. Any code block followed by another code block (First or Middle carriage) */
+.code-block-wrapper:has(+ .code-block-wrapper) {
+  margin-bottom: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+/* 2. Any code block immediately following another code block (Middle or Last carriage) */
+.code-block-wrapper + .code-block-wrapper {
+  margin-top: -1px !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+
+
+
+/* Syntax highlighting classes */
+.hl-comment {
+  color: #6e7681 !important;
+  font-style: italic;
+}
+
+.hl-string {
+  color: #a5d6ff !important;
+}
+
+.hl-keyword {
+  color: #ff7b72 !important;
+  font-weight: 500;
+}
+
+.hl-number {
+  color: #79c0ff !important;
+}
+
+.hl-builtin {
+  color: #d2a8ff !important;
 }

@@ -1,22 +1,31 @@
 "use client";
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Contact from '../components/Utils/Contact';
 import BlogCard from '../components/Utils/BlogCard';
 import { getImageUrl } from '../utils/image';
 import { formatDate } from '../utils/date';
+import { preventOrphans } from '../utils/text';
 
 export default function BlogDetail({ post, prevPost, nextPost, otherPosts = [] }) {
+  const containerRef = useRef(null);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [post?.slug]);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      preventOrphans(containerRef.current);
+    }
+  }, [post?.content]);
 
   if (!post) {
     return null;
   }
 
   return (
-    <div className="pt-20 bg-bg-dark">
+    <div ref={containerRef} className="pt-20 bg-bg-dark">
 
       {/* Article header */}
       <section className="pt-[100px] pb-[60px] px-10 max-[810px]:pt-[60px] max-[810px]:px-5 max-w-[900px] mx-auto flex flex-col items-center text-center border-b border-border">

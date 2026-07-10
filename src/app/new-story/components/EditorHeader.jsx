@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { FiUser, FiGrid, FiPlus, FiLogOut } from 'react-icons/fi';
+import { FiUser, FiGrid, FiPlus, FiLogOut, FiHome, FiBookOpen } from 'react-icons/fi';
 
 export default function EditorHeader({
   saveStatus,
@@ -17,6 +17,16 @@ export default function EditorHeader({
   showProfileDropdown,
   setShowProfileDropdown
 }) {
+  const [showLogoDropdown, setShowLogoDropdown] = useState(false);
+
+  useEffect(() => {
+    const closeDropdown = () => setShowLogoDropdown(false);
+    if (showLogoDropdown) {
+      window.addEventListener('click', closeDropdown);
+      return () => window.removeEventListener('click', closeDropdown);
+    }
+  }, [showLogoDropdown]);
+
   const handlePublishClick = () => {
     const finalTitle = title.trim();
     const contentHtml = editorRef.current?.innerHTML || '';
@@ -44,15 +54,36 @@ export default function EditorHeader({
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-[#08080a]/80 backdrop-blur-md border-b border-neutral-900/80">
+    <div className="fixed top-0 left-0 right-0 z-50 bg-[#08080a]/80 backdrop-blur-md border-b border-neutral-900/80 cursor-default">
       <div className="max-w-[680px] w-full mx-auto px-6 md:px-12 h-16 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <Link 
-            href="/"
-            className="font-serif text-[22px] font-black text-white hover:text-accent transition-colors duration-150 tracking-tight mr-1"
-          >
-            Huddin
-          </Link>
+          <div className="relative">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowLogoDropdown(!showLogoDropdown);
+              }}
+              className="font-serif text-[22px] font-black text-white hover:text-accent transition-colors duration-150 tracking-tight mr-1 cursor-pointer focus:outline-none"
+            >
+              Huddin
+            </button>
+            {showLogoDropdown && (
+              <div className="absolute left-0 mt-2 w-36 bg-neutral-950/95 backdrop-blur-xl border border-neutral-900 rounded-2xl py-2 px-1.5 shadow-2xl flex flex-col gap-0.5 z-50">
+                <Link
+                  href="/"
+                  className="w-full text-left px-3 py-2 hover:bg-neutral-900 rounded-xl text-xs text-neutral-300 hover:text-white transition-colors duration-150 flex items-center gap-2 cursor-pointer font-mono"
+                >
+                  <FiHome className="w-3.5 h-3.5" /> Home
+                </Link>
+                <Link
+                  href="/blog"
+                  className="w-full text-left px-3 py-2 hover:bg-neutral-900 rounded-xl text-xs text-neutral-300 hover:text-white transition-colors duration-150 flex items-center gap-2 cursor-pointer font-mono"
+                >
+                  <FiBookOpen className="w-3.5 h-3.5" /> Blog
+                </Link>
+              </div>
+            )}
+          </div>
           <span className="text-neutral-500 text-sm font-normal">
             Draft
           </span>

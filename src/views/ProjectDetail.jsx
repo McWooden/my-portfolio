@@ -1,14 +1,23 @@
 "use client";
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import Contact from '../components/Utils/Contact';
 import ProjectCard from '../components/Utils/ProjectCard';
 import { getImageUrl } from '../utils/image';
 import { formatDate } from '../utils/date';
+import { preventOrphans } from '../utils/text';
 
 export default function ProjectDetail({ project, otherProjects = [] }) {
+  const containerRef = useRef(null);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [project?.slug]);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      preventOrphans(containerRef.current);
+    }
+  }, [project?.content]);
 
   if (!project) {
     return null;
@@ -17,7 +26,7 @@ export default function ProjectDetail({ project, otherProjects = [] }) {
   const coverImgUrl = getImageUrl(project.coverImage);
 
   return (
-    <div className="pt-20 bg-bg-dark">
+    <div ref={containerRef} className="pt-20 bg-bg-dark">
 
       {/* Header */}
       <section className="pt-[100px] pb-[60px] px-10 max-[810px]:pt-[60px] max-[810px]:px-5 max-w-[1200px] mx-auto border-b border-border">

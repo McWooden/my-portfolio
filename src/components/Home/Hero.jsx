@@ -79,15 +79,15 @@ export default function Hero({ homepageData, testimonialCard }) {
     const tick = () => {
       currentStep++;
       currentTempIndex = (currentTempIndex + 1) % jobs.length;
-      
+
       setSpeed(speeds[currentStep - 1] || 300);
-      
+
       if (currentStep === steps) {
         setJobIndex(targetIndex);
         setIsRolling(false);
         return;
       }
-      
+
       setJobIndex(currentTempIndex);
       setTimeout(tick, delays[currentStep - 1]);
     };
@@ -98,11 +98,11 @@ export default function Hero({ homepageData, testimonialCard }) {
   return (
     <section
       id="hero"
-      className="pt-[100px] pb-[70px] px-5 xl:pt-[120px] xl:pb-[90px] xl:px-10 flex flex-col xl:flex-row xl:items-stretch items-center max-w-[1600px] mx-auto gap-[60px]"
+      className="pt-[100px] pb-8 px-5 xl:pt-[110px] xl:pb-12 xl:px-10 flex flex-col xl:flex-row xl:items-stretch items-center max-w-[1600px] mx-auto gap-[60px]"
     >
       {/* Content */}
       <div ref={contentRef} className="flex flex-col items-center text-center xl:items-start xl:text-left xl:w-1/2 w-full justify-center">
-        
+
         {/* Interactive rolling job slot */}
         <button
           onClick={rollJob}
@@ -110,9 +110,9 @@ export default function Hero({ homepageData, testimonialCard }) {
           className="font-mono text-[1rem] tracking-[-0.02em] text-text-primary uppercase mb-5 select-none cursor-pointer flex flex-col items-center xl:items-start h-[1.5em] overflow-hidden group focus:outline-none disabled:cursor-default"
           title="Click to roll next job!"
         >
-          <div 
+          <div
             className="transition-transform ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col items-center xl:items-start"
-            style={{ 
+            style={{
               transform: `translateY(-${jobIndex * 1.5}em)`,
               transitionDuration: `${speed}ms`
             }}
@@ -130,13 +130,13 @@ export default function Hero({ homepageData, testimonialCard }) {
 
         <h1 className="max-w-[720px] text-[clamp(3rem,14vw,3.6rem)] sm:text-[3.6rem] md:text-[4.6rem] lg:text-[4.8rem] font-medium leading-[1.45] tracking-[-0.04em] text-white mb-6">
           I'm The{" "}
-          <span 
+          <span
             className="inline-flex items-center justify-center mx-1 sm:mx-2 w-[2.2em] h-[1.15em] rounded-[24px] overflow-hidden bg-black select-none align-middle relative -rotate-2"
             style={{
               boxShadow: '0 0.5px 1px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4), 0 3px 6px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.2), 0 16px 24px rgba(0, 0, 0, 0.15), 0 24px 32px rgba(0, 0, 0, 0.09)'
             }}
           >
-            <div 
+            <div
               className="absolute inset-0 flex flex-col"
               onTransitionEnd={handleTransitionEnd}
               style={{
@@ -158,24 +158,24 @@ export default function Hero({ homepageData, testimonialCard }) {
           <br className="hidden md:inline" />
           Who{" "}
           <br className="md:hidden" />
-          <span 
+          <span
             className="inline-flex items-center justify-center mx-1 sm:mx-2 w-[1.9em] h-[1.15em] rounded-[24px] overflow-hidden bg-black select-none align-middle relative rotate-2"
             style={{
               boxShadow: '0 0.5px 1px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4), 0 3px 6px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.2), 0 16px 24px rgba(0, 0, 0, 0.15), 0 24px 32px rgba(0, 0, 0, 0.09)'
             }}
           >
-            <img 
-              src="/assets/hero-loop.gif" 
-              className="w-full h-full object-cover pointer-events-none opacity-85" 
-              alt="Slow looping design animation" 
+            <img
+              src="/assets/hero-loop.gif"
+              className="w-full h-full object-cover pointer-events-none opacity-85"
+              alt="Slow looping design animation"
             />
             {/* Inverted border overlay (White) */}
             <div className="absolute inset-0 border-2 border-white rounded-[inherit] pointer-events-none z-10" />
           </span>{" "}
           Designs
         </h1>
-        <p className="text-[0.95rem] sm:text-[1.25rem] text-text-secondary leading-[1.4] mb-10 w-[90%] sm:w-full max-w-[480px] line-clamp-3 md:line-clamp-2">
-          Huddin is a Magelang programmer,<br />known for clean and expressive code —<br className="md:hidden" />who also designs the brand
+        <p className="text-[0.95rem] sm:text-[1.25rem] text-text-secondary leading-[1.4] mb-10 w-[90%] sm:w-full max-w-[480px]">
+          Huddin is a Magelang programmer, known for clean and expressive code — who also designs the brand
         </p>
 
         {/* CTA buttons */}

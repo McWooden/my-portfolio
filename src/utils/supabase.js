@@ -53,6 +53,14 @@ export function mapBlog(dbBlog) {
 
 export function mapStory(dbStory) {
   if (!dbStory) return null;
+
+  let meta = null;
+  if (dbStory.testimonial_company && dbStory.testimonial_company.trim().startsWith('{')) {
+    try {
+      meta = JSON.parse(dbStory.testimonial_company);
+    } catch (_) {}
+  }
+
   return {
     id: dbStory.id,
     slug: dbStory.slug,
@@ -71,7 +79,18 @@ export function mapStory(dbStory) {
       author: dbStory.testimonial_author,
       company: dbStory.testimonial_company
     } : null,
-    category: dbStory.category || ''
+    category: dbStory.category || '',
+    
+    // Extracted custom fields
+    author: meta?.author || {
+      name: 'Huddin',
+      username: 'huddin',
+      avatar: 'https://framerusercontent.com/images/NkL1zDB0ea9KmqIpMf80b6TCw.png',
+      email: 'halohuddin@gmail.com',
+      id: 'admin'
+    },
+    claps: meta?.claps || 0,
+    claps_by_user: meta?.claps_by_user || {}
   };
 }
 

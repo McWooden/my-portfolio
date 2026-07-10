@@ -10,16 +10,21 @@ import { navigationMenu } from '../../data/siteData';
 export default function Header({ availabilityStatus = 'available' }) {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState(false);
   const headerRef = useRef(null);
+  const desktopMenuRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (headerRef.current && !headerRef.current.contains(event.target)) {
         setIsMenuOpen(false);
       }
+      if (desktopMenuRef.current && !desktopMenuRef.current.contains(event.target)) {
+        setIsDesktopMenuOpen(false);
+      }
     };
 
-    if (isMenuOpen) {
+    if (isMenuOpen || isDesktopMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('touchstart', handleClickOutside);
     }
@@ -28,7 +33,7 @@ export default function Header({ availabilityStatus = 'available' }) {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
     };
-  }, [isMenuOpen]);
+  }, [isMenuOpen, isDesktopMenuOpen]);
 
   const handleContactClick = (e) => {
     e.preventDefault();
@@ -39,7 +44,7 @@ export default function Header({ availabilityStatus = 'available' }) {
   };
 
   const navLinkClass = (active) =>
-    `font-mono text-[0.95rem] font-medium uppercase tracking-tight transition-colors duration-200 ${
+    `font-mono text-[0.95rem] leading-none font-medium uppercase tracking-tight transition-colors duration-200 inline-flex items-center translate-y-[1px] ${
       active ? 'text-accent' : 'text-text-primary'
     }`;
 
@@ -50,7 +55,7 @@ export default function Header({ availabilityStatus = 'available' }) {
         {/* Left — Nav Links (Desktop) / Hamburger Button & "Huddin" (Mobile) */}
         <div className="flex items-center shrink-0">
           {/* Desktop links */}
-          <div className="flex gap-6 max-md:hidden">
+          <div className="flex gap-6 max-md:hidden items-center">
             {navigationMenu.filter(item => item.path !== '/').map(item => {
               const isActive = item.path === '/blog'
                 ? pathname.startsWith('/blog')
@@ -61,6 +66,54 @@ export default function Header({ availabilityStatus = 'available' }) {
                 </Link>
               );
             })}
+
+            {/* Desktop Hamburger Button & Dropdown */}
+            <div ref={desktopMenuRef} className="relative flex items-center">
+              <button
+                onClick={() => setIsDesktopMenuOpen(!isDesktopMenuOpen)}
+                className="w-8 h-8 flex items-center justify-center text-text-primary cursor-pointer select-none"
+                aria-label="Toggle Desktop Menu"
+              >
+                <div className="w-4.5 h-2.5 relative flex flex-col justify-between items-start">
+                  <span
+                    className={`h-[1px] bg-current rounded-full transition-all duration-300 ease-out origin-center ${
+                      isDesktopMenuOpen ? 'w-4.5 rotate-45 absolute top-1/2 -translate-y-1/2' : 'w-4.5'
+                    }`}
+                  />
+                  <span
+                    className={`h-[1px] bg-current rounded-full transition-all duration-300 ease-out origin-center ${
+                      isDesktopMenuOpen ? 'w-4.5 -rotate-45 absolute top-1/2 -translate-y-1/2' : 'w-3'
+                    }`}
+                  />
+                </div>
+              </button>
+
+              {/* Desktop Dropdown Menu (no hover animations/bg-changes on children) */}
+              {isDesktopMenuOpen && (
+                <div className="absolute top-[45px] right-0 w-44 bg-bg-dark border border-border rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-3 duration-200">
+                  <Link
+                    href="/login"
+                    onClick={() => setIsDesktopMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary font-mono uppercase tracking-tight"
+                  >
+                    <svg className="w-4 h-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                    </svg>
+                    <span>Login</span>
+                  </Link>
+                  <Link
+                    href="/playground"
+                    onClick={() => setIsDesktopMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary font-mono uppercase tracking-tight"
+                  >
+                    <svg className="w-4 h-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Playground</span>
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Mobile hamburger menu toggle & Huddin branding */}
@@ -138,17 +191,28 @@ export default function Header({ availabilityStatus = 'available' }) {
             />
           </Button>
         </div>
-
       </div>
 
       {/* Mobile Expandable Menu Dropdown */}
       <div
         className={`absolute top-[100px] left-0 w-full bg-bg-dark/95 px-6 z-40 transition-all duration-300 ease-in-out md:hidden overflow-hidden ${
-          isMenuOpen ? 'max-h-[350px] py-8 opacity-100' : 'max-h-0 py-0 opacity-0 pointer-events-none'
+          isMenuOpen ? 'max-h-[450px] py-8 opacity-100' : 'max-h-0 py-0 opacity-0 pointer-events-none'
         }`}
       >
         <div className="flex flex-col gap-6">
-          {navigationMenu.map((item, idx) => {
+          {[
+            ...navigationMenu,
+            {
+              label: 'Login',
+              path: '/login',
+              svgPath: 'M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1'
+            },
+            {
+              label: 'Playground',
+              path: '/playground',
+              svgPath: 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+            }
+          ].map((item, idx) => {
             const isActive = item.path === '/blog'
               ? pathname.startsWith('/blog')
               : pathname === item.path;
@@ -182,7 +246,7 @@ export default function Header({ availabilityStatus = 'available' }) {
             }}
             className="flex gap-5 items-center pt-4 mt-2 border-t border-border/50 text-text-secondary hover:text-text-primary transition-all duration-200 cursor-pointer"
             style={{
-              transitionDelay: isMenuOpen ? '250ms' : '0ms',
+              transitionDelay: isMenuOpen ? '350ms' : '0ms',
               transform: isMenuOpen ? 'translateX(0)' : 'translateX(-20px)',
               opacity: isMenuOpen ? 1 : 0,
               transitionProperty: 'all',

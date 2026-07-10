@@ -140,15 +140,8 @@ export default function StoriesPage() {
     // 1. Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        const currentUser = session.user;
-        if (ALLOWED_EMAILS.includes(currentUser.email)) {
-          setUser(currentUser);
-          fetchStories();
-        } else {
-          setErrorMsg(`Access Denied: ${currentUser.email} is not authorized.`);
-          supabase.auth.signOut();
-          setLoading(false);
-        }
+        setUser(session.user);
+        fetchStories(session.user.id);
       } else {
         setLoading(false);
       }
@@ -157,17 +150,9 @@ export default function StoriesPage() {
     // 2. Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
-        const currentUser = session.user;
-        if (ALLOWED_EMAILS.includes(currentUser.email)) {
-          setUser(currentUser);
-          setErrorMsg('');
-          fetchStories();
-        } else {
-          setErrorMsg(`Access Denied: ${currentUser.email} is not authorized.`);
-          setUser(null);
-          supabase.auth.signOut();
-          setLoading(false);
-        }
+        setUser(session.user);
+        setErrorMsg('');
+        fetchStories(session.user.id);
       } else {
         setUser(null);
         setLoading(false);
@@ -179,12 +164,22 @@ export default function StoriesPage() {
     };
   }, []);
 
-  const fetchStories = async () => {
+  const fetchStories = async (userId) => {
+    let targetUid = userId;
+    if (!targetUid) {
+      const { data: { session } } = await supabase.auth.getSession();
+      targetUid = session?.user?.id;
+    }
+    if (!targetUid) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('stories')
         .select('*')
+        .eq('user_id', targetUid)
         .order('date', { ascending: false });
 
       if (error) throw error;
@@ -506,7 +501,7 @@ export default function StoriesPage() {
           return (
             <>
               <div 
-                className="fixed inset-0 z-40 bg-black/10 backdrop-blur-[1px]"
+                className="fixed inset-0 z-40 bg-black/10"
                 onClick={(e) => {
                   e.stopPropagation();
                   setContextMenu(null);
@@ -517,7 +512,7 @@ export default function StoriesPage() {
                 }}
               />
               <div 
-                className="fixed bg-neutral-950 border border-neutral-850 rounded-2xl shadow-2xl py-2 px-1.5 w-44 z-50 flex flex-col gap-0.5"
+                className="fixed bg-neutral-950 border border-neutral-900 rounded-2xl shadow-2xl py-2 px-1.5 w-44 z-50 flex flex-col gap-0.5"
                 style={{ 
                   top: typeof window !== 'undefined' ? Math.min(contextMenu.y, window.innerHeight - 150) : contextMenu.y, 
                   left: typeof window !== 'undefined' ? Math.min(contextMenu.x, window.innerWidth - 190) : contextMenu.x 
@@ -529,7 +524,7 @@ export default function StoriesPage() {
                     handleTogglePublish(contextMenu.storyId);
                     setContextMenu(null);
                   }}
-                  className="w-full text-left px-3.5 py-2 hover:bg-neutral-900 rounded-xl text-xs font-mono text-neutral-300 hover:text-white transition-colors flex items-center gap-2 cursor-pointer"
+                  className="w-full text-left px-3.5 py-2 hover:bg-neutral-900 rounded-xl text-xs font-mono text-neutral-300 hover:text-white flex items-center gap-2 cursor-pointer"
                 >
                   {isPublished ? (
                     <>
@@ -541,14 +536,14 @@ export default function StoriesPage() {
                     </>
                   )}
                 </button>
-                <div className="h-[1px] bg-neutral-900 my-1" />
+                <div className="h-[1px] bg-border my-1" />
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     router.push(`/new-story?id=${contextMenu.storyId}`);
                     setContextMenu(null);
                   }}
-                  className="w-full text-left px-3.5 py-2 hover:bg-neutral-900 rounded-xl text-xs font-mono text-neutral-300 hover:text-white transition-colors flex items-center gap-2 cursor-pointer"
+                  className="w-full text-left px-3.5 py-2 hover:bg-neutral-900 rounded-xl text-xs font-mono text-neutral-300 hover:text-white flex items-center gap-2 cursor-pointer"
                 >
                   <FiEdit className="w-3.5 h-3.5 text-neutral-400" /> Edit
                 </button>
@@ -558,7 +553,7 @@ export default function StoriesPage() {
                     handleDelete(contextMenu.storyId);
                     setContextMenu(null);
                   }}
-                  className="w-full text-left px-3.5 py-2 hover:bg-red-950/30 hover:text-red-400 rounded-xl text-xs font-mono text-red-500 transition-colors flex items-center gap-2 cursor-pointer"
+                  className="w-full text-left px-3.5 py-2 hover:bg-red-950/30 hover:text-red-400 rounded-xl text-xs font-mono text-red-500 flex items-center gap-2 cursor-pointer"
                 >
                   <FiTrash2 className="w-3.5 h-3.5 text-red-500" /> Delete
                 </button>

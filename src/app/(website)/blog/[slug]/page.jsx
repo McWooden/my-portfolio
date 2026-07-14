@@ -5,6 +5,38 @@ import { supabase, mapStory } from '../../../../utils/supabase';
 
 export const dynamic = 'force-dynamic';
 
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+
+  const { data: post, error } = await supabase
+    .from('stories')
+    .select('title, subtitle, cover_image, slug')
+    .eq('slug', slug)
+    .eq('type', 'blog')
+    .eq('published', true)
+    .single();
+
+  if (error || !post) {
+    return {
+      title: 'Post Not Found',
+    };
+  }
+
+  return {
+    title: post.title,
+    description: post.subtitle || `Baca artikel "${post.title}" oleh Huddin — Developer & Designer di Magelang.`,
+    openGraph: {
+      title: `${post.title} | Huddin Blog`,
+      description: post.subtitle || `Artikel oleh Huddin tentang ${post.title}.`,
+      type: 'article',
+      images: post.cover_image ? [{ url: post.cover_image, alt: post.title }] : [],
+    },
+    alternates: {
+      canonical: `/blog/${slug}`,
+    },
+  };
+}
+
 export default async function Page({ params }) {
   const { slug } = await params;
 
@@ -45,4 +77,3 @@ export default async function Page({ params }) {
     />
   );
 }
-

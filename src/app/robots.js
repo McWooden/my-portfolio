@@ -5,7 +5,7 @@ export default function robots() {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/api/', '/keystatic/'], // Hide API routes and CMS editor from crawlers
+      disallow: ['/api/', '/keystatic/', '/login', '/logout', '/me', '/new-story', '/stories'],
     },
     sitemap: `${baseUrl}/sitemap.xml`,
   };

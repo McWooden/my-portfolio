@@ -5,6 +5,37 @@ import { supabase, mapStory } from '../../../../utils/supabase';
 
 export const dynamic = 'force-dynamic';
 
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+
+  const { data: project, error } = await supabase
+    .from('stories')
+    .select('title, subtitle, cover_image, slug')
+    .eq('slug', slug)
+    .eq('type', 'project')
+    .eq('published', true)
+    .single();
+
+  if (error || !project) {
+    return {
+      title: 'Project Not Found',
+    };
+  }
+
+  return {
+    title: project.title,
+    description: project.subtitle || `Detail proyek ${project.title} oleh Huddin — Full-Stack Developer & UI/UX Designer di Magelang.`,
+    openGraph: {
+      title: `${project.title} | Huddin Portfolio`,
+      description: project.subtitle || `Detail proyek ${project.title} oleh Huddin.`,
+      images: project.cover_image ? [{ url: project.cover_image, alt: project.title }] : [],
+    },
+    alternates: {
+      canonical: `/portfolio/${slug}`,
+    },
+  };
+}
+
 export default async function Page({ params }) {
   const { slug } = await params;
 
@@ -46,4 +77,3 @@ export default async function Page({ params }) {
     />
   );
 }
-

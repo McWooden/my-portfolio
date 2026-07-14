@@ -53,6 +53,15 @@ export const metadata = {
   alternates: {
     canonical: '/',
   },
+  icons: {
+    icon: [
+      { url: '/ico/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/ico/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+    ],
+    shortcut: '/ico/favicon.ico',
+    apple: '/ico/apple-touch-icon.png',
+  },
+  manifest: '/ico/site.webmanifest',
   openGraph: {
     type: 'website',
     locale: 'id_ID',
@@ -61,6 +70,14 @@ export const metadata = {
     title: 'Huddin | Magelang Full-Stack Developer & UI/UX Designer',
     description: 'Full-Stack Developer & UI/UX Designer berbasis di Magelang, Jawa Tengah. Spesialisasi Brand Systems, UI/UX Design, dan App Development. HaloHuddin Home Studio.',
     siteName: 'Huddin Portfolio',
+    images: [
+      {
+        url: '/ico/android-chrome-512x512.png',
+        width: 512,
+        height: 512,
+        alt: 'Huddin - Magelang Full-Stack Developer & UI/UX Designer',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
@@ -86,7 +103,7 @@ const jsonLd = {
       name: 'HaloHuddin - Home Studio',
       description: 'Studio kreatif untuk jasa Full-Stack Development, UI/UX Design, Brand Systems, dan App Development di Magelang, Jawa Tengah.',
       url: 'https://huddin.dev',
-      telephone: '',
+      telephone: '+6287745457767',
       address: {
         '@type': 'PostalAddress',
         addressLocality: 'Magelang',
@@ -108,7 +125,15 @@ const jsonLd = {
       priceRange: '$$',
       image: 'https://huddin.dev/og-image.jpg',
       founder: { '@id': 'https://huddin.dev/#person' },
-      sameAs: [],
+      sameAs: [
+        'https://www.linkedin.com/in/sholahuddin-ahmad/',
+        'https://github.com/McWooden',
+        'https://medium.com/@halohuddin',
+        'https://www.instagram.com/halohuddin',
+        'https://x.com/halohuddin',
+        'https://www.tiktok.com/@halohuddin',
+        'https://wa.me/6287745457767',
+      ],
     },
     {
       '@type': 'Person',
@@ -116,6 +141,7 @@ const jsonLd = {
       name: 'Sholahuddin Ahmad',
       alternateName: 'Huddin',
       url: 'https://huddin.dev',
+      image: 'https://framerusercontent.com/images/NkL1zDB0ea9KmqIpMf80b6TCw.png',
       jobTitle: 'Full-Stack Developer & UI/UX Designer',
       description: 'Full-Stack Developer & UI/UX Designer berbasis di Magelang, Jawa Tengah. Founder HaloHuddin Home Studio.',
       address: {
@@ -135,7 +161,44 @@ const jsonLd = {
         'Web Design',
         'App Development',
       ],
-      sameAs: [],
+      memberOf: [
+        {
+          '@type': 'Organization',
+          name: 'Titik Koma',
+          description: 'Programming learning space led by Sandhika Galih (Web Programming UNPAS)',
+        },
+        {
+          '@type': 'Organization',
+          name: 'Cuy Universe',
+          description: 'Software engineering and technology discussion community founded by Dea Afrizal',
+        },
+      ],
+      hasCredential: [
+        {
+          '@type': 'EducationalOccupationalCredential',
+          name: 'freeCodeCamp',
+          credentialCategory: 'certification',
+        },
+        {
+          '@type': 'EducationalOccupationalCredential',
+          name: 'Sololearn',
+          credentialCategory: 'certification',
+        },
+        {
+          '@type': 'EducationalOccupationalCredential',
+          name: 'Codepolitan',
+          credentialCategory: 'certification',
+        },
+      ],
+      sameAs: [
+        'https://www.linkedin.com/in/sholahuddin-ahmad/',
+        'https://github.com/McWooden',
+        'https://medium.com/@halohuddin',
+        'https://www.instagram.com/halohuddin',
+        'https://x.com/halohuddin',
+        'https://www.tiktok.com/@halohuddin',
+        'https://wa.me/6287745457767',
+      ],
     },
     {
       '@type': 'WebSite',

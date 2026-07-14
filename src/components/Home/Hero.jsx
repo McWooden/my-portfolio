@@ -146,7 +146,7 @@ export default function Hero({ homepageData, testimonialCard }) {
             >
               {displayImages.map((img, idx) => (
                 <div key={idx} className="w-full h-full shrink-0">
-                  <img src={img} className="w-full h-full object-cover pointer-events-none" alt="" />
+                  <img src={img} className="w-full h-full object-cover pointer-events-none" alt={`Huddin project showcase ${idx + 1}`} />
                 </div>
               ))}
             </div>

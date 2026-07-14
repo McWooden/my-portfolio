@@ -1,6 +1,6 @@
-import { projects, blogPosts } from '../data/siteData';
+import { supabase } from '../utils/supabase';
 
-export default function sitemap() {
+export default async function sitemap() {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://huddin.dev';
 
   // Base routes
@@ -11,21 +11,39 @@ export default function sitemap() {
     priority: route === '' ? 1.0 : 0.8,
   }));
 
-  // Project details routes
-  const projectRoutes = projects.map((project) => ({
-    url: `${baseUrl}/portfolio/${project.slug}`,
-    lastModified: new Date().toISOString(),
-    changeFrequency: 'monthly',
-    priority: 0.7,
-  }));
+  // Fetch all published stories from Supabase for dynamic routes
+  let projectRoutes = [];
+  let blogRoutes = [];
 
-  // Blog posts routes
-  const blogRoutes = blogPosts.map((post) => ({
-    url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: new Date().toISOString(),
-    changeFrequency: 'monthly',
-    priority: 0.6,
-  }));
+  try {
+    const { data: stories, error } = await supabase
+      .from('stories')
+      .select('slug, type, updated_at, date')
+      .eq('published', true)
+      .order('date', { ascending: false });
+
+    if (!error && stories) {
+      projectRoutes = stories
+        .filter((s) => s.type === 'project')
+        .map((project) => ({
+          url: `${baseUrl}/portfolio/${project.slug}`,
+          lastModified: project.updated_at || project.date || new Date().toISOString(),
+          changeFrequency: 'monthly',
+          priority: 0.7,
+        }));
+
+      blogRoutes = stories
+        .filter((s) => s.type === 'blog')
+        .map((post) => ({
+          url: `${baseUrl}/blog/${post.slug}`,
+          lastModified: post.updated_at || post.date || new Date().toISOString(),
+          changeFrequency: 'monthly',
+          priority: 0.6,
+        }));
+    }
+  } catch (err) {
+    console.error('Sitemap: Error fetching stories from Supabase:', err);
+  }
 
   return [...routes, ...projectRoutes, ...blogRoutes];
 }

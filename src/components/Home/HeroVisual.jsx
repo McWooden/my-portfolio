@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import ExpandableImages from './ExpandableImages';
 
-export default function HeroVisual({ contentHeight, homepageData, testimonialCard }) {
+export default function HeroVisual({ contentHeight, homepageData, testimonialCard, mousePos = { x: 0, y: 0 } }) {
   // Drag state for visual panel's floating card
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -92,8 +92,13 @@ export default function HeroVisual({ contentHeight, homepageData, testimonialCar
 
   return (
     <div 
-      style={contentHeight ? { height: `${contentHeight}px` } : {}}
-      className="w-full xl:w-1/2 relative rounded-[30px] overflow-visible bg-bg-card border-8 border-border -rotate-[1deg]"
+      style={{
+        ...(contentHeight ? { height: `${contentHeight}px` } : {}),
+        transform: `translate3d(${mousePos.x * 24}px, ${mousePos.y * 18}px, 60px) rotateY(${mousePos.x * 10}deg) rotateX(${-mousePos.y * 8}deg) rotateZ(-1deg)`,
+        transformStyle: 'preserve-3d',
+        transition: isDragging ? 'none' : 'transform 500ms ease-out'
+      }}
+      className="w-full xl:w-1/2 relative rounded-[30px] overflow-visible bg-bg-card border-8 border-border transition-all"
     >
       <ExpandableImages />
 
@@ -102,12 +107,13 @@ export default function HeroVisual({ contentHeight, homepageData, testimonialCar
         onMouseDown={handleDragStart}
         onTouchStart={handleDragStart}
         style={{
-          transform: `translate3d(${dragOffset.x}px, ${dragOffset.y}px, 0)`,
+          transform: `translate3d(calc(${dragOffset.x}px + ${mousePos.x * 20}px), calc(${dragOffset.y}px + ${mousePos.y * 16}px), 75px) rotateY(${mousePos.x * 4}deg)`,
+          transformStyle: 'preserve-3d',
           transition: isDragging ? 'none' : 'transform 600ms cubic-bezier(0.25, 1, 0.5, 1)',
           cursor: isDragging ? 'grabbing' : 'grab',
           touchAction: 'none'
         }}
-        className="absolute top-[30px] left-5 bg-white text-bg-dark p-5 rounded-3xl w-[280px] flex flex-col gap-4 z-30 select-none"
+        className="absolute top-[30px] left-5 bg-white text-bg-dark p-5 rounded-3xl w-[280px] flex flex-col gap-4 z-30 select-none shadow-[0_20px_50px_rgba(0,0,0,0.3)]"
       >
         <p className="font-sans text-[0.95rem] leading-[1.4] text-[#1a1a1a] font-medium">
           "{quote}"
@@ -133,7 +139,13 @@ export default function HeroVisual({ contentHeight, homepageData, testimonialCar
       </div>
 
       {/* Floating slots badge */}
-      <div className="absolute bottom-5 right-5 bg-[#222222]/95 border border-border px-6 py-3 rounded-[20px] flex items-center gap-[10px] z-30">
+      <div 
+        style={{
+          transform: `translate3d(${mousePos.x * 16}px, ${mousePos.y * 14}px, 60px) rotateY(${mousePos.x * 2}deg)`,
+          transition: 'transform 500ms ease-out'
+        }}
+        className="absolute bottom-5 right-5 bg-[#222222]/95 border border-border px-6 py-3 rounded-[20px] flex items-center gap-[10px] z-30 shadow-[0_15px_35px_rgba(0,0,0,0.3)]"
+      >
         <span className={`pulse-dot status-${status}`}></span>
         <span className="font-mono text-[0.95rem] font-medium uppercase text-text-primary tracking-[-0.02em]">
           {statusText}

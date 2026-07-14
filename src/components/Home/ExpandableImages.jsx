@@ -14,6 +14,10 @@ export default function ExpandableImages() {
   return (
     <div 
       className="w-full h-full flex gap-[6px] p-0 overflow-hidden rounded-[22px] select-none bg-bg-card"
+      style={{
+        isolation: 'isolate',
+        transform: 'translate3d(0, 0, 0)',
+      }}
       onMouseLeave={() => setHoveredIndex(null)}
     >
       {projectImages.map((src, idx) => (
@@ -26,12 +30,14 @@ export default function ExpandableImages() {
             minWidth: 0,
             transition: 'flex 500ms cubic-bezier(0.25, 1, 0.3, 1)',
             willChange: 'flex',
+            isolation: 'isolate',
+            transform: 'translate3d(0, 0, 0)',
           }}
         >
           <img
             src={src}
             alt={`Project preview ${idx + 1}`}
-            className="w-full h-full object-cover pointer-events-none"
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
             style={{
               transform: hoveredIndex === idx ? 'scale(1.05)' : 'scale(1)',
               transition: 'transform 700ms cubic-bezier(0.25, 1, 0.3, 1)',

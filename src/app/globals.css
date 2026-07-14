@@ -134,13 +134,18 @@ DESIGN SYSTEM & CODING RULES (Keep styling consistent / No hallucinations)
   }
 
   /* Scrollbar */
-  ::-webkit-scrollbar       { width: 8px; }
-  ::-webkit-scrollbar-track { background: theme(--color-bg-dark); }
-  ::-webkit-scrollbar-thumb {
-    background: theme(--color-bg-card);
-    border-radius: 4px;
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #1a1a1a #262626;
   }
-  ::-webkit-scrollbar-thumb:hover { background: theme(--color-text-muted); }
+
+  ::-webkit-scrollbar       { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: #262626; }
+  ::-webkit-scrollbar-thumb {
+    background: #1a1a1a;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: #333333; }
 }
 
 /* ── Custom Utilities ── */

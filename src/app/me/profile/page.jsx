@@ -11,6 +11,7 @@ export default function ProfilePage() {
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
+  const [bio, setBio] = useState('');
   const [uploading, setUploading] = useState(false);
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
   const [isCopied, setIsCopied] = useState(false);
@@ -39,6 +40,7 @@ export default function ProfilePage() {
         setName(u.user_metadata?.name || u.user_metadata?.full_name || '');
         setUsername(u.user_metadata?.username || '');
         setAvatarUrl(u.user_metadata?.avatar_url || '');
+        setBio(u.user_metadata?.bio || '');
       } else {
         window.location.href = '/login';
       }
@@ -100,7 +102,8 @@ export default function ProfilePage() {
         data: {
           name,
           username,
-          avatar_url: avatarUrl
+          avatar_url: avatarUrl,
+          bio
         }
       });
       if (error) throw error;
@@ -269,6 +272,17 @@ export default function ProfilePage() {
                     required
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-mono uppercase tracking-widest text-neutral-500 mb-2">Short Bio</label>
+                <textarea
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  placeholder="Tell us about yourself..."
+                  rows={4}
+                  className="w-full px-4 py-3 bg-neutral-900 border border-neutral-800 focus:border-accent/40 rounded-2xl text-sm text-white placeholder-neutral-700 focus:outline-none transition-all resize-none"
+                />
               </div>
 
               <button

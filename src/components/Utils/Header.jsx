@@ -6,13 +6,29 @@ import Button from './Button';
 import { SiGithub, SiMedium } from 'react-icons/si';
 import { FaLinkedinIn } from "react-icons/fa";
 import { navigationMenu } from '../../data/siteData';
+import { supabase } from '../../utils/supabase';
 
 export default function Header({ availabilityStatus = 'available' }) {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState(false);
+  const [session, setSession] = useState(null);
   const headerRef = useRef(null);
   const desktopMenuRef = useRef(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -91,16 +107,41 @@ export default function Header({ availabilityStatus = 'available' }) {
               {/* Desktop Dropdown Menu (no hover animations/bg-changes on children) */}
               {isDesktopMenuOpen && (
                 <div className="absolute top-[45px] right-0 w-44 bg-bg-dark border border-border rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-3 duration-200">
-                  <Link
-                    href="/login"
-                    onClick={() => setIsDesktopMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary font-mono uppercase tracking-tight"
-                  >
-                    <svg className="w-4 h-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                    </svg>
-                    <span>Login</span>
-                  </Link>
+                  {session ? (
+                    <>
+                      <Link
+                        href="/me/stories"
+                        onClick={() => setIsDesktopMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary font-mono uppercase tracking-tight"
+                      >
+                        <svg className="w-4 h-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <span>Stories</span>
+                      </Link>
+                      <Link
+                        href="/logout"
+                        onClick={() => setIsDesktopMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary font-mono uppercase tracking-tight"
+                      >
+                        <svg className="w-4 h-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        <span>Logout</span>
+                      </Link>
+                    </>
+                  ) : (
+                    <Link
+                      href="/login"
+                      onClick={() => setIsDesktopMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary font-mono uppercase tracking-tight"
+                    >
+                      <svg className="w-4 h-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                      </svg>
+                      <span>Login</span>
+                    </Link>
+                  )}
                   <Link
                     href="/playground"
                     onClick={() => setIsDesktopMenuOpen(false)}
@@ -196,17 +237,33 @@ export default function Header({ availabilityStatus = 'available' }) {
       {/* Mobile Expandable Menu Dropdown */}
       <div
         className={`absolute top-[100px] left-0 w-full bg-bg-dark/95 px-6 z-40 transition-all duration-300 ease-in-out md:hidden overflow-hidden ${
-          isMenuOpen ? 'max-h-[450px] py-8 opacity-100' : 'max-h-0 py-0 opacity-0 pointer-events-none'
+          isMenuOpen ? 'max-h-[500px] py-8 opacity-100' : 'max-h-0 py-0 opacity-0 pointer-events-none'
         }`}
       >
         <div className="flex flex-col gap-6">
           {[
             ...navigationMenu,
-            {
-              label: 'Login',
-              path: '/login',
-              svgPath: 'M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1'
-            },
+            ...(session
+              ? [
+                  {
+                    label: 'Stories',
+                    path: '/me/stories',
+                    svgPath: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'
+                  },
+                  {
+                    label: 'Logout',
+                    path: '/logout',
+                    svgPath: 'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1'
+                  }
+                ]
+              : [
+                  {
+                    label: 'Login',
+                    path: '/login',
+                    svgPath: 'M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1'
+                  }
+                ]
+            ),
             {
               label: 'Playground',
               path: '/playground',

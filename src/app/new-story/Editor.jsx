@@ -1751,7 +1751,7 @@ export default function Editor({ type }) {
 
   const createEditorDropdown = (selectedLang = 'txt') => {
     const dropdown = document.createElement('div');
-    dropdown.className = 'code-language-dropdown relative select-none z-20';
+    dropdown.className = 'code-language-dropdown relative z-20';
     
     const btn = document.createElement('button');
     btn.className = 'code-language-btn text-neutral-400 text-xs font-sans opacity-70 hover:text-white transition-colors flex items-center gap-1 cursor-pointer py-1';
@@ -1811,7 +1811,7 @@ export default function Editor({ type }) {
 
     // Header bar
     const header = document.createElement('div');
-    header.className = 'code-block-header flex items-center justify-between select-none';
+    header.className = 'code-block-header flex items-center justify-between';
     header.setAttribute('contenteditable', 'false');
 
     // Dropdown container
@@ -2807,8 +2807,9 @@ export default function Editor({ type }) {
 
     pushHistory(true);
 
-    const caretOffset = getCaretCharacterOffsetWithin(pre);
-    const text = pre.textContent || '';
+    const codeEl = pre.querySelector('.pre--content') || pre;
+    const caretOffset = getCaretCharacterOffsetWithin(codeEl);
+    const text = codeEl.textContent || '';
     
     const beforeText = text.substring(0, caretOffset);
     const afterText = text.substring(caretOffset);
@@ -2843,7 +2844,7 @@ export default function Editor({ type }) {
       secondPre.setAttribute('spellcheck', 'false');
       
       const header = document.createElement('div');
-      header.className = 'code-block-header flex items-center justify-between select-none';
+      header.className = 'code-block-header flex items-center justify-between';
       header.setAttribute('contenteditable', 'false');
       
       const dropdown = createEditorDropdown(currentLang);
@@ -3413,7 +3414,7 @@ export default function Editor({ type }) {
           box-sizing: border-box !important;
           position: relative !important;
           border-radius: 16px !important; /* Match rounded-2xl */
-          overflow: hidden !important;
+          overflow: visible !important;
           width: 100% !important;
         }
         .code-block-wrapper .code-block-header {

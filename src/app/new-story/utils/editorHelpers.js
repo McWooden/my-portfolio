@@ -204,7 +204,7 @@ export const highlightSyntax = (codeText, lang) => {
 
 const createCustomDropdown = (doc, currentLang, languageColors) => {
   const container = doc.createElement('div');
-  container.className = 'code-language-dropdown relative select-none z-20';
+  container.className = 'code-language-dropdown relative z-20';
   
   const btn = doc.createElement('button');
   btn.className = 'code-language-btn text-neutral-400 text-xs font-sans opacity-70 hover:text-white transition-colors flex items-center gap-1 cursor-pointer py-1';
@@ -284,11 +284,11 @@ export const wrapCodeBlocksInWrapper = (html) => {
     if (!header) {
       header = doc.createElement('div');
       header.setAttribute('contenteditable', 'false');
-      header.className = 'code-block-header flex items-center justify-between select-none';
+      header.className = 'code-block-header flex items-center justify-between';
       pre.insertBefore(header, pre.firstChild);
     } else {
       header.setAttribute('contenteditable', 'false');
-      header.className = 'code-block-header flex items-center justify-between select-none';
+      header.className = 'code-block-header flex items-center justify-between';
     }
 
     let dropdown = header.querySelector('.code-language-dropdown');
@@ -296,7 +296,7 @@ export const wrapCodeBlocksInWrapper = (html) => {
       dropdown = createCustomDropdown(doc, currentLang, languageColors);
       header.appendChild(dropdown);
     } else {
-      dropdown.className = 'code-language-dropdown relative select-none z-20';
+      dropdown.className = 'code-language-dropdown relative z-20';
       const span = dropdown.querySelector('.selected-lang');
       if (span) span.textContent = currentLang;
       const items = dropdown.querySelectorAll('.code-language-item');

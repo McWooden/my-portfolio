@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import ScratchCanvas from './ScratchCanvas';
+import ExpandableImages from './ExpandableImages';
 
 export default function HeroVisual({ contentHeight, homepageData, testimonialCard }) {
   // Drag state for visual panel's floating card
@@ -95,7 +95,7 @@ export default function HeroVisual({ contentHeight, homepageData, testimonialCar
       style={contentHeight ? { height: `${contentHeight}px` } : {}}
       className="w-full xl:w-1/2 relative rounded-[30px] overflow-visible bg-bg-card border-8 border-border -rotate-[1deg]"
     >
-      <ScratchCanvas />
+      <ExpandableImages />
 
       {/* Floating testimonial card */}
       <div

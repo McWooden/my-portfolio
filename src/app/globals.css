@@ -536,6 +536,7 @@ DESIGN SYSTEM & CODING RULES (Keep styling consistent / No hallucinations)
   border: 1px solid #171717 !important;
   border-radius: 4px;
   padding: 32px !important;
+  overflow: visible !important;
 }
 
 .code-block-wrapper pre {

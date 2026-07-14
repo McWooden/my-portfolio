@@ -44,6 +44,9 @@ export const metadata = {
     title: 'Huddin | Full-Stack Developer & UI/UX Designer',
     description: 'Professional portfolio and blog of Huddin, a skilled developer and designer specializing in Brand Systems, UI/UX Design, and App Development.',
   },
+  verification: {
+    google: 'tiI7BdXji1tApq0xUV3dCx8GDygsKi69sobZn1oLOrw',
+  },
 };
 
 export default function RootLayout({ children }) {

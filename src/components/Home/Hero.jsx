@@ -58,15 +58,15 @@ export default function Hero({ homepageData, testimonialCard }) {
       setMousePos({ x: 0, y: 0 });
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
     const container = containerRef.current;
     if (container) {
+      container.addEventListener('mousemove', handleMouseMove);
       container.addEventListener('mouseleave', handleMouseLeave);
     }
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
       if (container) {
+        container.removeEventListener('mousemove', handleMouseMove);
         container.removeEventListener('mouseleave', handleMouseLeave);
       }
     };
@@ -159,20 +159,25 @@ export default function Hero({ homepageData, testimonialCard }) {
       <div className="room-grid-wall-right hidden xl:block" />
 
       <div className="room-stage flex flex-col xl:flex-row xl:items-stretch items-center gap-[60px] w-full relative">
-        {/* Content Panel (Left side with light depth and independent tilt) */}
+        {/* Content Panel (Left side container - serves as 3D frame) */}
         <div 
           ref={contentRef} 
           className="flex flex-col items-center text-center xl:items-start xl:text-left xl:w-1/2 w-full justify-center z-10 transition-transform duration-500 ease-out"
           style={{
-            transform: `translate3d(${mousePos.x * 12}px, ${mousePos.y * 10}px, 40px) rotateX(${-mousePos.y * 5}deg) rotateY(${mousePos.x * 6}deg)`,
+            transform: `translate3d(${mousePos.x * 4}px, ${mousePos.y * 3}px, 10px)`,
             transformStyle: 'preserve-3d'
           }}
         >
 
-          {/* Interactive rolling job slot */}
+          {/* Block 1: Interactive rolling job slot */}
           <button
             onClick={rollJob}
             disabled={isRolling}
+            style={{
+              transform: `translate3d(${mousePos.x * 8}px, ${mousePos.y * 6}px, 25px) rotateX(${-mousePos.y * 3}deg) rotateY(${mousePos.x * 4}deg)`,
+              transformStyle: 'preserve-3d',
+              transition: 'transform 500ms ease-out'
+            }}
             className="font-mono text-[1rem] tracking-[-0.02em] text-text-primary uppercase mb-5 select-none cursor-pointer flex flex-col items-center xl:items-start h-[1.5em] overflow-hidden group focus:outline-none disabled:cursor-default"
             title="Click to roll next job!"
           >
@@ -194,58 +199,75 @@ export default function Hero({ homepageData, testimonialCard }) {
             </div>
           </button>
 
-          <h1 className="max-w-[720px] text-[clamp(3rem,14vw,3.6rem)] sm:text-[3.6rem] md:text-[4.6rem] lg:text-[4.8rem] font-medium leading-[1.45] tracking-[-0.04em] text-white mb-6">
-            I'm The{" "}
-            <span
-              className="inline-flex items-center justify-center mx-1 sm:mx-2 w-[2.2em] h-[1.15em] rounded-[24px] overflow-hidden bg-black select-none align-middle relative -rotate-2"
-              style={{
-                boxShadow: '0 0.5px 1px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4), 0 3px 6px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.2), 0 16px 24px rgba(0, 0, 0, 0.15), 0 24px 32px rgba(0, 0, 0, 0.09)'
-              }}
-            >
-              <div
-                className="absolute inset-0 flex flex-col"
-                onTransitionEnd={handleTransitionEnd}
+          {/* Block 2: Headline + Description Panel */}
+          <div
+            style={{
+              transform: `translate3d(${mousePos.x * 16}px, ${mousePos.y * 12}px, 50px) rotateX(${-mousePos.y * 6}deg) rotateY(${mousePos.x * 8}deg)`,
+              transformStyle: 'preserve-3d',
+              transition: 'transform 500ms ease-out'
+            }}
+            className="flex flex-col items-center text-center xl:items-start xl:text-left w-full"
+          >
+            <h1 className="max-w-[720px] text-[clamp(3rem,14vw,3.6rem)] sm:text-[3.6rem] md:text-[4.6rem] lg:text-[4.8rem] font-medium leading-[1.45] tracking-[-0.04em] text-white mb-6">
+              I'm The{" "}
+              <span
+                className="inline-flex items-center justify-center mx-1 sm:mx-2 w-[2.2em] h-[1.15em] rounded-[24px] overflow-hidden bg-black select-none align-middle relative -rotate-2"
                 style={{
-                  transform: `translateY(-${slideIndex * 100}%)`,
-                  transition: isTransitioning ? 'transform 600ms ease-in-out' : 'none'
+                  boxShadow: '0 0.5px 1px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4), 0 3px 6px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.2), 0 16px 24px rgba(0, 0, 0, 0.15), 0 24px 32px rgba(0, 0, 0, 0.09)'
                 }}
               >
-                {displayImages.map((img, idx) => (
-                  <div key={idx} className="w-full h-full shrink-0">
-                    <img src={img} className="w-full h-full object-cover pointer-events-none" alt={`Huddin project showcase ${idx + 1}`} />
-                  </div>
-                ))}
-              </div>
-              {/* Inverted border overlay (White) */}
-              <div className="absolute inset-0 border-2 border-white rounded-[inherit] pointer-events-none z-10" />
-            </span>{" "}
-            <br className="md:hidden" />
-            Coder{" "}
-            <br className="hidden md:inline" />
-            Who{" "}
-            <br className="md:hidden" />
-            <span
-              className="inline-flex items-center justify-center mx-1 sm:mx-2 w-[1.9em] h-[1.15em] rounded-[24px] overflow-hidden bg-black select-none align-middle relative rotate-2"
-              style={{
-                boxShadow: '0 0.5px 1px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4), 0 3px 6px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.2), 0 16px 24px rgba(0, 0, 0, 0.15), 0 24px 32px rgba(0, 0, 0, 0.09)'
-              }}
-            >
-              <img
-                src="/assets/hero-loop.gif"
-                className="w-full h-full object-cover pointer-events-none opacity-85"
-                alt="Slow looping design animation"
-              />
-              {/* Inverted border overlay (White) */}
-              <div className="absolute inset-0 border-2 border-white rounded-[inherit] pointer-events-none z-10" />
-            </span>{" "}
-            Designs
-          </h1>
-          <p className="text-[0.95rem] sm:text-[1.25rem] text-text-secondary leading-[1.4] mb-10 w-[90%] sm:w-full max-w-[480px]">
-            Huddin is a Magelang programmer, known for clean and expressive code — who also designs the brand
-          </p>
+                <div
+                  className="absolute inset-0 flex flex-col"
+                  onTransitionEnd={handleTransitionEnd}
+                  style={{
+                    transform: `translateY(-${slideIndex * 100}%)`,
+                    transition: isTransitioning ? 'transform 600ms ease-in-out' : 'none'
+                  }}
+                >
+                  {displayImages.map((img, idx) => (
+                    <div key={idx} className="w-full h-full shrink-0">
+                      <img src={img} className="w-full h-full object-cover pointer-events-none" alt={`Huddin project showcase ${idx + 1}`} />
+                    </div>
+                  ))}
+                </div>
+                {/* Inverted border overlay (White) */}
+                <div className="absolute inset-0 border-2 border-white rounded-[inherit] pointer-events-none z-10" />
+              </span>{" "}
+              <br className="md:hidden" />
+              Coder{" "}
+              <br className="hidden md:inline" />
+              Who{" "}
+              <br className="md:hidden" />
+              <span
+                className="inline-flex items-center justify-center mx-1 sm:mx-2 w-[1.9em] h-[1.15em] rounded-[24px] overflow-hidden bg-black select-none align-middle relative rotate-2"
+                style={{
+                  boxShadow: '0 0.5px 1px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4), 0 3px 6px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.2), 0 16px 24px rgba(0, 0, 0, 0.15), 0 24px 32px rgba(0, 0, 0, 0.09)'
+                }}
+              >
+                <img
+                  src="/assets/hero-loop.gif"
+                  className="w-full h-full object-cover pointer-events-none opacity-85"
+                  alt="Slow looping design animation"
+                />
+                {/* Inverted border overlay (White) */}
+                <div className="absolute inset-0 border-2 border-white rounded-[inherit] pointer-events-none z-10" />
+              </span>{" "}
+              Designs
+            </h1>
+            <p className="text-[0.95rem] sm:text-[1.25rem] text-text-secondary leading-[1.4] mb-10 w-[90%] sm:w-full max-w-[480px]">
+              Huddin is a Magelang programmer, known for clean and expressive code — who also designs the brand
+            </p>
+          </div>
 
-          {/* CTA buttons */}
-          <div className="flex gap-4 w-full justify-center xl:justify-start mb-10">
+          {/* Block 3: CTA buttons wrapper */}
+          <div 
+            style={{
+              transform: `translate3d(${mousePos.x * 12}px, ${mousePos.y * 9}px, 35px) rotateX(${-mousePos.y * 4}deg) rotateY(${mousePos.x * 5}deg)`,
+              transformStyle: 'preserve-3d',
+              transition: 'transform 500ms ease-out'
+            }}
+            className="flex gap-4 w-full justify-center xl:justify-start mb-10"
+          >
             <Button href="#contact" variant="primary">
               Get started
             </Button>
@@ -254,8 +276,15 @@ export default function Hero({ homepageData, testimonialCard }) {
             </Button>
           </div>
 
-          {/* Reviews badge */}
-          <div className="flex items-center gap-3">
+          {/* Block 4: Reviews badge wrapper */}
+          <div 
+            style={{
+              transform: `translate3d(${mousePos.x * 6}px, ${mousePos.y * 4}px, 20px) rotateX(${-mousePos.y * 2}deg) rotateY(${mousePos.x * 3}deg)`,
+              transformStyle: 'preserve-3d',
+              transition: 'transform 500ms ease-out'
+            }}
+            className="flex items-center gap-3"
+          >
             <div className="flex -space-x-3 mr-2">
               {[
                 'https://framerusercontent.com/images/XeylT9Ic2cwthJBQFpH03b3XEo.png?width=1024&height=1024',

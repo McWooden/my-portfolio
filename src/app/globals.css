@@ -313,14 +313,6 @@ DESIGN SYSTEM & CODING RULES (Keep styling consistent / No hallucinations)
     background: #333333;
   }
 
-  /* Fix Keystatic Slate editor placeholder wrapping and overlapping */
-  [data-slate-placeholder="true"] {
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    max-width: 100% !important;
-    display: inline-block !important;
-  }
 
   /* Project Document Content HTML Styling */
   .project-document-content h1 {

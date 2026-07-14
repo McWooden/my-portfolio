@@ -1,7 +1,7 @@
 import { supabase } from '../utils/supabase';
 
 export default async function sitemap() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://huddin.dev';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://halohuddin.vercel.app';
 
   // Base routes
   const routes = ['', '/portfolio', '/blog', '/network'].map((route) => ({

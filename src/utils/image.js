@@ -1,9 +1,9 @@
 /**
- * Resolves an image value from Keystatic schema fields.
- * Handles string paths (from fields.image()), null/undefined, and 
- * legacy object formats for backward compatibility.
+ * Resolves an image value from schema fields.
+ * Handles string paths, null/undefined, and legacy object formats
+ * for backward compatibility.
  * 
- * @param {string | object | null} imageField - The image field value from Keystatic
+ * @param {string | object | null} imageField - The image field value
  * @returns {string | null} The resolved image URL or path, null if none
  */
 export function getImageUrl(imageField) {

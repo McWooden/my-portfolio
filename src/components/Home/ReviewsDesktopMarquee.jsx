@@ -102,7 +102,14 @@ export default function ReviewsDesktopMarquee({ reviews = staticReviews }) {
   };
 
   return (
-    <div ref={containerRef} className="relative w-full overflow-hidden mt-16 py-4 select-none">
+    <div 
+      ref={containerRef} 
+      className="relative w-full overflow-hidden mt-16 py-4 select-none"
+      style={{
+        contentVisibility: 'auto',
+        containIntrinsicSize: '0 400px'
+      }}
+    >
       {/* Left Edge Hotspot (Rewind) */}
       <div
         onClick={() => triggerSpeedChange('backward')}

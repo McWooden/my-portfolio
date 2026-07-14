@@ -24,7 +24,22 @@ export default function Hero({ homepageData, testimonialCard }) {
     return () => resizeObserver.disconnect();
   }, []);
 
+  const mouseRef = useRef({ x: 0, y: 0 });
+  const rafRef = useRef(null);
+
   useEffect(() => {
+    const updateState = () => {
+      setRotate({
+        x: -mouseRef.current.y * 8, // rotation limits
+        y: mouseRef.current.x * 12
+      });
+      setMousePos({
+        x: mouseRef.current.x,
+        y: mouseRef.current.y
+      });
+      rafRef.current = null;
+    };
+
     const handleMouseMove = (e) => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
@@ -43,17 +58,19 @@ export default function Hero({ homepageData, testimonialCard }) {
       const clampedDx = Math.max(-1.5, Math.min(1.5, dx));
       const clampedDy = Math.max(-1.5, Math.min(1.5, dy));
       
-      setRotate({
-        x: -clampedDy * 8, // rotation limits
-        y: clampedDx * 12
-      });
-      setMousePos({
-        x: clampedDx,
-        y: clampedDy
-      });
+      mouseRef.current = { x: clampedDx, y: clampedDy };
+
+      if (!rafRef.current) {
+        rafRef.current = requestAnimationFrame(updateState);
+      }
     };
 
     const handleMouseLeave = () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      mouseRef.current = { x: 0, y: 0 };
       setRotate({ x: 0, y: 0 });
       setMousePos({ x: 0, y: 0 });
     };
@@ -65,6 +82,9 @@ export default function Hero({ homepageData, testimonialCard }) {
     }
 
     return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
       if (container) {
         container.removeEventListener('mousemove', handleMouseMove);
         container.removeEventListener('mouseleave', handleMouseLeave);

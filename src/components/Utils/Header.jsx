@@ -13,6 +13,7 @@ export default function Header({ availabilityStatus = 'available' }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState(false);
   const [session, setSession] = useState(null);
+  const [isSticky, setIsSticky] = useState(false);
   const headerRef = useRef(null);
   const desktopMenuRef = useRef(null);
 
@@ -29,6 +30,30 @@ export default function Header({ availabilityStatus = 'available' }) {
       subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const heroEl = document.getElementById('hero');
+      // If we are on a detail page or there is no hero section, make it sticky immediately
+      if (!heroEl) {
+        setIsSticky(true);
+        return;
+      }
+      
+      const threshold = heroEl.offsetHeight || 600;
+      if (window.scrollY >= threshold) {
+        setIsSticky(true);
+      } else {
+        setIsSticky(false);
+      }
+    };
+
+    // Run once on load
+    handleScroll();
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [pathname]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -65,7 +90,14 @@ export default function Header({ availabilityStatus = 'available' }) {
     }`;
 
   return (
-    <nav ref={headerRef} className="fixed top-0 left-0 w-full h-[100px] bg-bg-dark z-[1000] flex justify-center items-center">
+    <nav 
+      ref={headerRef} 
+      className={`left-0 w-full h-[100px] bg-bg-dark z-[1000] flex justify-center items-center transition-all duration-300 ${
+        isSticky 
+          ? 'fixed top-0 shadow-lg border-b border-border animate-in fade-in slide-in-from-top duration-300' 
+          : 'absolute top-0'
+      }`}
+    >
       <div className="w-full max-w-[1600px] px-5 xl:px-10 flex justify-between items-center relative h-full">
 
         {/* Left — Nav Links (Desktop) / Hamburger Button & "Huddin" (Mobile) */}

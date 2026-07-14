@@ -92,10 +92,10 @@ export default function Header({ availabilityStatus = 'available' }) {
   return (
     <nav 
       ref={headerRef} 
-      className={`left-0 w-full h-[100px] bg-bg-dark z-[1000] flex justify-center items-center transition-all duration-300 ${
+      className={`left-0 w-full h-[100px] z-[1000] flex justify-center items-center transition-all duration-300 ${
         isSticky 
-          ? 'fixed top-0 shadow-lg border-b border-border animate-in fade-in slide-in-from-top duration-300' 
-          : 'absolute top-0'
+          ? 'fixed top-0 bg-bg-dark shadow-lg border-b border-border animate-in fade-in slide-in-from-top duration-300' 
+          : 'absolute top-0 bg-transparent'
       }`}
     >
       <div className="w-full max-w-[1600px] px-5 xl:px-10 flex justify-between items-center relative h-full">

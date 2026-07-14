@@ -1,6 +1,5 @@
 import React from 'react';
 import Hero from '../components/Home/Hero';
-import Ticker from '../components/Utils/Ticker';
 import ServicesSection from '../components/Home/ServicesSection';
 import PortfolioSection from '../components/Home/PortfolioSection';
 import ReviewsSection from '../components/Home/ReviewsSection';
@@ -10,14 +9,11 @@ import Contact from '../components/Utils/Contact';
 
 export default function Home({ projects, blogPosts, faqs, reviews, homepageData, testimonialCard }) {
   return (
-    <div className="pt-20 bg-bg-dark">
+    <div className="pt-20 bg-transparent">
       {/* 1. Hero Section */}
       <Hero homepageData={homepageData} testimonialCard={testimonialCard} />
 
-      {/* 2. Ticker */}
-      <Ticker />
-
-      {/* 3. Services */}
+      {/* 2. Services */}
       <ServicesSection />
 
       {/* 4. Projects */}

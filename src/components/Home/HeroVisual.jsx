@@ -98,7 +98,7 @@ export default function HeroVisual({ contentHeight, homepageData, testimonialCar
         transformStyle: 'preserve-3d',
         transition: isDragging ? 'none' : 'transform 500ms ease-out'
       }}
-      className="w-full xl:w-1/2 relative rounded-[30px] overflow-visible bg-bg-card border-8 border-border transition-all"
+      className="w-full min-h-[380px] sm:min-h-[440px] xl:min-h-[500px] relative rounded-[30px] overflow-visible bg-bg-card border-8 border-border transition-all"
     >
       <ExpandableImages />
 

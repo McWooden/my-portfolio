@@ -2,13 +2,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Button from '../Utils/Button';
 import HeroVisual from './HeroVisual';
+import Ticker from '../Utils/Ticker';
 
 export default function Hero({ homepageData, testimonialCard }) {
   const contentRef = useRef(null);
   const containerRef = useRef(null);
   const [contentHeight, setContentHeight] = useState(null);
-  const [rotate, setRotate] = useState({ x: 0, y: 0 });
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const visualRef = useRef(null);
+  const [leftMousePos, setLeftMousePos] = useState({ x: 0, y: 0 });
+  const [rightMousePos, setRightMousePos] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     if (!contentRef.current) return;
@@ -24,70 +26,120 @@ export default function Hero({ homepageData, testimonialCard }) {
     return () => resizeObserver.disconnect();
   }, []);
 
-  const mouseRef = useRef({ x: 0, y: 0 });
-  const rafRef = useRef(null);
+  const leftMouseRef = useRef({ x: 0, y: 0 });
+  const leftRafRef = useRef(null);
 
   useEffect(() => {
-    const updateState = () => {
-      setRotate({
-        x: -mouseRef.current.y * 8, // rotation limits
-        y: mouseRef.current.x * 12
+    const updateLeftState = () => {
+      setLeftMousePos({
+        x: leftMouseRef.current.x,
+        y: leftMouseRef.current.y
       });
-      setMousePos({
-        x: mouseRef.current.x,
-        y: mouseRef.current.y
-      });
-      rafRef.current = null;
+      leftRafRef.current = null;
     };
 
     const handleMouseMove = (e) => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      
+      if (!contentRef.current) return;
+      const rect = contentRef.current.getBoundingClientRect();
       const xc = rect.width / 2;
       const yc = rect.height / 2;
-      
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       
-      // Normalized values (-1 to 1)
       const dx = (x - xc) / xc;
       const dy = (y - yc) / yc;
       
-      // Limit to actual window bounds to prevent extreme values
-      const clampedDx = Math.max(-1.5, Math.min(1.5, dx));
-      const clampedDy = Math.max(-1.5, Math.min(1.5, dy));
-      
-      mouseRef.current = { x: clampedDx, y: clampedDy };
+      leftMouseRef.current = {
+        x: Math.max(-1.5, Math.min(1.5, dx)),
+        y: Math.max(-1.5, Math.min(1.5, dy))
+      };
 
-      if (!rafRef.current) {
-        rafRef.current = requestAnimationFrame(updateState);
+      if (!leftRafRef.current) {
+        leftRafRef.current = requestAnimationFrame(updateLeftState);
       }
     };
 
     const handleMouseLeave = () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = null;
+      if (leftRafRef.current) {
+        cancelAnimationFrame(leftRafRef.current);
+        leftRafRef.current = null;
       }
-      mouseRef.current = { x: 0, y: 0 };
-      setRotate({ x: 0, y: 0 });
-      setMousePos({ x: 0, y: 0 });
+      leftMouseRef.current = { x: 0, y: 0 };
+      setLeftMousePos({ x: 0, y: 0 });
     };
 
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener('mousemove', handleMouseMove);
-      container.addEventListener('mouseleave', handleMouseLeave);
+    const el = contentRef.current;
+    if (el) {
+      el.addEventListener('mousemove', handleMouseMove);
+      el.addEventListener('mouseleave', handleMouseLeave);
     }
 
     return () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
+      if (leftRafRef.current) {
+        cancelAnimationFrame(leftRafRef.current);
       }
-      if (container) {
-        container.removeEventListener('mousemove', handleMouseMove);
-        container.removeEventListener('mouseleave', handleMouseLeave);
+      if (el) {
+        el.removeEventListener('mousemove', handleMouseMove);
+        el.removeEventListener('mouseleave', handleMouseLeave);
+      }
+    };
+  }, []);
+
+  const rightMouseRef = useRef({ x: 0, y: 0 });
+  const rightRafRef = useRef(null);
+
+  useEffect(() => {
+    const updateRightState = () => {
+      setRightMousePos({
+        x: rightMouseRef.current.x,
+        y: rightMouseRef.current.y
+      });
+      rightRafRef.current = null;
+    };
+
+    const handleMouseMove = (e) => {
+      if (!visualRef.current) return;
+      const rect = visualRef.current.getBoundingClientRect();
+      const xc = rect.width / 2;
+      const yc = rect.height / 2;
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      const dx = (x - xc) / xc;
+      const dy = (y - yc) / yc;
+      
+      rightMouseRef.current = {
+        x: Math.max(-1.5, Math.min(1.5, dx)),
+        y: Math.max(-1.5, Math.min(1.5, dy))
+      };
+
+      if (!rightRafRef.current) {
+        rightRafRef.current = requestAnimationFrame(updateRightState);
+      }
+    };
+
+    const handleMouseLeave = () => {
+      if (rightRafRef.current) {
+        cancelAnimationFrame(rightRafRef.current);
+        rightRafRef.current = null;
+      }
+      rightMouseRef.current = { x: 0, y: 0 };
+      setRightMousePos({ x: 0, y: 0 });
+    };
+
+    const el = visualRef.current;
+    if (el) {
+      el.addEventListener('mousemove', handleMouseMove);
+      el.addEventListener('mouseleave', handleMouseLeave);
+    }
+
+    return () => {
+      if (rightRafRef.current) {
+        cancelAnimationFrame(rightRafRef.current);
+      }
+      if (el) {
+        el.removeEventListener('mousemove', handleMouseMove);
+        el.removeEventListener('mouseleave', handleMouseLeave);
       }
     };
   }, []);
@@ -172,19 +224,14 @@ export default function Hero({ homepageData, testimonialCard }) {
       id="hero"
       className="perspective-3d-room pt-[100px] pb-8 px-5 xl:pt-[110px] xl:pb-12 xl:px-10 max-w-[1600px] mx-auto relative overflow-visible"
     >
-      {/* Room Boundaries (Ambient Grids) - Placed absolute inside the section relative to the page */}
-      <div className="room-grid-wall-back" />
-      <div className="room-grid-floor" />
-      <div className="room-grid-wall-left hidden xl:block" />
-      <div className="room-grid-wall-right hidden xl:block" />
 
-      <div className="room-stage flex flex-col xl:flex-row xl:items-stretch items-center gap-[60px] w-full relative">
+      <div className="room-stage flex flex-col xl:flex-row xl:items-stretch items-center gap-[60px] w-full relative z-10">
         {/* Content Panel (Left side container - serves as 3D frame) */}
         <div 
           ref={contentRef} 
           className="flex flex-col items-center text-center xl:items-start xl:text-left xl:w-1/2 w-full justify-center z-10 transition-transform duration-500 ease-out"
           style={{
-            transform: `translate3d(${mousePos.x * 4}px, ${mousePos.y * 3}px, 10px)`,
+            transform: `translate3d(${leftMousePos.x * 4}px, ${leftMousePos.y * 3}px, 10px)`,
             transformStyle: 'preserve-3d'
           }}
         >
@@ -194,7 +241,7 @@ export default function Hero({ homepageData, testimonialCard }) {
             onClick={rollJob}
             disabled={isRolling}
             style={{
-              transform: `translate3d(${mousePos.x * 8}px, ${mousePos.y * 6}px, 25px) rotateX(${-mousePos.y * 3}deg) rotateY(${mousePos.x * 4}deg)`,
+              transform: `translate3d(${leftMousePos.x * 8}px, ${leftMousePos.y * 6}px, 25px) rotateX(${-leftMousePos.y * 3}deg) rotateY(${leftMousePos.x * 4}deg)`,
               transformStyle: 'preserve-3d',
               transition: 'transform 500ms ease-out'
             }}
@@ -222,7 +269,7 @@ export default function Hero({ homepageData, testimonialCard }) {
           {/* Block 2: Headline + Description Panel */}
           <div
             style={{
-              transform: `translate3d(${mousePos.x * 16}px, ${mousePos.y * 12}px, 50px) rotateX(${-mousePos.y * 6}deg) rotateY(${mousePos.x * 8}deg)`,
+              transform: `translate3d(${leftMousePos.x * 16}px, ${leftMousePos.y * 12}px, 50px) rotateX(${-leftMousePos.y * 6}deg) rotateY(${leftMousePos.x * 8}deg)`,
               transformStyle: 'preserve-3d',
               transition: 'transform 500ms ease-out'
             }}
@@ -282,7 +329,7 @@ export default function Hero({ homepageData, testimonialCard }) {
           {/* Block 3: CTA buttons wrapper */}
           <div 
             style={{
-              transform: `translate3d(${mousePos.x * 12}px, ${mousePos.y * 9}px, 35px) rotateX(${-mousePos.y * 4}deg) rotateY(${mousePos.x * 5}deg)`,
+              transform: `translate3d(${leftMousePos.x * 12}px, ${leftMousePos.y * 9}px, 35px) rotateX(${-leftMousePos.y * 4}deg) rotateY(${leftMousePos.x * 5}deg)`,
               transformStyle: 'preserve-3d',
               transition: 'transform 500ms ease-out'
             }}
@@ -299,7 +346,7 @@ export default function Hero({ homepageData, testimonialCard }) {
           {/* Block 4: Reviews badge wrapper */}
           <div 
             style={{
-              transform: `translate3d(${mousePos.x * 6}px, ${mousePos.y * 4}px, 20px) rotateX(${-mousePos.y * 2}deg) rotateY(${mousePos.x * 3}deg)`,
+              transform: `translate3d(${leftMousePos.x * 6}px, ${leftMousePos.y * 4}px, 20px) rotateX(${-leftMousePos.y * 2}deg) rotateY(${leftMousePos.x * 3}deg)`,
               transformStyle: 'preserve-3d',
               transition: 'transform 500ms ease-out'
             }}
@@ -333,12 +380,18 @@ export default function Hero({ homepageData, testimonialCard }) {
         </div>
 
         {/* Visual panel (Right side with heavier depth) */}
-        <HeroVisual 
-          contentHeight={contentHeight} 
-          homepageData={homepageData} 
-          testimonialCard={testimonialCard} 
-          mousePos={mousePos}
-        />
+        <div ref={visualRef} className="xl:w-1/2 w-full relative flex justify-center items-center">
+          <HeroVisual 
+            contentHeight={contentHeight} 
+            homepageData={homepageData} 
+            testimonialCard={testimonialCard} 
+            mousePos={rightMousePos}
+          />
+        </div>
+      </div>
+
+      <div className="relative z-10 mt-16 xl:mt-24 w-full">
+        <Ticker />
       </div>
     </section>
   );

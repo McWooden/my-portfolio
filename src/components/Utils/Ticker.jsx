@@ -23,7 +23,7 @@ export default function Ticker() {
   );
 
   return (
-    <section className="w-full max-w-[1600px] mx-auto px-10 max-[810px]:px-5 overflow-hidden bg-bg-dark border-b border-border py-[30px] relative">
+    <section className="w-full max-w-[1600px] mx-auto px-10 max-[810px]:px-5 overflow-hidden bg-transparent py-[30px] relative">
       <Marquee gapClass="gap-20" className="w-full">
         {items.map((item, i) => renderItem(item, i))}
       </Marquee>

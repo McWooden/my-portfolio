@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const projectImages = [
   "https://framerusercontent.com/images/XHEChVekS6RzYRttHyDfrU.png?width=1536&height=768", // Onyx Skincare
@@ -10,6 +10,21 @@ const projectImages = [
 
 export default function ExpandableImages() {
   const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [loadedImages, setLoadedImages] = useState({});
+  const imgRefs = useRef([]);
+
+  const handleImageLoad = (idx) => {
+    setLoadedImages(prev => ({ ...prev, [idx]: true }));
+  };
+
+  useEffect(() => {
+    // Check if images are already complete (loaded from cache)
+    imgRefs.current.forEach((img, idx) => {
+      if (img && img.complete) {
+        handleImageLoad(idx);
+      }
+    });
+  }, []);
 
   return (
     <div 
@@ -24,7 +39,9 @@ export default function ExpandableImages() {
         <div
           key={idx}
           onMouseEnter={() => setHoveredIndex(idx)}
-          className="h-full relative overflow-hidden cursor-pointer"
+          className={`h-full relative overflow-hidden cursor-pointer transition-all duration-300 ${
+            !loadedImages[idx] ? 'bg-neutral-800/80 animate-pulse' : ''
+          }`}
           style={{
             flex: hoveredIndex === null ? '1 1 0%' : hoveredIndex === idx ? '2.5 1 0%' : '0.75 1 0%',
             minWidth: 0,
@@ -35,9 +52,13 @@ export default function ExpandableImages() {
           }}
         >
           <img
+            ref={el => imgRefs.current[idx] = el}
             src={src}
+            onLoad={() => handleImageLoad(idx)}
             alt={`Project preview ${idx + 1}`}
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+            className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-500 ${
+              loadedImages[idx] ? 'opacity-100' : 'opacity-0'
+            }`}
             style={{
               transform: hoveredIndex === idx ? 'scale(1.05)' : 'scale(1)',
               transition: 'transform 700ms cubic-bezier(0.25, 1, 0.3, 1)',

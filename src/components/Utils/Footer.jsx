@@ -111,9 +111,9 @@ export default function Footer() {
  
       {/* Large Sholahuddin Ahmad Heading Text Background */}
       <div className="w-full max-w-[1600px] select-none overflow-hidden pt-4 pb-4 flex justify-end [mask-image:linear-gradient(to_right,rgba(0,0,0,0.15),#000)] [-webkit-mask-image:linear-gradient(to_right,rgba(0,0,0,0.15),#000)]">
-        <h1 className="w-full text-right uppercase font-mono text-text-primary leading-none tracking-tighter text-[clamp(5rem,10vw,100rem)] whitespace-nowrap">
+        <div className="w-full text-right uppercase font-mono text-text-primary leading-none tracking-tighter text-[clamp(5rem,10vw,100rem)] whitespace-nowrap">
           SHOLAHUDDIN AHMAD
-        </h1>
+        </div>
       </div>
     </footer>
   );

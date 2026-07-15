@@ -27,7 +27,7 @@ export const metadata = {
     default: 'Huddin | Magelang Full-Stack Developer & UI/UX Designer',
     template: '%s | Huddin - Magelang Developer'
   },
-  description: 'Huddin (Sholahuddin Ahmad) — Full-Stack Developer & UI/UX Designer berbasis di Magelang, Jawa Tengah. Spesialisasi Brand Systems, Web & App Development, UI/UX Design. HaloHuddin Home Studio, Magelang.',
+  description: 'Huddin (Sholahuddin Ahmad) — Full-Stack Developer & UI/UX Designer di Magelang. Spesialisasi Brand Systems, Web & App Development, dan UI/UX Design.',
   keywords: [
     'Full-Stack Developer Magelang',
     'UI/UX Designer Magelang',
@@ -84,7 +84,7 @@ export const metadata = {
     alternateLocale: 'en_US',
     url: 'https://halohuddin.vercel.app',
     title: 'Huddin | Magelang Full-Stack Developer & UI/UX Designer',
-    description: 'Full-Stack Developer & UI/UX Designer berbasis di Magelang, Jawa Tengah. Spesialisasi Brand Systems, UI/UX Design, dan App Development. HaloHuddin Home Studio.',
+    description: 'Full-Stack Developer & UI/UX Designer di Magelang. Spesialisasi Brand Systems, UI/UX Design, dan App Development.',
     siteName: 'Huddin Portfolio',
     images: [
       {

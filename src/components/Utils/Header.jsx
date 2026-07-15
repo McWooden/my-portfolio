@@ -98,13 +98,13 @@ export default function Header({ availabilityStatus = 'available' }) {
           : 'absolute top-0 bg-transparent'
       }`}
     >
-      <div className="w-full max-w-[1600px] px-5 xl:px-10 flex justify-between items-center relative h-full">
+      <div className="w-full max-w-[1600px] px-5 xl:px-10 flex justify-between md:grid md:grid-cols-3 items-center relative h-full">
 
         {/* Left — Nav Links (Desktop) / Hamburger Button & "Huddin" (Mobile) */}
-        <div className="flex items-center shrink-0">
+        <div className="flex items-center justify-start shrink-0">
           {/* Desktop links */}
           <div className="flex gap-6 max-md:hidden items-center">
-            {navigationMenu.filter(item => item.path !== '/').map(item => {
+            {navigationMenu.filter(item => item.path !== '/' && item.path !== '/network').map(item => {
               const isActive = item.path === '/blog'
                 ? pathname.startsWith('/blog')
                 : pathname === item.path;
@@ -139,29 +139,49 @@ export default function Header({ availabilityStatus = 'available' }) {
               {/* Desktop Dropdown Menu (no hover animations/bg-changes on children) */}
               {isDesktopMenuOpen && (
                 <div className="absolute top-[45px] right-0 w-44 bg-bg-dark border border-border rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-3 duration-200">
+                  <Link
+                    href="/network"
+                    onClick={() => setIsDesktopMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary font-mono uppercase tracking-tight"
+                  >
+                    <svg className="w-4 h-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2m16-10a4 4 0 11-8 0 4 4 0 018 0zm6 10v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75" />
+                    </svg>
+                    <span>Network</span>
+                  </Link>
+                  <Link
+                    href="/playground"
+                    onClick={() => setIsDesktopMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary font-mono uppercase tracking-tight"
+                  >
+                    <svg className="w-4 h-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Playground</span>
+                  </Link>
+                  {session && (
+                    <Link
+                      href="/me/stories"
+                      onClick={() => setIsDesktopMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary font-mono uppercase tracking-tight"
+                    >
+                      <svg className="w-4 h-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                      <span>Stories</span>
+                    </Link>
+                  )}
                   {session ? (
-                    <>
-                      <Link
-                        href="/me/stories"
-                        onClick={() => setIsDesktopMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary font-mono uppercase tracking-tight"
-                      >
-                        <svg className="w-4 h-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                        </svg>
-                        <span>Stories</span>
-                      </Link>
-                      <Link
-                        href="/logout"
-                        onClick={() => setIsDesktopMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary font-mono uppercase tracking-tight"
-                      >
-                        <svg className="w-4 h-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                        <span>Logout</span>
-                      </Link>
-                    </>
+                    <Link
+                      href="/logout"
+                      onClick={() => setIsDesktopMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary font-mono uppercase tracking-tight"
+                    >
+                      <svg className="w-4 h-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      <span>Logout</span>
+                    </Link>
                   ) : (
                     <Link
                       href="/login"
@@ -174,16 +194,6 @@ export default function Header({ availabilityStatus = 'available' }) {
                       <span>Login</span>
                     </Link>
                   )}
-                  <Link
-                    href="/playground"
-                    onClick={() => setIsDesktopMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary font-mono uppercase tracking-tight"
-                  >
-                    <svg className="w-4 h-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>Playground</span>
-                  </Link>
                 </div>
               )}
             </div>
@@ -218,10 +228,7 @@ export default function Header({ availabilityStatus = 'available' }) {
 
         {/* Center — Logo */}
         <div className="flex justify-center items-center max-md:hidden">
-          <Link href="/" className="flex items-center gap-2 font-mono text-[1.15rem] font-medium uppercase text-text-primary tracking-tight">
-            <div className="w-4 h-4 flex justify-center items-center relative">
-              <span className={`pulse-dot status-${availabilityStatus}`}></span>
-            </div>
+          <Link href="/" className="flex items-center font-mono text-[1.15rem] font-medium uppercase text-text-primary tracking-tight">
             <span className="max-md:hidden">Sholahuddin Ahmad</span>
           </Link>
         </div>
@@ -249,20 +256,6 @@ export default function Header({ availabilityStatus = 'available' }) {
               </div>
             </div>
           </a>
-
-          {/* Email button */}
-          <Button
-            href="mailto:halohuddin@gmail.com"
-            variant="email-pill"
-            noTranslate
-          >
-            <span>Email me</span>
-            <img
-              src="/ico/apple-touch-icon.png"
-              alt="Sholahuddin Ahmad"
-              className="w-[2.5em] h-[2.5em] rounded-full object-cover border border-accent"
-            />
-          </Button>
         </div>
       </div>
 
@@ -274,7 +267,17 @@ export default function Header({ availabilityStatus = 'available' }) {
       >
         <div className="flex flex-col gap-6">
           {[
-            ...navigationMenu,
+            {
+              label: 'Network',
+              path: '/network',
+              svgPath: 'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2m16-10a4 4 0 11-8 0 4 4 0 018 0zm6 10v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75'
+            },
+            ...navigationMenu.filter(item => item.path !== '/network'),
+            {
+              label: 'Playground',
+              path: '/playground',
+              svgPath: 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+            },
             ...(session
               ? [
                   {
@@ -295,12 +298,7 @@ export default function Header({ availabilityStatus = 'available' }) {
                     svgPath: 'M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1'
                   }
                 ]
-            ),
-            {
-              label: 'Playground',
-              path: '/playground',
-              svgPath: 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
-            }
+            )
           ].map((item, idx) => {
             const isActive = item.path === '/blog'
               ? pathname.startsWith('/blog')

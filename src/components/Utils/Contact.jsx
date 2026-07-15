@@ -16,7 +16,7 @@ export default function Contact() {
   ];
 
   return (
-    <Section id="contact">
+    <Section id="contact" pyClass="pt-[100px] pb-0 max-[810px]:pt-[60px] max-[810px]:pb-0">
       <div className="w-full flex flex-col items-center gap-[60px]">
         {/* Full-width Centered Header */}
         <SectionHeader

@@ -146,6 +146,15 @@ DESIGN SYSTEM & CODING RULES (Keep styling consistent / No hallucinations)
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover { background: #333333; }
+
+  /* Hide scrollbar thumb on homepage */
+  .home-page {
+    scrollbar-color: transparent transparent !important;
+  }
+  .home-page::-webkit-scrollbar-thumb,
+  .home-page::-webkit-scrollbar-thumb:hover {
+    background: transparent !important;
+  }
 }
 
 /* ── Custom Utilities ── */
@@ -606,5 +615,7 @@ DESIGN SYSTEM & CODING RULES (Keep styling consistent / No hallucinations)
   transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
   will-change: transform;
 }
+
+
 
 

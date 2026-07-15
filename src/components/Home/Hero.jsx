@@ -3,14 +3,91 @@ import React, { useState, useEffect, useRef } from 'react';
 import Button from '../Utils/Button';
 import HeroVisual from './HeroVisual';
 import Ticker from '../Utils/Ticker';
+import { createPortal } from 'react-dom';
+import { motion, useMotionValue, useSpring, AnimatePresence } from 'framer-motion';
+
+function CursorCard({ triggerText, children, imageSrc }) {
+  const [hovered, setHovered] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const springConfig = { damping: 25, stiffness: 300 };
+  const springX = useSpring(x, springConfig);
+  const springY = useSpring(y, springConfig);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleMouseMove = (e) => {
+    x.set(e.clientX - 100); // Center card (width 200 / 2)
+    y.set(e.clientY + 20);  // Slight vertical offset below cursor
+  };
+
+  return (
+    <>
+      <span
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onMouseMove={handleMouseMove}
+        className="underline decoration-accent/50 hover:decoration-accent decoration-2 underline-offset-[6px] cursor-pointer text-white font-medium transition-all duration-200"
+      >
+        {triggerText}
+      </span>
+      
+      {mounted && typeof document !== "undefined" && createPortal(
+        <AnimatePresence>
+          {hovered && (
+            <motion.span
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+              style={{
+                position: 'fixed',
+                left: 0,
+                top: 0,
+                x: springX,
+                y: springY,
+                pointerEvents: 'none',
+                zIndex: 10000,
+              }}
+              className="w-[200px] block bg-neutral-900/95 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden p-3 shadow-2xl text-left"
+            >
+              {imageSrc && (
+                <img 
+                  src={imageSrc} 
+                  alt={triggerText} 
+                  className="w-full h-[110px] object-cover rounded-xl mb-2.5 pointer-events-none"
+                />
+              )}
+              <span className="block px-0.5">
+                {children}
+              </span>
+            </motion.span>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+    </>
+  );
+}
 
 export default function Hero({ homepageData, testimonialCard }) {
   const contentRef = useRef(null);
   const containerRef = useRef(null);
   const [contentHeight, setContentHeight] = useState(null);
   const visualRef = useRef(null);
-  const [leftMousePos, setLeftMousePos] = useState({ x: 0, y: 0 });
   const [rightMousePos, setRightMousePos] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    document.documentElement.classList.add('home-page');
+    return () => {
+      document.documentElement.classList.remove('home-page');
+    };
+  }, []);
 
   useEffect(() => {
     if (!contentRef.current) return;
@@ -26,64 +103,7 @@ export default function Hero({ homepageData, testimonialCard }) {
     return () => resizeObserver.disconnect();
   }, []);
 
-  const leftMouseRef = useRef({ x: 0, y: 0 });
-  const leftRafRef = useRef(null);
 
-  useEffect(() => {
-    const updateLeftState = () => {
-      setLeftMousePos({
-        x: leftMouseRef.current.x,
-        y: leftMouseRef.current.y
-      });
-      leftRafRef.current = null;
-    };
-
-    const handleMouseMove = (e) => {
-      if (!contentRef.current) return;
-      const rect = contentRef.current.getBoundingClientRect();
-      const xc = rect.width / 2;
-      const yc = rect.height / 2;
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
-      const dx = (x - xc) / xc;
-      const dy = (y - yc) / yc;
-      
-      leftMouseRef.current = {
-        x: Math.max(-1.5, Math.min(1.5, dx)),
-        y: Math.max(-1.5, Math.min(1.5, dy))
-      };
-
-      if (!leftRafRef.current) {
-        leftRafRef.current = requestAnimationFrame(updateLeftState);
-      }
-    };
-
-    const handleMouseLeave = () => {
-      if (leftRafRef.current) {
-        cancelAnimationFrame(leftRafRef.current);
-        leftRafRef.current = null;
-      }
-      leftMouseRef.current = { x: 0, y: 0 };
-      setLeftMousePos({ x: 0, y: 0 });
-    };
-
-    const el = contentRef.current;
-    if (el) {
-      el.addEventListener('mousemove', handleMouseMove);
-      el.addEventListener('mouseleave', handleMouseLeave);
-    }
-
-    return () => {
-      if (leftRafRef.current) {
-        cancelAnimationFrame(leftRafRef.current);
-      }
-      if (el) {
-        el.removeEventListener('mousemove', handleMouseMove);
-        el.removeEventListener('mouseleave', handleMouseLeave);
-      }
-    };
-  }, []);
 
   const rightMouseRef = useRef({ x: 0, y: 0 });
   const rightRafRef = useRef(null);
@@ -222,64 +242,41 @@ export default function Hero({ homepageData, testimonialCard }) {
     <section
       ref={containerRef}
       id="hero"
-      className="perspective-3d-room pt-[100px] pb-8 px-5 xl:pt-[110px] xl:pb-12 xl:px-10 max-w-[1600px] mx-auto relative overflow-visible"
+      className="perspective-3d-room pt-[80px] pb-6 px-5 xl:pt-[90px] xl:pb-8 xl:px-10 max-w-[1600px] mx-auto relative overflow-visible"
     >
 
-      <div className="room-stage flex flex-col xl:flex-row xl:items-stretch items-center gap-[60px] w-full relative z-10">
+      <div className="room-stage flex flex-col items-center gap-[40px] w-full relative z-10">
         {/* Content Panel Wrapper (Outer static hover area) */}
-        <div 
-          ref={contentRef} 
-          className="xl:w-1/2 w-full flex flex-col justify-center relative z-10"
-        >
-          {/* Content Panel Inner (Inner moving panel that tilts) */}
-          <div 
-            className="flex flex-col items-center text-center xl:items-start xl:text-left w-full justify-center transition-transform duration-500 ease-out"
-            style={{
-              transform: `translate3d(${leftMousePos.x * 4}px, ${leftMousePos.y * 3}px, 10px)`,
-              transformStyle: 'preserve-3d'
-            }}
-          >
+        <div ref={contentRef} className="w-full flex justify-center relative z-10">
+          <div className="w-full max-w-[850px] flex flex-col justify-center">
+            {/* Content Panel Inner */}
+            <div className="flex flex-col items-center text-center w-full justify-center">
 
           {/* Block 1: Interactive rolling job slot */}
           <button
             onClick={rollJob}
             disabled={isRolling}
-            style={{
-              transform: `translate3d(${leftMousePos.x * 8}px, ${leftMousePos.y * 6}px, 25px) rotateX(${-leftMousePos.y * 3}deg) rotateY(${leftMousePos.x * 4}deg)`,
-              transformStyle: 'preserve-3d',
-              transition: 'transform 500ms ease-out'
-            }}
-            className="font-mono text-[1rem] tracking-[-0.02em] text-text-primary uppercase mb-5 select-none cursor-pointer flex flex-col items-center xl:items-start h-[1.5em] overflow-hidden group focus:outline-none disabled:cursor-default"
+            className="font-mono text-[0.85rem] tracking-[0.1em] text-white uppercase mb-4 select-none cursor-pointer flex flex-col items-center h-[1.5em] overflow-hidden group focus:outline-none disabled:cursor-default"
             title="Click to roll next job!"
           >
             <div
-              className="transition-transform ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col items-center xl:items-start"
+              className="transition-transform ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col items-center"
               style={{
                 transform: `translateY(-${jobIndex * 1.5}em)`,
                 transitionDuration: `${speed}ms`
               }}
             >
               {jobs.map((job) => (
-                <span key={job} className="h-[1.5em] leading-[1.5em] block group-hover:text-accent transition-colors duration-200 relative">
+                <span key={job} className="h-[1.5em] leading-[1.5em] block relative">
                   {job}
-                  <span className={`text-accent/60 text-[0.85em] ml-1 transition-all duration-200 absolute left-full top-0 ${isRolling ? 'animate-spin inline-block' : 'opacity-0 group-hover:opacity-100'}`}>
-                    ⟳
-                  </span>
                 </span>
               ))}
             </div>
           </button>
 
           {/* Block 2: Headline + Description Panel */}
-          <div
-            style={{
-              transform: `translate3d(${leftMousePos.x * 16}px, ${leftMousePos.y * 12}px, 50px) rotateX(${-leftMousePos.y * 6}deg) rotateY(${leftMousePos.x * 8}deg)`,
-              transformStyle: 'preserve-3d',
-              transition: 'transform 500ms ease-out'
-            }}
-            className="flex flex-col items-center text-center xl:items-start xl:text-left w-full"
-          >
-            <h1 className="max-w-[720px] text-[clamp(3rem,14vw,3.6rem)] sm:text-[3.6rem] md:text-[4.6rem] lg:text-[4.8rem] font-medium leading-[1.45] tracking-[-0.04em] text-white mb-6">
+          <div className="flex flex-col items-center text-center w-full">
+            <h1 className="max-w-[720px] text-[clamp(2.8rem,12vw,3.6rem)] sm:text-[3.6rem] md:text-[4.4rem] lg:text-[4.6rem] font-medium leading-[1.45] tracking-[-0.04em] text-white mb-5">
               I'm The{" "}
               <span
                 className="inline-flex items-center justify-center mx-1 sm:mx-2 w-[2.2em] h-[1.15em] rounded-[24px] overflow-hidden bg-black select-none align-middle relative -rotate-2"
@@ -325,53 +322,59 @@ export default function Hero({ homepageData, testimonialCard }) {
               </span>{" "}
               Designs
             </h1>
-            <p className="text-[0.95rem] sm:text-[1.25rem] text-text-secondary leading-[1.4] mb-10 w-[90%] sm:w-full max-w-[480px]">
-              Huddin is a Magelang programmer, known for clean and expressive code — who also designs the brand
+            <p className="text-[1rem] sm:text-[1.15rem] text-text-secondary leading-[1.6] mb-8 w-[90%] sm:w-full max-w-[440px]">
+              <CursorCard 
+                triggerText="Huddin" 
+                imageSrc="/images/huddin.webp"
+              >
+                <span className="flex flex-col gap-0.5">
+                  <span className="font-mono text-[0.8rem] font-bold text-white uppercase tracking-wider">Sholahuddin Ahmad</span>
+                  <span className="text-[0.7rem] text-text-secondary font-medium">Full-Stack Coder & Designer</span>
+                  <span className="text-[0.65rem] text-text-muted leading-snug mt-1">
+                    Building premium web applications with clean code and visual systems.
+                  </span>
+                </span>
+              </CursorCard> is a{" "}
+              <CursorCard 
+                triggerText="Magelang" 
+                imageSrc="/images/magelang.webp"
+              >
+                <span className="flex flex-col gap-0.5">
+                  <span className="font-mono text-[0.8rem] font-bold text-white uppercase tracking-wider">Magelang</span>
+                  <span className="text-[0.7rem] text-text-secondary font-medium">Central Java, ID</span>
+                  <span className="text-[0.65rem] text-text-muted leading-snug mt-1">
+                    Home of Candi Borobudur and surrounded by beautiful volcanic peaks.
+                  </span>
+                </span>
+              </CursorCard>{" "}
+              programmer, known for clean and expressive code — who also designs the brand
             </p>
           </div>
 
           {/* Block 3: CTA buttons wrapper */}
-          <div 
-            style={{
-              transform: `translate3d(${leftMousePos.x * 12}px, ${leftMousePos.y * 9}px, 35px) rotateX(${-leftMousePos.y * 4}deg) rotateY(${leftMousePos.x * 5}deg)`,
-              transformStyle: 'preserve-3d',
-              transition: 'transform 500ms ease-out'
-            }}
-            className="flex gap-4 w-full justify-center xl:justify-start mb-10"
-          >
-            <Button href="#contact" variant="primary">
+          <div className="flex gap-4 w-full justify-center mb-8">
+            <a 
+              href="#contact" 
+              className="group bg-accent text-bg-dark text-[1.05rem] font-semibold pl-7 pr-3 py-3 rounded-full flex items-center justify-center whitespace-nowrap select-none hover:bg-accent/90 transition-all duration-200"
+            >
               Get started
-            </Button>
-            <Button href="#portfolio" variant="secondary">
+              <span className="w-9 h-9 rounded-full bg-bg-dark text-accent flex items-center justify-center ml-4 shrink-0 shadow-sm">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 transition-transform duration-300 group-hover:rotate-45">
+                  <path d="M7 17L17 7M17 7H7M17 7V17" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            </a>
+            <a 
+              href="#portfolio" 
+              className="bg-bg-card text-text-primary text-[1.05rem] font-medium px-7 py-[14px] rounded-full select-none text-center flex items-center justify-center whitespace-nowrap"
+            >
               Portfolio
-            </Button>
+            </a>
           </div>
 
           {/* Block 4: Reviews badge wrapper */}
-          <div 
-            style={{
-              transform: `translate3d(${leftMousePos.x * 6}px, ${leftMousePos.y * 4}px, 20px) rotateX(${-leftMousePos.y * 2}deg) rotateY(${leftMousePos.x * 3}deg)`,
-              transformStyle: 'preserve-3d',
-              transition: 'transform 500ms ease-out'
-            }}
-            className="flex items-center gap-3"
-          >
-            <div className="flex -space-x-3 mr-2">
-              {[
-                'https://framerusercontent.com/images/XeylT9Ic2cwthJBQFpH03b3XEo.png?width=1024&height=1024',
-                'https://framerusercontent.com/images/qMrMTWyggoctZktmN3xk9LziWM.png?width=1024&height=1024',
-                'https://framerusercontent.com/images/LVcACvWfr9MemEEBhRIZ9Mj0A.png?width=1024&height=1024',
-              ].map((src, i) => (
-                <img
-                  key={i}
-                  src={src}
-                  alt="Reviewer"
-                  className="w-9 h-9 rounded-full object-cover border-2 border-bg-dark first:ml-0"
-                />
-              ))}
-            </div>
-            <div className="flex flex-col gap-1">
-              <span className="font-mono text-[0.95rem] text-text-primary uppercase">15+ networks</span>
+          <div className="flex justify-center">
+            <div className="bg-card border border-white/5 rounded-full px-4 py-2 flex items-center gap-3 shadow-lg">
               <div className="flex gap-[3px] text-accent">
                 {[...Array(5)].map((_, i) => (
                   <svg key={i} viewBox="0 0 24 24" fill="currentColor" className="w-[14px] h-[14px]">
@@ -379,13 +382,18 @@ export default function Hero({ homepageData, testimonialCard }) {
                   </svg>
                 ))}
               </div>
+              <span className="font-mono text-[0.8rem] text-text-primary uppercase tracking-wider">
+                15+ clients
+              </span>
             </div>
           </div>
         </div>
       </div>
+      </div>
 
-        {/* Visual panel (Right side with heavier depth) */}
-        <div ref={visualRef} className="xl:w-1/2 w-full relative flex justify-center items-center">
+      {/* Visual panel (Right side with heavier depth) */}
+      <div ref={visualRef} className="w-full flex justify-center mt-6 relative z-10">
+        <div className="w-full max-w-[1000px] relative flex justify-center items-center">
           <HeroVisual 
             contentHeight={contentHeight} 
             homepageData={homepageData} 
@@ -394,6 +402,7 @@ export default function Hero({ homepageData, testimonialCard }) {
           />
         </div>
       </div>
+    </div>
 
       <div className="relative z-10 mt-16 xl:mt-24 w-full">
         <Ticker />

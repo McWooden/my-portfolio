@@ -48,7 +48,7 @@ export default function ReviewsDesktopMarquee({ reviews = staticReviews }) {
         if (scrollWidthRef.current === 0) {
           scrollWidthRef.current = trackRef.current.scrollWidth;
         }
-        
+
         const totalWidth = scrollWidthRef.current;
         const oneSetWidth = totalWidth / 3;
 
@@ -102,9 +102,9 @@ export default function ReviewsDesktopMarquee({ reviews = staticReviews }) {
   };
 
   return (
-    <div 
-      ref={containerRef} 
-      className="relative w-full overflow-hidden mt-16 py-4 select-none"
+    <div
+      ref={containerRef}
+      className="relative w-full overflow-hidden py-4 select-none"
       style={{
         contentVisibility: 'auto',
         containIntrinsicSize: '0 400px'

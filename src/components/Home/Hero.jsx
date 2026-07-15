@@ -372,21 +372,7 @@ export default function Hero({ homepageData, testimonialCard }) {
             </a>
           </div>
 
-          {/* Block 4: Reviews badge wrapper */}
-          <div className="flex justify-center">
-            <div className="bg-card border border-white/5 rounded-full px-4 py-2 flex items-center gap-3 shadow-lg">
-              <div className="flex gap-[3px] text-accent">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} viewBox="0 0 24 24" fill="currentColor" className="w-[14px] h-[14px]">
-                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                  </svg>
-                ))}
-              </div>
-              <span className="font-mono text-[0.8rem] text-text-primary uppercase tracking-wider">
-                15+ clients
-              </span>
-            </div>
-          </div>
+
         </div>
       </div>
       </div>

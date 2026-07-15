@@ -24,7 +24,7 @@ export default async function Page() {
   // Fallback / homepageData configuration
   const homepageData = {
     status: 'available',
-    openSlots: 3,
+    openSlots: 2,
     heroTestimonialProject: 'onyx-skincare',
     featuredProjects: [],
     featuredBlogs: []

@@ -1,12 +1,22 @@
 import { supabase } from '../utils/supabase';
 
+function formatDate(dateInput) {
+  try {
+    const date = dateInput ? new Date(dateInput) : new Date();
+    // Use YYYY-MM-DD format, which is safe and standard for sitemaps
+    return date.toISOString().split('T')[0];
+  } catch (_) {
+    return new Date().toISOString().split('T')[0];
+  }
+}
+
 export default async function sitemap() {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://halohuddin.vercel.app';
 
   // Base routes
   const routes = ['', '/portfolio', '/blog', '/network'].map((route) => ({
     url: `${baseUrl}${route}`,
-    lastModified: new Date().toISOString(),
+    lastModified: formatDate(),
     changeFrequency: route === '' ? 'daily' : 'weekly',
     priority: route === '' ? 1.0 : 0.8,
   }));
@@ -27,7 +37,7 @@ export default async function sitemap() {
         .filter((s) => s.type === 'project')
         .map((project) => ({
           url: `${baseUrl}/portfolio/${project.slug}`,
-          lastModified: project.updated_at || project.date || new Date().toISOString(),
+          lastModified: formatDate(project.updated_at || project.date),
           changeFrequency: 'monthly',
           priority: 0.7,
         }));
@@ -36,7 +46,7 @@ export default async function sitemap() {
         .filter((s) => s.type === 'blog')
         .map((post) => ({
           url: `${baseUrl}/blog/${post.slug}`,
-          lastModified: post.updated_at || post.date || new Date().toISOString(),
+          lastModified: formatDate(post.updated_at || post.date),
           changeFrequency: 'monthly',
           priority: 0.6,
         }));
@@ -47,3 +57,4 @@ export default async function sitemap() {
 
   return [...routes, ...projectRoutes, ...blogRoutes];
 }
+

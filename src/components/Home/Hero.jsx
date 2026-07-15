@@ -226,15 +226,19 @@ export default function Hero({ homepageData, testimonialCard }) {
     >
 
       <div className="room-stage flex flex-col xl:flex-row xl:items-stretch items-center gap-[60px] w-full relative z-10">
-        {/* Content Panel (Left side container - serves as 3D frame) */}
+        {/* Content Panel Wrapper (Outer static hover area) */}
         <div 
           ref={contentRef} 
-          className="flex flex-col items-center text-center xl:items-start xl:text-left xl:w-1/2 w-full justify-center z-10 transition-transform duration-500 ease-out"
-          style={{
-            transform: `translate3d(${leftMousePos.x * 4}px, ${leftMousePos.y * 3}px, 10px)`,
-            transformStyle: 'preserve-3d'
-          }}
+          className="xl:w-1/2 w-full flex flex-col justify-center relative z-10"
         >
+          {/* Content Panel Inner (Inner moving panel that tilts) */}
+          <div 
+            className="flex flex-col items-center text-center xl:items-start xl:text-left w-full justify-center transition-transform duration-500 ease-out"
+            style={{
+              transform: `translate3d(${leftMousePos.x * 4}px, ${leftMousePos.y * 3}px, 10px)`,
+              transformStyle: 'preserve-3d'
+            }}
+          >
 
           {/* Block 1: Interactive rolling job slot */}
           <button
@@ -378,6 +382,7 @@ export default function Hero({ homepageData, testimonialCard }) {
             </div>
           </div>
         </div>
+      </div>
 
         {/* Visual panel (Right side with heavier depth) */}
         <div ref={visualRef} className="xl:w-1/2 w-full relative flex justify-center items-center">

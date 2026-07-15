@@ -19,7 +19,7 @@ export default async function WebsiteLayout({ children }) {
       
       {/* Global Background SideRays Layer - top right of viewport, positioned in back */}
       <div 
-        className="absolute top-0 right-0 w-[55vw] max-w-[900px] h-[750px] pointer-events-none overflow-hidden" 
+        className="absolute top-0 right-0 w-full h-[750px] pointer-events-none overflow-hidden" 
         style={{ zIndex: 0 }}
       >
         <SideRays

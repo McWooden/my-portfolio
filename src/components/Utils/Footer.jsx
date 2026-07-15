@@ -46,7 +46,7 @@ export default function Footer() {
         <address className="not-italic flex flex-col gap-4 max-w-[300px] text-left">
           <div className="flex items-center gap-3">
             <img
-              src="https://framerusercontent.com/images/NkL1zDB0ea9KmqIpMf80b6TCw.png?width=1024&height=1024"
+              src="/ico/apple-touch-icon.png"
               alt="Sholahuddin Ahmad"
               className="w-9 h-9 rounded-full object-cover border border-white/10"
             />

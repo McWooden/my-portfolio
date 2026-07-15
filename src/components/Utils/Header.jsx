@@ -258,7 +258,7 @@ export default function Header({ availabilityStatus = 'available' }) {
           >
             <span>Email me</span>
             <img
-              src="https://framerusercontent.com/images/NkL1zDB0ea9KmqIpMf80b6TCw.png?width=1024&height=1024"
+              src="/ico/apple-touch-icon.png"
               alt="Sholahuddin Ahmad"
               className="w-[2.5em] h-[2.5em] rounded-full object-cover border border-accent"
             />

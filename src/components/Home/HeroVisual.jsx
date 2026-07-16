@@ -138,27 +138,6 @@ export default function HeroVisual({ contentHeight, homepageData, testimonialCar
           </svg>
         </Link>
       </div>
-
-      {/* Floating slots badge */}
-      <div 
-        style={{
-          transform: `translate3d(${mousePos.x * 16}px, ${mousePos.y * 14}px, 60px) rotateY(${mousePos.x * 2}deg)`,
-          transition: 'transform 500ms ease-out'
-        }}
-        className="absolute bottom-5 right-5 bg-[#222222]/95 border border-border px-5 py-2.5 rounded-[20px] flex items-center gap-[10px] z-30 shadow-[0_15px_35px_rgba(0,0,0,0.3)]"
-      >
-        <span className={`pulse-dot status-${status} shrink-0`}></span>
-        <div className="flex flex-col text-left leading-normal">
-          <span className="font-mono text-[0.85rem] font-medium uppercase text-text-primary tracking-[-0.02em]">
-            {status === 'available' ? `${openSlots} Open Slot${openSlots !== 1 ? 's' : ''}` : statusText}
-          </span>
-          {status === 'available' && (
-            <span className="font-mono text-[0.7rem] text-text-secondary uppercase tracking-[-0.02em]">
-              for {currentMonth}
-            </span>
-          )}
-        </div>
-      </div>
     </div>
   );
 }

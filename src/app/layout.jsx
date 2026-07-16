@@ -1,5 +1,5 @@
 import React from 'react';
-import { Inter, DM_Mono, Sedgwick_Ave } from 'next/font/google';
+import { Inter, DM_Mono, Sedgwick_Ave, Bebas_Neue } from 'next/font/google';
 import './globals.css';
 
 const inter = Inter({
@@ -19,6 +19,13 @@ const sedgwickAve = Sedgwick_Ave({
   weight: '400',
   subsets: ['latin'],
   variable: '--font-sedgwick-ave',
+  display: 'swap',
+});
+
+const bebasNeue = Bebas_Neue({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-bebas-neue',
   display: 'swap',
 });
 
@@ -229,7 +236,7 @@ const jsonLd = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${inter.variable} ${dmMono.variable} ${sedgwickAve.variable}`} data-scroll-behavior="smooth">
+    <html lang="en" className={`${inter.variable} ${dmMono.variable} ${sedgwickAve.variable} ${bebasNeue.variable}`} data-scroll-behavior="smooth">
       <head>
         <script
           type="application/ld+json"

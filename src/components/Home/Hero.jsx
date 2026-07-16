@@ -22,7 +22,11 @@ function CursorCard({ triggerText, children, imageSrc }) {
   }, []);
 
   const handleMouseMove = (e) => {
-    x.set(e.clientX - 100); // Center card (width 200 / 2)
+    const cardWidth = 200;
+    const padding = 12;
+    const targetX = e.clientX - cardWidth / 2;
+    const clampedX = Math.max(padding, Math.min(targetX, window.innerWidth - cardWidth - padding));
+    x.set(clampedX);
     y.set(e.clientY + 20);  // Slight vertical offset below cursor
   };
 
@@ -239,44 +243,16 @@ export default function Hero({ homepageData, testimonialCard }) {
   };
 
   return (
-    <section
-      ref={containerRef}
-      id="hero"
-      className="perspective-3d-room pt-[80px] pb-6 px-5 xl:pt-[90px] xl:pb-8 xl:px-10 max-w-[1600px] mx-auto relative overflow-visible"
-    >
-
-      <div className="room-stage flex flex-col items-center gap-[40px] w-full relative z-10">
-        {/* Content Panel Wrapper (Outer static hover area) */}
-        <div ref={contentRef} className="w-full flex justify-center relative z-10">
-          <div className="w-full max-w-[850px] flex flex-col justify-center">
-            {/* Content Panel Inner */}
-            <div className="flex flex-col items-center text-center w-full justify-center">
-
-          {/* Block 1: Interactive rolling job slot */}
-          <button
-            onClick={rollJob}
-            disabled={isRolling}
-            className="font-mono text-[0.85rem] tracking-[0.1em] text-white uppercase mb-4 select-none cursor-pointer flex flex-col items-center h-[1.5em] overflow-hidden group focus:outline-none disabled:cursor-default"
-            title="Click to roll next job!"
-          >
-            <div
-              className="transition-transform ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col items-center"
-              style={{
-                transform: `translateY(-${jobIndex * 1.5}em)`,
-                transitionDuration: `${speed}ms`
-              }}
-            >
-              {jobs.map((job) => (
-                <span key={job} className="h-[1.5em] leading-[1.5em] block relative">
-                  {job}
-                </span>
-              ))}
-            </div>
-          </button>
-
-          {/* Block 2: Headline + Description Panel */}
-          <div className="flex flex-col items-center text-center w-full">
-            <h1 className="max-w-[720px] text-[clamp(2.8rem,12vw,3.6rem)] sm:text-[3.6rem] md:text-[4.4rem] lg:text-[4.6rem] font-medium leading-[1.45] tracking-[-0.04em] text-white mb-5">
+    <>
+      <section
+        ref={containerRef}
+        id="hero"
+        className="perspective-3d-room pt-[80px] pb-6 px-5 xl:pt-[90px] xl:pb-8 xl:px-10 max-w-[1600px] mx-auto relative overflow-visible min-h-[80vh] flex items-center"
+      >
+        <div className="room-stage flex flex-col items-center gap-[40px] w-full relative z-10">
+          {/* Headline Panel Wrapper (Aligned to the right) - temporarily hidden
+          <div className="w-full flex justify-end text-right relative z-10">
+            <h1 className="max-w-[720px] text-[clamp(2.8rem,12vw,3.6rem)] sm:text-[3.6rem] md:text-[4.4rem] lg:text-[4.6rem] font-medium leading-[1.45] tracking-[-0.04em] text-white mb-5 text-right">
               I'm The{" "}
               <span
                 className="inline-flex items-center justify-center mx-1 sm:mx-2 w-[2.2em] h-[1.15em] rounded-[24px] overflow-hidden bg-black select-none align-middle relative -rotate-2"
@@ -298,14 +274,11 @@ export default function Hero({ homepageData, testimonialCard }) {
                     </div>
                   ))}
                 </div>
-                {/* Inverted border overlay (White) */}
                 <div className="absolute inset-0 border-2 border-white rounded-[inherit] pointer-events-none z-10" />
               </span>{" "}
-              <br className="md:hidden" />
-              Coder{" "}
-              <br className="hidden md:inline" />
-              Who{" "}
-              <br className="md:hidden" />
+              <br />
+              Coder Who{" "}
+              <br />
               <span
                 className="inline-flex items-center justify-center mx-1 sm:mx-2 w-[1.9em] h-[1.15em] rounded-[24px] overflow-hidden bg-black select-none align-middle relative rotate-2"
                 style={{
@@ -317,17 +290,21 @@ export default function Hero({ homepageData, testimonialCard }) {
                   className="w-full h-full object-cover pointer-events-none opacity-85"
                   alt="Slow looping design animation"
                 />
-                {/* Inverted border overlay (White) */}
                 <div className="absolute inset-0 border-2 border-white rounded-[inherit] pointer-events-none z-10" />
               </span>{" "}
               Designs
             </h1>
-            <p className="text-[1rem] sm:text-[1.15rem] text-text-secondary leading-[1.6] mb-8 w-[90%] sm:w-full max-w-[440px]">
+          </div>
+          */}
+
+          {/* Description & Buttons Panel (Left-aligned) */}
+          <div ref={contentRef} className="w-full flex flex-col items-center md:items-start text-center md:text-left mt-8">
+            <p className="text-[1rem] sm:text-[1.15rem] text-text-secondary leading-[1.6] mb-8 w-full max-w-[300px] sm:max-w-[340px]">
               <CursorCard 
                 triggerText="Huddin" 
                 imageSrc="/images/huddin.webp"
               >
-                <span className="flex flex-col gap-0.5">
+                <span className="flex flex-col gap-0.5 text-left">
                   <span className="font-mono text-[0.8rem] font-bold text-white uppercase tracking-wider">Sholahuddin Ahmad</span>
                   <span className="text-[0.7rem] text-text-secondary font-medium">Full-Stack Coder & Designer</span>
                   <span className="text-[0.65rem] text-text-muted leading-snug mt-1">
@@ -339,7 +316,7 @@ export default function Hero({ homepageData, testimonialCard }) {
                 triggerText="Magelang" 
                 imageSrc="/images/magelang.webp"
               >
-                <span className="flex flex-col gap-0.5">
+                <span className="flex flex-col gap-0.5 text-left">
                   <span className="font-mono text-[0.8rem] font-bold text-white uppercase tracking-wider">Magelang</span>
                   <span className="text-[0.7rem] text-text-secondary font-medium">Central Java, ID</span>
                   <span className="text-[0.65rem] text-text-muted leading-snug mt-1">
@@ -349,50 +326,47 @@ export default function Hero({ homepageData, testimonialCard }) {
               </CursorCard>{" "}
               programmer, known for clean and expressive code — who also designs the brand
             </p>
+
+            <div className="flex gap-4 w-full justify-center md:justify-start">
+              <a 
+                href="#contact" 
+                className="group bg-accent text-bg-dark text-[1.05rem] font-semibold pl-7 pr-3 py-3 rounded-full flex items-center justify-center whitespace-nowrap select-none hover:bg-accent/90 transition-all duration-200"
+              >
+                Get started
+                <span className="w-9 h-9 rounded-full bg-bg-dark text-accent flex items-center justify-center ml-4 shrink-0 shadow-sm">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 transition-transform duration-300 group-hover:rotate-45">
+                    <path d="M7 17L17 7M17 7H7M17 7V17" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+              </a>
+              <a 
+                href="#portfolio" 
+                className="bg-bg-card text-text-primary text-[1.05rem] font-medium px-7 py-[14px] rounded-full select-none text-center flex items-center justify-center whitespace-nowrap"
+              >
+                Portfolio
+              </a>
+            </div>
           </div>
+        </div>
+      </section>
 
-          {/* Block 3: CTA buttons wrapper */}
-          <div className="flex gap-4 w-full justify-center mb-8">
-            <a 
-              href="#contact" 
-              className="group bg-accent text-bg-dark text-[1.05rem] font-semibold pl-7 pr-3 py-3 rounded-full flex items-center justify-center whitespace-nowrap select-none hover:bg-accent/90 transition-all duration-200"
-            >
-              Get started
-              <span className="w-9 h-9 rounded-full bg-bg-dark text-accent flex items-center justify-center ml-4 shrink-0 shadow-sm">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 transition-transform duration-300 group-hover:rotate-45">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
-            </a>
-            <a 
-              href="#portfolio" 
-              className="bg-bg-card text-text-primary text-[1.05rem] font-medium px-7 py-[14px] rounded-full select-none text-center flex items-center justify-center whitespace-nowrap"
-            >
-              Portfolio
-            </a>
+      {/* Expandable Images Section (Full-width after Hero) */}
+      <section className="px-5 xl:px-10 max-w-[1600px] mx-auto mt-16 relative z-10">
+        <div ref={visualRef} className="w-full flex justify-center">
+          <div className="w-full max-w-[1000px] relative flex justify-center items-center">
+            <HeroVisual 
+              contentHeight={null} 
+              homepageData={homepageData} 
+              testimonialCard={testimonialCard} 
+              mousePos={rightMousePos}
+            />
           </div>
-
-
         </div>
-      </div>
-      </div>
-
-      {/* Visual panel (Right side with heavier depth) */}
-      <div ref={visualRef} className="w-full flex justify-center mt-6 relative z-10">
-        <div className="w-full max-w-[1000px] relative flex justify-center items-center">
-          <HeroVisual 
-            contentHeight={contentHeight} 
-            homepageData={homepageData} 
-            testimonialCard={testimonialCard} 
-            mousePos={rightMousePos}
-          />
-        </div>
-      </div>
-    </div>
+      </section>
 
       <div className="relative z-10 mt-16 xl:mt-24 w-full">
         <Ticker />
       </div>
-    </section>
+    </>
   );
 }

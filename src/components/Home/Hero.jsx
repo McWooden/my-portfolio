@@ -250,7 +250,7 @@ export default function Hero({ homepageData, testimonialCard }) {
         className="perspective-3d-room w-full h-screen min-h-[600px] relative overflow-hidden bg-bg-dark flex items-end md:items-center pb-20 md:pb-0"
       >
         {/* Full-screen Background Image with premium blend gradients */}
-        <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-[75%] md:h-full z-0 pointer-events-none">
           <img 
             src="/hero-bg.webp" 
             alt="Hero Background" 

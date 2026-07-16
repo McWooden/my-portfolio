@@ -9,7 +9,7 @@ import Contact from '../components/Utils/Contact';
 
 export default function Home({ projects, blogPosts, faqs, reviews, homepageData, testimonialCard }) {
   return (
-    <div className="pt-20 bg-transparent">
+    <div className="bg-transparent">
       {/* 1. Hero Section */}
       <Hero homepageData={homepageData} testimonialCard={testimonialCard} />
 

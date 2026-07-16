@@ -31,6 +31,20 @@ export default function Chatbot() {
   const [showWidget, setShowWidget] = useState(true);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Quota states
   const [quotaUsed, setQuotaUsed] = useState(0);
@@ -1632,7 +1646,9 @@ CRITICAL LENGTH & CONCISENESS RULES:
       : isKickingOut
         ? 'bg-red-500 hover:bg-red-400 text-white'
         : 'bg-orange-500 hover:bg-orange-400 text-white'
-    : 'bg-accent hover:bg-white text-bg-dark';
+    : isScrolled
+      ? 'bg-accent hover:bg-white text-bg-dark'
+      : 'bg-bg-card hover:bg-white hover:text-bg-dark text-text-primary border border-border/30';
 
   return (
     <>

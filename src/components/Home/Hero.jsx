@@ -247,104 +247,71 @@ export default function Hero({ homepageData, testimonialCard }) {
       <section
         ref={containerRef}
         id="hero"
-        className="perspective-3d-room pt-[80px] pb-6 px-5 xl:pt-[90px] xl:pb-8 xl:px-10 max-w-[1600px] mx-auto relative overflow-visible min-h-[80vh] flex items-center"
+        className="perspective-3d-room w-full h-screen min-h-[600px] relative overflow-hidden bg-bg-dark flex items-end md:items-center pb-20 md:pb-0"
       >
-        <div className="room-stage flex flex-col items-center gap-[40px] w-full relative z-10">
-          {/* Headline Panel Wrapper (Aligned to the right) - temporarily hidden
-          <div className="w-full flex justify-end text-right relative z-10">
-            <h1 className="max-w-[720px] text-[clamp(2.8rem,12vw,3.6rem)] sm:text-[3.6rem] md:text-[4.4rem] lg:text-[4.6rem] font-medium leading-[1.45] tracking-[-0.04em] text-white mb-5 text-right">
-              I'm The{" "}
-              <span
-                className="inline-flex items-center justify-center mx-1 sm:mx-2 w-[2.2em] h-[1.15em] rounded-[24px] overflow-hidden bg-black select-none align-middle relative -rotate-2"
-                style={{
-                  boxShadow: '0 0.5px 1px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4), 0 3px 6px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.2), 0 16px 24px rgba(0, 0, 0, 0.15), 0 24px 32px rgba(0, 0, 0, 0.09)'
-                }}
-              >
-                <div
-                  className="absolute inset-0 flex flex-col"
-                  onTransitionEnd={handleTransitionEnd}
-                  style={{
-                    transform: `translateY(-${slideIndex * 100}%)`,
-                    transition: isTransitioning ? 'transform 600ms ease-in-out' : 'none'
-                  }}
+        {/* Full-screen Background Image with premium blend gradients */}
+        <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
+          <img 
+            src="/hero-bg.webp" 
+            alt="Hero Background" 
+            className="w-full h-full object-cover object-center md:object-left opacity-65 brightness-[0.7] saturate-[0.9]"
+          />
+          {/* Subtle vertical and horizontal gradient overlays to blend text readability with dark theme */}
+          <div className="absolute inset-0 bg-gradient-to-t from-bg-dark via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-bg-dark/90 via-bg-dark/30 to-transparent" />
+        </div>
+
+        <div className="w-full max-w-[1600px] mx-auto px-5 xl:px-10 relative z-10">
+          <div className="room-stage flex flex-col items-center md:items-start w-full relative z-10">
+            {/* Description & Buttons Panel (Left-aligned) */}
+            <div ref={contentRef} className="w-full flex flex-col items-center md:items-start text-center md:text-left mt-8">
+              <p className="text-[1rem] sm:text-[1.15rem] text-text-secondary leading-[1.6] mb-8 w-full max-w-[300px] sm:max-w-[340px]">
+                <CursorCard 
+                  triggerText="Huddin" 
+                  imageSrc="/images/huddin.webp"
                 >
-                  {displayImages.map((img, idx) => (
-                    <div key={idx} className="w-full h-full shrink-0">
-                      <img src={img} className="w-full h-full object-cover pointer-events-none" alt={`Huddin project showcase ${idx + 1}`} />
-                    </div>
-                  ))}
-                </div>
-                <div className="absolute inset-0 border-2 border-white rounded-[inherit] pointer-events-none z-10" />
-              </span>{" "}
-              <br />
-              Coder Who{" "}
-              <br />
-              <span
-                className="inline-flex items-center justify-center mx-1 sm:mx-2 w-[1.9em] h-[1.15em] rounded-[24px] overflow-hidden bg-black select-none align-middle relative rotate-2"
-                style={{
-                  boxShadow: '0 0.5px 1px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4), 0 3px 6px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.2), 0 16px 24px rgba(0, 0, 0, 0.15), 0 24px 32px rgba(0, 0, 0, 0.09)'
-                }}
-              >
-                <img
-                  src="/assets/hero-loop.gif"
-                  className="w-full h-full object-cover pointer-events-none opacity-85"
-                  alt="Slow looping design animation"
-                />
-                <div className="absolute inset-0 border-2 border-white rounded-[inherit] pointer-events-none z-10" />
-              </span>{" "}
-              Designs
-            </h1>
-          </div>
-          */}
-
-          {/* Description & Buttons Panel (Left-aligned) */}
-          <div ref={contentRef} className="w-full flex flex-col items-center md:items-start text-center md:text-left mt-8">
-            <p className="text-[1rem] sm:text-[1.15rem] text-text-secondary leading-[1.6] mb-8 w-full max-w-[300px] sm:max-w-[340px]">
-              <CursorCard 
-                triggerText="Huddin" 
-                imageSrc="/images/huddin.webp"
-              >
-                <span className="flex flex-col gap-0.5 text-left">
-                  <span className="font-mono text-[0.8rem] font-bold text-white uppercase tracking-wider">Sholahuddin Ahmad</span>
-                  <span className="text-[0.7rem] text-text-secondary font-medium">Full-Stack Coder & Designer</span>
-                  <span className="text-[0.65rem] text-text-muted leading-snug mt-1">
-                    Building premium web applications with clean code and visual systems.
+                  <span className="flex flex-col gap-0.5 text-left">
+                    <span className="font-mono text-[0.8rem] font-bold text-white uppercase tracking-wider">Sholahuddin Ahmad</span>
+                    <span className="text-[0.7rem] text-text-secondary font-medium">Full-Stack Coder & Designer</span>
+                    <span className="text-[0.65rem] text-text-muted leading-snug mt-1">
+                      Building premium web applications with clean code and visual systems.
+                    </span>
                   </span>
-                </span>
-              </CursorCard> is a{" "}
-              <CursorCard 
-                triggerText="Magelang" 
-                imageSrc="/images/magelang.webp"
-              >
-                <span className="flex flex-col gap-0.5 text-left">
-                  <span className="font-mono text-[0.8rem] font-bold text-white uppercase tracking-wider">Magelang</span>
-                  <span className="text-[0.7rem] text-text-secondary font-medium">Central Java, ID</span>
-                  <span className="text-[0.65rem] text-text-muted leading-snug mt-1">
-                    Home of Candi Borobudur and surrounded by beautiful volcanic peaks.
+                </CursorCard> is a{" "}
+                <CursorCard 
+                  triggerText="Magelang" 
+                  imageSrc="/images/magelang.webp"
+                >
+                  <span className="flex flex-col gap-0.5 text-left">
+                    <span className="font-mono text-[0.8rem] font-bold text-white uppercase tracking-wider">Magelang</span>
+                    <span className="text-[0.7rem] text-text-secondary font-medium">Central Java, ID</span>
+                    <span className="text-[0.65rem] text-text-muted leading-snug mt-1">
+                      Home of Candi Borobudur and surrounded by beautiful volcanic peaks.
+                    </span>
                   </span>
-                </span>
-              </CursorCard>{" "}
-              programmer, known for clean and expressive code — who also designs the brand
-            </p>
+                </CursorCard>{" "}
+                programmer, known for clean and expressive code — who also designs the brand
+              </p>
 
-            <div className="flex gap-4 w-full justify-center md:justify-start">
-              <a 
-                href="#contact" 
-                className="group bg-accent text-bg-dark text-[1.05rem] font-semibold pl-7 pr-3 py-3 rounded-full flex items-center justify-center whitespace-nowrap select-none hover:bg-accent/90 transition-all duration-200"
-              >
-                Get started
-                <span className="w-9 h-9 rounded-full bg-bg-dark text-accent flex items-center justify-center ml-4 shrink-0 shadow-sm">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 transition-transform duration-300 group-hover:rotate-45">
-                    <path d="M7 17L17 7M17 7H7M17 7V17" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
-              </a>
-              <a 
-                href="#portfolio" 
-                className="bg-bg-card text-text-primary text-[1.05rem] font-medium px-7 py-[14px] rounded-full select-none text-center flex items-center justify-center whitespace-nowrap"
-              >
-                Portfolio
-              </a>
+              <div className="flex gap-4 w-full justify-center md:justify-start">
+                <a 
+                  href="#contact" 
+                  className="group bg-accent text-bg-dark text-[1.05rem] font-semibold pl-7 pr-3 py-3 rounded-full flex items-center justify-center whitespace-nowrap select-none hover:bg-accent/90 transition-all duration-200"
+                >
+                  Get started
+                  <span className="w-9 h-9 rounded-full bg-bg-dark text-accent flex items-center justify-center ml-4 shrink-0 shadow-sm">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 transition-transform duration-300 group-hover:rotate-45">
+                      <path d="M7 17L17 7M17 7H7M17 7V17" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                </a>
+                <a 
+                  href="#portfolio" 
+                  className="bg-bg-card text-text-primary text-[1.05rem] font-medium px-7 py-[14px] rounded-full select-none text-center flex items-center justify-center whitespace-nowrap"
+                >
+                  Portfolio
+                </a>
+              </div>
             </div>
           </div>
         </div>

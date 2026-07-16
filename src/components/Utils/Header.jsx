@@ -20,13 +20,10 @@ export default function Header({ availabilityStatus = 'available' }) {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 20) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+      setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -99,11 +96,15 @@ export default function Header({ availabilityStatus = 'available' }) {
   return (
     <nav 
       ref={headerRef} 
-      className={`fixed top-0 left-0 w-full z-[1000] flex justify-center items-start bg-bg-dark/95 backdrop-blur-md transition-all duration-300 ${
-        isScrolled ? 'h-[70px] pt-4' : 'h-[110px] pt-6'
+      className={`fixed top-0 left-0 w-full z-[1000] flex justify-center transition-all duration-300 bg-gradient-to-b from-bg-dark to-transparent ${
+        isScrolled 
+          ? 'h-[70px] items-center' 
+          : 'h-[70px] items-center md:h-[110px] md:items-start md:pt-6'
       }`}
     >
-      <div className="w-full max-w-[1600px] px-5 xl:px-10 flex justify-between items-start relative h-full">
+      <div className={`w-full max-w-[1600px] px-5 xl:px-10 flex justify-between relative h-full transition-all duration-300 ${
+        isScrolled ? 'items-center' : 'items-center md:items-start'
+      }`}>
 
         {/* Left — Brand & Navigation (Desktop & Mobile) */}
         <div ref={brandMenuRef} className="relative flex flex-col items-start gap-0.5 shrink-0">
@@ -164,16 +165,7 @@ export default function Header({ availabilityStatus = 'available' }) {
                 </svg>
                 <span>Network</span>
               </Link>
-              <Link
-                href="/playground"
-                onClick={() => setIsBrandMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-bg-dark-light transition-colors font-mono uppercase tracking-tight"
-              >
-                <svg className="w-4 h-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>Playground</span>
-              </Link>
+
               {session && (
                 <Link
                   href="/me/stories"
@@ -214,7 +206,7 @@ export default function Header({ availabilityStatus = 'available' }) {
         </div>
 
         {/* Right — Time, Status & Location (Desktop) / Hamburger (Mobile) */}
-        <div className="flex items-center gap-6 max-md:gap-3 shrink-0 self-start">
+        <div className="flex items-center gap-6 max-md:gap-3 shrink-0">
           {mounted && (
             <>
               {/* Availability status badge */}
@@ -251,7 +243,7 @@ export default function Header({ availabilityStatus = 'available' }) {
           {/* Mobile Hamburger Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="hidden max-md:flex items-center gap-3 z-50 text-text-primary hover:text-accent transition-colors cursor-pointer select-none shrink-0 mt-[0.35rem]"
+            className="hidden max-md:flex items-center gap-3 z-50 text-text-primary hover:text-accent transition-colors cursor-pointer select-none shrink-0"
             aria-label="Toggle Menu"
           >
             <div className="w-6 h-4.5 relative flex flex-col justify-between items-end">
@@ -275,25 +267,14 @@ export default function Header({ availabilityStatus = 'available' }) {
         </div>
       </div>
 
-      {/* Mobile Expandable Menu Dropdown */}
       <div
-        className={`absolute top-[100px] left-0 w-full bg-bg-dark/95 px-6 z-40 transition-all duration-300 ease-in-out md:hidden overflow-hidden ${
-          isMenuOpen ? 'max-h-[500px] py-8 opacity-100' : 'max-h-0 py-0 opacity-0 pointer-events-none'
+        className={`absolute top-[70px] left-0 w-full bg-bg-dark/95 px-6 z-40 transition-all duration-300 ease-in-out md:hidden overflow-y-auto ${
+          isMenuOpen ? 'max-h-[calc(100vh-70px)] py-8 opacity-100' : 'max-h-0 py-0 opacity-0 pointer-events-none'
         }`}
       >
         <div className="flex flex-col gap-6">
           {[
-            {
-              label: 'Network',
-              path: '/network',
-              svgPath: 'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2m16-10a4 4 0 11-8 0 4 4 0 018 0zm6 10v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75'
-            },
-            ...navigationMenu.filter(item => item.path !== '/network'),
-            {
-              label: 'Playground',
-              path: '/playground',
-              svgPath: 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
-            },
+            ...navigationMenu,
             ...(session
               ? [
                   {
@@ -311,7 +292,7 @@ export default function Header({ availabilityStatus = 'available' }) {
                   {
                     label: 'Login',
                     path: '/login',
-                    svgPath: 'M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013 3h7a3 3 0 013 3v1'
+                    svgPath: 'M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1'
                   }
                 ]
             )
@@ -341,13 +322,9 @@ export default function Header({ availabilityStatus = 'available' }) {
             );
           })}
 
-          <a
-            href="#contact"
-            onClick={(e) => {
-              setIsMenuOpen(false);
-              handleContactClick(e);
-            }}
-            className="flex gap-5 items-center pt-4 mt-2 border-t border-border/50 text-text-secondary hover:text-text-primary transition-all duration-200 cursor-pointer"
+          {/* Socials & Contact Divider */}
+          <div 
+            className="flex gap-5 items-center justify-between pt-4 mt-2 border-t border-border/10 text-text-secondary"
             style={{
               transitionDelay: isMenuOpen ? '350ms' : '0ms',
               transform: isMenuOpen ? 'translateX(0)' : 'translateX(-20px)',
@@ -355,12 +332,67 @@ export default function Header({ availabilityStatus = 'available' }) {
               transitionProperty: 'all',
             }}
           >
-            <SiGithub className="w-5 h-5" />
-            <FaLinkedinIn className="w-5 h-5" />
-            <SiMedium className="w-5 h-5" />
-          </a>
-        </div>
+            <a
+              href="#contact"
+              onClick={(e) => {
+                setIsMenuOpen(false);
+                handleContactClick(e);
+              }}
+              className="hover:text-accent font-sans font-semibold text-[0.95rem] tracking-tight uppercase transition-colors duration-200 cursor-pointer"
+            >
+              Contact
+            </a>
+            
+            <div className="flex gap-4 items-center">
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors" aria-label="GitHub">
+                <SiGithub className="w-5 h-5" />
+              </a>
+              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors" aria-label="LinkedIn">
+                <FaLinkedinIn className="w-5 h-5" />
+              </a>
+              <a href="https://medium.com" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors" aria-label="Medium">
+                <SiMedium className="w-5 h-5" />
+              </a>
+            </div>
+          </div>
 
+          {/* Mobile Metadata Section (Single Row) */}
+          <div 
+            className="border-t border-border/10 pt-5 mt-2 flex items-start justify-between w-full text-text-secondary"
+            style={{
+              transitionDelay: isMenuOpen ? '400ms' : '0ms',
+              transform: isMenuOpen ? 'translateX(0)' : 'translateX(-20px)',
+              opacity: isMenuOpen ? 1 : 0,
+              transitionProperty: 'all',
+            }}
+          >
+            {/* Availability status badge */}
+            <div className="flex items-center gap-1.5 select-none shrink-0">
+              <span className="pulse-dot status-available shrink-0"></span>
+              <div className="flex flex-col text-left">
+                <span className="font-sans font-semibold text-text-primary text-[0.75rem] leading-none">2 Slots Open</span>
+                <span className="font-mono text-text-muted text-[0.6rem] tracking-[0.04em] uppercase mt-1">for {new Date().toLocaleString('en-US', { month: 'short' })}</span>
+              </div>
+            </div>
+
+            {/* Timezone clock */}
+            <div className="flex flex-col text-left select-none shrink-0">
+              <span className="font-sans font-semibold text-text-primary text-[0.75rem] leading-none">{time}</span>
+              <span className="font-mono text-text-muted text-[0.6rem] tracking-[0.04em] uppercase mt-1">(GMT+7)</span>
+            </div>
+
+            {/* Google Maps Location */}
+            <a
+              href="https://maps.app.goo.gl/QaQxcJyqj2XyEuXB6"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col text-left hover:text-accent group shrink-0"
+            >
+              <span className="font-sans font-semibold text-text-primary group-hover:text-accent transition-colors text-[0.75rem] leading-none">Home Studio</span>
+              <span className="font-mono text-text-muted group-hover:text-accent transition-colors text-[0.6rem] tracking-[0.04em] uppercase mt-1">Magelang, ID</span>
+            </a>
+          </div>
+        </div>
       </div>
     </nav>
   );

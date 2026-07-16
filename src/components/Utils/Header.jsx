@@ -96,15 +96,9 @@ export default function Header({ availabilityStatus = 'available' }) {
   return (
     <nav 
       ref={headerRef} 
-      className={`fixed top-0 left-0 w-full z-[1000] flex justify-center transition-all duration-300 bg-gradient-to-b from-bg-dark to-transparent ${
-        isScrolled 
-          ? 'h-[70px] items-center' 
-          : 'h-[70px] items-center md:h-[110px] md:items-start md:pt-6'
-      }`}
+      className="fixed top-0 left-0 w-full z-[1000] flex justify-center transition-all duration-300 bg-gradient-to-b from-bg-dark to-transparent h-[70px] items-center md:h-[110px] md:items-start md:pt-6"
     >
-      <div className={`w-full max-w-[1600px] px-5 xl:px-10 flex justify-between relative h-full transition-all duration-300 ${
-        isScrolled ? 'items-center' : 'items-center md:items-start'
-      }`}>
+      <div className="w-full max-w-[1600px] px-5 xl:px-10 flex justify-between relative h-full transition-all duration-300 items-center md:items-start">
 
         {/* Left — Brand & Navigation (Desktop & Mobile) */}
         <div ref={brandMenuRef} className="relative flex flex-col items-start gap-0.5 shrink-0">

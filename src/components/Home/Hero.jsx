@@ -87,8 +87,43 @@ export default function Hero({ homepageData, testimonialCard }) {
   const contentRef = useRef(null);
   const containerRef = useRef(null);
   const [contentHeight, setContentHeight] = useState(null);
+  const [viewportHeight, setViewportHeight] = useState(null);
   const visualRef = useRef(null);
   const [rightMousePos, setRightMousePos] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    let lastWidth = window.innerWidth;
+    let lastHeight = window.innerHeight;
+    setViewportHeight(window.innerHeight);
+
+    const handleResize = () => {
+      const currentWidth = window.innerWidth;
+      const currentHeight = window.innerHeight;
+      const isMobile = window.matchMedia('(pointer: coarse)').matches || currentWidth < 768;
+
+      if (isMobile) {
+        // Only update height if the width changes (e.g. orientation changes),
+        // preventing adjustments when the address bar collapses or expands on scroll.
+        if (currentWidth !== lastWidth) {
+          setViewportHeight(currentHeight);
+          lastWidth = currentWidth;
+          lastHeight = currentHeight;
+        }
+      } else {
+        // Update height on any desktop resize event
+        setViewportHeight(currentHeight);
+        lastWidth = currentWidth;
+        lastHeight = currentHeight;
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   // Background parallax motion values
   const bgX = useMotionValue(0);
@@ -320,7 +355,8 @@ export default function Hero({ homepageData, testimonialCard }) {
       <section
         ref={containerRef}
         id="hero"
-        className="perspective-3d-room w-full h-[100dvh] min-h-[500px] md:min-h-[600px] relative overflow-hidden bg-bg-dark flex items-end pb-0 md:items-stretch"
+        style={viewportHeight ? { height: `${viewportHeight}px` } : {}}
+        className="perspective-3d-room w-full h-[100svh] min-h-[500px] md:min-h-[600px] relative overflow-hidden bg-bg-dark flex items-end pb-0 md:items-stretch"
       >
         {/* Full-screen Background Image with premium blend gradients */}
         <div className="absolute top-0 left-0 w-full h-[75%] md:h-full z-0 overflow-hidden pointer-events-none">

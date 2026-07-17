@@ -1646,9 +1646,7 @@ CRITICAL LENGTH & CONCISENESS RULES:
       : isKickingOut
         ? 'bg-red-500 hover:bg-red-400 text-white'
         : 'bg-orange-500 hover:bg-orange-400 text-white'
-    : isScrolled
-      ? 'bg-accent hover:bg-white text-bg-dark'
-      : 'bg-bg-card hover:bg-white hover:text-bg-dark text-text-primary border border-border/30';
+    : 'bg-accent text-bg-dark hover:bg-accent/90';
 
   return (
     <>
@@ -1661,7 +1659,11 @@ CRITICAL LENGTH & CONCISENESS RULES:
               hasRungBellRef.current = true;
             }
           }}
-          className={`fixed bottom-6 ${posClass} z-50 w-14 h-14 ${triggerBtnClasses} rounded-full shadow-2xl flex items-center justify-center hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300 group`}
+          className={`fixed bottom-6 ${posClass} z-50 w-14 h-14 ${triggerBtnClasses} rounded-full shadow-2xl flex items-center justify-center hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300 group ${
+            isScrolled
+              ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto'
+              : 'opacity-0 translate-y-4 scale-90 pointer-events-none'
+          }`}
           aria-label="Open AI Assistant"
         >
           <MessageSquare className="w-6 h-6 group-hover:rotate-6 transition-transform duration-300" />

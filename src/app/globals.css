@@ -137,25 +137,18 @@ DESIGN SYSTEM & CODING RULES (Keep styling consistent / No hallucinations)
   /* Scrollbar */
   * {
     scrollbar-width: thin;
-    scrollbar-color: #1a1a1a #262626;
+    scrollbar-color: #262626 transparent;
   }
 
   ::-webkit-scrollbar       { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: #262626; }
+  ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {
-    background: #1a1a1a;
+    background: #262626;
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover { background: #333333; }
 
-  /* Hide scrollbar thumb on homepage */
-  .home-page {
-    scrollbar-color: transparent transparent !important;
-  }
-  .home-page::-webkit-scrollbar-thumb,
-  .home-page::-webkit-scrollbar-thumb:hover {
-    background: transparent !important;
-  }
+
 }
 
 /* ── Custom Utilities ── */

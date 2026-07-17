@@ -3,8 +3,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import Button from '../Utils/Button';
 import HeroVisual from './HeroVisual';
 import Ticker from '../Utils/Ticker';
+import Marquee from '../Utils/Marquee';
 import { createPortal } from 'react-dom';
-import { motion, useMotionValue, useSpring, AnimatePresence } from 'framer-motion';
+import { motion, useMotionValue, useSpring, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { SiSololearn } from 'react-icons/si';
+import { LiaFreeCodeCamp } from 'react-icons/lia';
+import { HiMiniCodeBracket } from 'react-icons/hi2';
 
 function CursorCard({ triggerText, children, imageSrc }) {
   const [hovered, setHovered] = useState(false);
@@ -86,6 +90,17 @@ export default function Hero({ homepageData, testimonialCard }) {
   const visualRef = useRef(null);
   const [rightMousePos, setRightMousePos] = useState({ x: 0, y: 0 });
 
+  // Background parallax motion values
+  const bgX = useMotionValue(0);
+  const bgY = useMotionValue(0);
+  const springBgX = useSpring(bgX, { stiffness: 300, damping: 30 });
+  const springBgY = useSpring(bgY, { stiffness: 300, damping: 30 });
+
+  // Scroll animations for background image (bright initially, darkens on scroll)
+  const { scrollY } = useScroll();
+  const opacityVal = useTransform(scrollY, [0, 500], [0.95, 0.3]);
+  const filterVal = useTransform(scrollY, [0, 500], ["brightness(1.05) saturate(1.0)", "brightness(0.3) saturate(0.8)"]);
+
   useEffect(() => {
     document.documentElement.classList.add('home-page');
     return () => {
@@ -106,6 +121,54 @@ export default function Hero({ homepageData, testimonialCard }) {
     resizeObserver.observe(contentRef.current);
     return () => resizeObserver.disconnect();
   }, []);
+
+  useEffect(() => {
+    const handleBgMouseMove = (e) => {
+      if (typeof window !== 'undefined' && window.innerWidth < 768) return;
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      
+      // Check if mouse is within the bounding rect of the hero container
+      // (This includes the navbar region since the navbar overlays the top of the hero container)
+      const isInside = (
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom
+      );
+
+      if (isInside) {
+        const xc = rect.width / 2;
+        const yc = rect.height / 2;
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const dx = (x - xc) / xc;
+        const dy = (y - yc) / yc;
+        
+        // Reverse displacement (reverse parallax)
+        bgX.set(Math.max(-1.5, Math.min(1.5, dx)) * -65);
+        bgY.set(Math.max(-1.5, Math.min(1.5, dy)) * -40);
+      } else {
+        bgX.set(0);
+        bgY.set(0);
+      }
+    };
+
+    const handleBgMouseLeave = () => {
+      bgX.set(0);
+      bgY.set(0);
+    };
+
+    window.addEventListener('mousemove', handleBgMouseMove);
+    document.addEventListener('mouseleave', handleBgMouseLeave);
+
+    return () => {
+      window.removeEventListener('mousemove', handleBgMouseMove);
+      document.removeEventListener('mouseleave', handleBgMouseLeave);
+    };
+  }, [bgX, bgY]);
+
 
 
 
@@ -244,28 +307,47 @@ export default function Hero({ homepageData, testimonialCard }) {
 
   return (
     <>
+      <style dangerouslySetInnerHTML={{ __html: `
+        html, body {
+          scrollbar-width: none !important;
+        }
+        ::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+      `}} />
       <section
         ref={containerRef}
         id="hero"
-        className="perspective-3d-room w-full h-screen min-h-[600px] relative overflow-hidden bg-bg-dark flex items-end md:items-center pb-20 md:pb-0"
+        className="perspective-3d-room w-full h-[100dvh] min-h-[500px] md:min-h-[600px] relative overflow-hidden bg-bg-dark flex items-end pb-0 md:items-stretch"
       >
         {/* Full-screen Background Image with premium blend gradients */}
-        <div className="absolute top-0 left-0 w-full h-[75%] md:h-full z-0 pointer-events-none">
-          <img 
+        <div className="absolute top-0 left-0 w-full h-[75%] md:h-full z-0 overflow-hidden pointer-events-none">
+          <motion.img 
             src="/hero-bg.webp" 
             alt="Hero Background" 
-            className="w-full h-full object-cover object-center md:object-left opacity-65 brightness-[0.7] saturate-[0.9]"
+            className="w-full h-full object-cover object-center md:object-left"
+            style={{
+              x: springBgX,
+              y: springBgY,
+              scale: 1.12,
+              opacity: opacityVal,
+              filter: filterVal,
+            }}
           />
           {/* Subtle vertical and horizontal gradient overlays to blend text readability with dark theme */}
           <div className="absolute inset-0 bg-gradient-to-t from-bg-dark via-transparent to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-bg-dark/90 via-bg-dark/30 to-transparent" />
         </div>
 
-        <div className="w-full max-w-[1600px] mx-auto px-5 xl:px-10 relative z-10">
-          <div className="room-stage flex flex-col items-center md:items-start w-full relative z-10">
-            {/* Description & Buttons Panel (Left-aligned) */}
-            <div ref={contentRef} className="w-full flex flex-col items-center md:items-start text-center md:text-left mt-8">
-              <p className="text-[1rem] sm:text-[1.15rem] text-text-secondary leading-[1.6] mb-8 w-full max-w-[300px] sm:max-w-[340px]">
+        <div className="w-full h-full max-w-[1600px] mx-auto px-5 xl:px-10 relative z-10">
+          <div className="room-stage w-full h-full relative z-10 flex flex-col pt-[70px] md:pt-[110px] pb-6 md:pb-6">
+            <div 
+              ref={contentRef} 
+              className="w-full flex flex-col items-start text-left mt-auto md:flex-1 md:justify-center"
+            >
+              <p className="text-[1rem] sm:text-[1.15rem] text-text-secondary leading-[1.6] w-full max-w-[300px] sm:max-w-[340px]">
                 <CursorCard 
                   triggerText="Huddin" 
                   imageSrc="/images/huddin.webp"
@@ -292,11 +374,58 @@ export default function Hero({ homepageData, testimonialCard }) {
                 </CursorCard>{" "}
                 programmer, known for clean and expressive code — who also designs the brand
               </p>
+            </div>
 
-              <div className="flex gap-4 w-full justify-center md:justify-start">
+            {/* Bottom Row Panel (Trusted by on the left, Buttons on the right) */}
+            <div className="w-full flex flex-col md:flex-row md:justify-between md:items-end gap-6 mt-6 md:mt-0">
+              
+              {/* Left Side: Trusted By Marquee (35% width on desktop, bottom order on mobile) */}
+              <div className="flex items-center gap-4 w-full md:w-[35vw] max-w-full overflow-hidden order-2 md:order-1">
+                <span className="font-mono text-[0.7rem] font-bold text-text-muted uppercase tracking-wider shrink-0 select-none">
+                  Trusted by:
+                </span>
+                <Marquee gapClass="gap-10" className="w-full">
+                  <div className="flex items-center gap-10">
+                    <div className="flex items-center gap-1.5 select-none opacity-50 hover:opacity-100 hover:text-accent transition-all duration-300">
+                      <LiaFreeCodeCamp className="w-5 h-5 text-current translate-y-[0.5px]" />
+                      <span className="font-mono font-bold text-xs uppercase tracking-wider text-current leading-none">freeCodeCamp</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 select-none opacity-50 hover:opacity-100 hover:text-accent transition-all duration-300">
+                      <SiSololearn className="w-4 h-4 text-current translate-y-[0.5px]" />
+                      <span className="font-sans font-bold text-xs uppercase tracking-widest text-current leading-none">Sololearn</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 select-none opacity-50 hover:opacity-100 hover:text-accent transition-all duration-300">
+                      <svg viewBox="0 0 24 24" className="w-4.5 h-4.5 fill-none stroke-current translate-y-[0.5px]" strokeWidth="2.5">
+                        <rect x="4" y="4" width="16" height="16" rx="4" />
+                        <path d="M9 10l3 3 3-3" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      <span className="font-sans font-black text-xs uppercase tracking-wider text-current leading-none">Mimo</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 select-none opacity-50 hover:opacity-100 hover:text-accent transition-all duration-300">
+                      <HiMiniCodeBracket className="w-4.5 h-4.5 text-current translate-y-[0.5px]" />
+                      <span className="font-sans font-bold text-xs uppercase tracking-widest text-current leading-none">Dicoding</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 select-none opacity-50 hover:opacity-100 hover:text-accent transition-all duration-300">
+                      <svg viewBox="0 0 24 24" className="w-4.5 h-4.5 fill-none stroke-current translate-y-[0.5px]" strokeWidth="2.5">
+                        <path d="M8 6H4v12h4M16 6h4v12h-4" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      <span className="font-mono font-extrabold text-xs uppercase tracking-tight text-current leading-none">CODEPOLITAN</span>
+                    </div>
+                  </div>
+                </Marquee>
+              </div>
+
+              {/* Right Side: Buttons (flex row side-by-side, Get Started stretches to fill) */}
+              <div className="flex flex-row gap-4 shrink-0 justify-center md:justify-end items-center md:items-end w-full md:w-auto order-1 md:order-2">
+                <a 
+                  href="#portfolio" 
+                  className="bg-bg-card text-text-primary text-[1.05rem] font-medium px-7 py-[14px] rounded-full select-none text-center flex items-center justify-center whitespace-nowrap"
+                >
+                  Portfolio
+                </a>
                 <a 
                   href="#contact" 
-                  className="group bg-accent text-bg-dark text-[1.05rem] font-semibold pl-7 pr-3 py-3 rounded-full flex items-center justify-center whitespace-nowrap select-none hover:bg-accent/90 transition-all duration-200"
+                  className="flex-1 md:flex-none group bg-accent text-bg-dark text-[1.05rem] font-semibold pl-7 pr-3 py-3 rounded-full flex items-center justify-center whitespace-nowrap select-none hover:bg-accent/90 transition-all duration-200"
                 >
                   Get started
                   <span className="w-9 h-9 rounded-full bg-bg-dark text-accent flex items-center justify-center ml-4 shrink-0 shadow-sm">
@@ -305,13 +434,8 @@ export default function Hero({ homepageData, testimonialCard }) {
                     </svg>
                   </span>
                 </a>
-                <a 
-                  href="#portfolio" 
-                  className="bg-bg-card text-text-primary text-[1.05rem] font-medium px-7 py-[14px] rounded-full select-none text-center flex items-center justify-center whitespace-nowrap"
-                >
-                  Portfolio
-                </a>
               </div>
+
             </div>
           </div>
         </div>

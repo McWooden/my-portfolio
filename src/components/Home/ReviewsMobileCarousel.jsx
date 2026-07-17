@@ -119,7 +119,7 @@ export default function ReviewsMobileCarousel({ reviews = staticReviews }) {
   };
 
   return (
-    <div ref={containerRef} className="flex flex-col items-center justify-center mt-16 w-full px-4">
+    <div ref={containerRef} className="flex flex-col items-center justify-center w-full px-4">
       {/* Stories Progress Indicators */}
       <div className="flex gap-2.5 w-full max-w-[360px] mb-8 px-2">
         {reviews.map((_, i) => {

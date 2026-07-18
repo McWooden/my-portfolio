@@ -92,28 +92,33 @@ export default function Hero({ homepageData, testimonialCard }) {
   const [rightMousePos, setRightMousePos] = useState({ x: 0, y: 0 });
   const videoRef = useRef(null);
 
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    const checkMobile = () => {
+      return window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768;
+    };
 
     let lastWidth = window.innerWidth;
     let lastHeight = window.innerHeight;
     setViewportHeight(window.innerHeight);
+    setIsMobileDevice(checkMobile());
 
     const handleResize = () => {
       const currentWidth = window.innerWidth;
       const currentHeight = window.innerHeight;
-      const isMobile = window.matchMedia('(pointer: coarse)').matches || currentWidth < 768;
+      const isMobile = checkMobile();
+      setIsMobileDevice(isMobile);
 
       if (isMobile) {
-        // Only update height if the width changes (e.g. orientation changes),
-        // preventing adjustments when the address bar collapses or expands on scroll.
         if (currentWidth !== lastWidth) {
           setViewportHeight(currentHeight);
           lastWidth = currentWidth;
           lastHeight = currentHeight;
         }
       } else {
-        // Update height on any desktop resize event
         setViewportHeight(currentHeight);
         lastWidth = currentWidth;
         lastHeight = currentHeight;
@@ -126,6 +131,18 @@ export default function Hero({ homepageData, testimonialCard }) {
     };
   }, []);
 
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (isMobileDevice) {
+      video.loop = true;
+      video.play().catch(() => {});
+    } else {
+      video.pause();
+    }
+  }, [isMobileDevice]);
+
   // Scroll animations and scrubbing setup
   const { scrollY } = useScroll();
 
@@ -134,6 +151,8 @@ export default function Hero({ homepageData, testimonialCard }) {
   const springProgress = useSpring(scrollProgress, { stiffness: 45, damping: 15 });
 
   useMotionValueEvent(springProgress, "change", (progress) => {
+    if (isMobileDevice) return;
+    
     const video = videoRef.current;
     if (video) {
       const duration = video.duration || 10;

@@ -93,6 +93,48 @@ export default function Hero({ homepageData, testimonialCard }) {
   const videoRef = useRef(null);
 
   const [isMobileDevice, setIsMobileDevice] = useState(false);
+  const [mobileVideoState, setMobileVideoState] = useState('image'); // 'image' | 'playing'
+  const [isFlashActive, setIsFlashActive] = useState(false);
+
+  const triggerFlashTransition = () => {
+    const video = videoRef.current;
+    setIsFlashActive(true);
+    setMobileVideoState('image');
+    
+    if (video) {
+      video.pause();
+      video.currentTime = 0;
+    }
+    
+    setTimeout(() => {
+      setIsFlashActive(false);
+    }, 400);
+  };
+
+  const handleHeroClickMobile = (e) => {
+    if (!isMobileDevice) return;
+
+    // Skip interactive elements like buttons, cards, chatbots
+    const isInteractive = e.target.closest('button, a, input, textarea, [role="button"]');
+    if (isInteractive) return;
+
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (mobileVideoState === 'image') {
+      setMobileVideoState('playing');
+      video.currentTime = 0;
+      video.play().catch(() => {});
+    } else if (mobileVideoState === 'playing') {
+      triggerFlashTransition();
+    }
+  };
+
+  const handleVideoEnded = () => {
+    if (isMobileDevice) {
+      triggerFlashTransition();
+    }
+  };
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -136,8 +178,8 @@ export default function Hero({ homepageData, testimonialCard }) {
     if (!video) return;
 
     if (isMobileDevice) {
-      video.loop = true;
-      video.play().catch(() => {});
+      video.loop = false;
+      video.pause();
     } else {
       video.pause();
     }
@@ -393,26 +435,54 @@ export default function Hero({ homepageData, testimonialCard }) {
       <section
         ref={containerRef}
         id="hero"
+        onClick={handleHeroClickMobile}
         style={viewportHeight ? { height: `${viewportHeight}px` } : {}}
-        className="perspective-3d-room w-full h-[100svh] min-h-[500px] md:min-h-[600px] relative overflow-hidden bg-bg-dark flex items-end pb-0 md:items-stretch"
+        className="perspective-3d-room w-full h-[100svh] min-h-[500px] md:min-h-[600px] relative overflow-hidden bg-bg-dark flex items-end pb-0 md:items-stretch cursor-pointer md:cursor-default"
       >
-        {/* Full-screen Background Image with premium blend gradients */}
+        {/* Full-screen Background with premium blend gradients */}
         <div className="absolute top-0 left-0 w-full h-[75%] md:h-full z-0 overflow-hidden pointer-events-none">
+          {/* Static WebP Background Image (visible on mobile, and as fallback behind video) */}
+          <motion.img 
+            src="/hero-bg.webp"
+            alt="Hero Background Static"
+            className="absolute inset-0 w-full h-full object-cover object-center md:object-left"
+            style={{
+              x: springBgX,
+              y: springBgY,
+              scale: 1.12,
+              opacity: isMobileDevice && mobileVideoState === 'playing' ? 0 : opacityVal,
+              filter: filterVal,
+            }}
+          />
+
+          {/* WebM Video Background on top of image */}
           <motion.video 
             ref={videoRef}
             src="/hero-bg.webm" 
             muted
             playsInline
-            poster="/hero-bg.webp"
-            className="w-full h-full object-cover object-center md:object-left"
+            onEnded={handleVideoEnded}
+            className="absolute inset-0 w-full h-full object-cover object-center md:object-left transition-opacity duration-500"
             style={{
               x: springBgX,
               y: springBgY,
               scale: 1.12,
-              opacity: opacityVal,
+              opacity: isMobileDevice 
+                ? (mobileVideoState === 'playing' ? opacityVal : 0)
+                : opacityVal,
               filter: filterVal,
             }}
           />
+
+          {/* Flash transition overlay (mobile only) */}
+          {isMobileDevice && (
+            <div 
+              className={`absolute inset-0 bg-[#f5ebd6] transition-opacity duration-300 pointer-events-none z-30 ${
+                isFlashActive ? 'opacity-100' : 'opacity-0'
+              }`} 
+            />
+          )}
+
           {/* Subtle vertical and horizontal gradient overlays to blend text readability with dark theme */}
           <div className="absolute inset-0 bg-gradient-to-t from-bg-dark via-transparent to-transparent z-20" />
           <div className="absolute inset-0 bg-gradient-to-r from-bg-dark/90 via-bg-dark/30 to-transparent z-20" />

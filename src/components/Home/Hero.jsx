@@ -90,6 +90,7 @@ export default function Hero({ homepageData, testimonialCard }) {
   const [viewportHeight, setViewportHeight] = useState(null);
   const visualRef = useRef(null);
   const [rightMousePos, setRightMousePos] = useState({ x: 0, y: 0 });
+  const videoRef = useRef(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -124,6 +125,42 @@ export default function Hero({ homepageData, testimonialCard }) {
       window.removeEventListener('resize', handleResize);
     };
   }, []);
+
+  useEffect(() => {
+    let animationFrameId;
+    let startTime = null;
+
+    const updateVideoTime = (timestamp) => {
+      const video = videoRef.current;
+      if (video) {
+        if (!startTime) startTime = timestamp;
+        const elapsed = (timestamp - startTime) / 1000;
+        const maxTime = Math.min(10, video.duration || 10);
+        const period = maxTime * 2;
+        const progress = (elapsed % period) / period;
+        const pingPong = progress < 0.5 ? progress * 2 : 2 - progress * 2;
+        
+        // Easing blend: 30% linear, 70% smoothstep to prevent boundary delay/pause
+        const k = 0.7;
+        const smooth = 3 * pingPong * pingPong - 2 * pingPong * pingPong * pingPong;
+        const easedProgress = (1 - k) * pingPong + k * smooth;
+        
+        const virtualTime = easedProgress * maxTime;
+        
+        if (video.readyState >= 2) {
+          video.currentTime = virtualTime;
+        }
+      }
+      animationFrameId = requestAnimationFrame(updateVideoTime);
+    };
+
+    animationFrameId = requestAnimationFrame(updateVideoTime);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
 
   // Background parallax motion values
   const bgX = useMotionValue(0);
@@ -360,9 +397,12 @@ export default function Hero({ homepageData, testimonialCard }) {
       >
         {/* Full-screen Background Image with premium blend gradients */}
         <div className="absolute top-0 left-0 w-full h-[75%] md:h-full z-0 overflow-hidden pointer-events-none">
-          <motion.img 
-            src="/hero-bg.webp" 
-            alt="Hero Background" 
+          <motion.video 
+            ref={videoRef}
+            src="/hero-bg.webm" 
+            muted
+            playsInline
+            poster="/hero-bg.webp"
             className="w-full h-full object-cover object-center md:object-left"
             style={{
               x: springBgX,
@@ -373,8 +413,8 @@ export default function Hero({ homepageData, testimonialCard }) {
             }}
           />
           {/* Subtle vertical and horizontal gradient overlays to blend text readability with dark theme */}
-          <div className="absolute inset-0 bg-gradient-to-t from-bg-dark via-transparent to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-bg-dark/90 via-bg-dark/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-bg-dark via-transparent to-transparent z-20" />
+          <div className="absolute inset-0 bg-gradient-to-r from-bg-dark/90 via-bg-dark/30 to-transparent z-20" />
         </div>
 
         <div className="w-full h-full max-w-[1600px] mx-auto px-5 xl:px-10 relative z-10">

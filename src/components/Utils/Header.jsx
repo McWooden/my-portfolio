@@ -17,6 +17,8 @@ export default function Header({ availabilityStatus = 'available' }) {
   const [time, setTime] = useState('');
   const [mounted, setMounted] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [showMapTooltip, setShowMapTooltip] = useState(false);
+  const mapTooltipRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -67,9 +69,12 @@ export default function Header({ availabilityStatus = 'available' }) {
       if (brandMenuRef.current && !brandMenuRef.current.contains(event.target)) {
         setIsBrandMenuOpen(false);
       }
+      if (mapTooltipRef.current && !mapTooltipRef.current.contains(event.target)) {
+        setShowMapTooltip(false);
+      }
     };
 
-    if (isMenuOpen || isBrandMenuOpen) {
+    if (isMenuOpen || isBrandMenuOpen || showMapTooltip) {
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('touchstart', handleClickOutside);
     }
@@ -78,7 +83,7 @@ export default function Header({ availabilityStatus = 'available' }) {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
     };
-  }, [isMenuOpen, isBrandMenuOpen]);
+  }, [isMenuOpen, isBrandMenuOpen, showMapTooltip]);
 
   const handleContactClick = (e) => {
     e.preventDefault();
@@ -221,16 +226,48 @@ export default function Header({ availabilityStatus = 'available' }) {
               </div>
 
               {/* Google Maps Location */}
-              <a
-                href="https://maps.app.goo.gl/QaQxcJyqj2XyEuXB6"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-end text-[0.75rem] select-none hover:text-accent transition-colors duration-200 max-md:hidden group"
-                title="View Studio on Google Maps"
-              >
-                <span className="font-sans font-semibold text-text-primary group-hover:text-accent transition-colors tracking-[-0.02em] leading-tight">Home Studio</span>
-                <span className="font-mono text-text-muted text-[0.65rem] tracking-[0.06em] leading-none mt-1 group-hover:text-accent transition-colors uppercase">Magelang, ID</span>
-              </a>
+              <div ref={mapTooltipRef} className="relative max-md:hidden">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setShowMapTooltip(!showMapTooltip);
+                  }}
+                  className="flex flex-col items-end text-[0.75rem] select-none hover:text-accent transition-colors duration-200 group text-right cursor-pointer"
+                  title="View Studio on Google Maps"
+                >
+                  <span className="font-sans font-semibold text-text-primary group-hover:text-accent transition-colors tracking-[-0.02em] leading-tight">Home Studio</span>
+                  <span className="font-mono text-text-muted text-[0.65rem] tracking-[0.06em] leading-none mt-1 group-hover:text-accent transition-colors uppercase">Magelang, ID</span>
+                </button>
+
+                {showMapTooltip && (
+                  <div className="absolute right-0 top-full mt-3 w-72 p-4 bg-bg-dark/95 backdrop-blur-md border border-border/10 rounded-xl shadow-2xl z-[1010] flex flex-col gap-3 origin-top-right text-left">
+                    {/* Small arrow pointing up */}
+                    <div className="absolute right-6 -top-1 w-2.5 h-2.5 bg-bg-dark border-t border-l border-border/10 rotate-45" />
+                    
+                    <p className="font-sans text-[0.85rem] text-text-secondary leading-relaxed">
+                      Do you really want to open a new page to see me on Google Maps?
+                    </p>
+                    
+                    <div className="flex gap-2 justify-end mt-1">
+                      <button
+                        onClick={() => setShowMapTooltip(false)}
+                        className="px-3 py-1.5 rounded-lg border border-border/10 text-[0.75rem] font-medium text-text-primary hover:bg-white/5 transition-colors cursor-pointer"
+                      >
+                        Wait
+                      </button>
+                      <a
+                        href="https://maps.app.goo.gl/QaQxcJyqj2XyEuXB6"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setShowMapTooltip(false)}
+                        className="px-3 py-1.5 rounded-lg bg-accent text-[0.75rem] font-semibold text-bg-dark hover:opacity-90 transition-opacity cursor-pointer flex items-center justify-center"
+                      >
+                        Let's Go!
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
             </>
           )}
 

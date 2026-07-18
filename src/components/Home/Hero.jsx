@@ -5,7 +5,7 @@ import HeroVisual from './HeroVisual';
 import Ticker from '../Utils/Ticker';
 import Marquee from '../Utils/Marquee';
 import { createPortal } from 'react-dom';
-import { motion, useMotionValue, useSpring, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { motion, useMotionValue, useSpring, AnimatePresence, useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
 import { SiSololearn } from 'react-icons/si';
 import { LiaFreeCodeCamp } from 'react-icons/lia';
 import { HiMiniCodeBracket } from 'react-icons/hi2';
@@ -126,40 +126,23 @@ export default function Hero({ homepageData, testimonialCard }) {
     };
   }, []);
 
-  useEffect(() => {
-    let animationFrameId;
-    let startTime = null;
+  // Scroll animations and scrubbing setup
+  const { scrollY } = useScroll();
 
-    const updateVideoTime = (timestamp) => {
-      const video = videoRef.current;
-      if (video) {
-        if (!startTime) startTime = timestamp;
-        const elapsed = (timestamp - startTime) / 1000;
-        const maxTime = Math.min(10, video.duration || 10);
-        const period = maxTime * 2;
-        const progress = (elapsed % period) / period;
-        const pingPong = progress < 0.5 ? progress * 2 : 2 - progress * 2;
-        
-        // Easing blend: 30% linear, 70% smoothstep to prevent boundary delay/pause
-        const k = 0.7;
-        const smooth = 3 * pingPong * pingPong - 2 * pingPong * pingPong * pingPong;
-        const easedProgress = (1 - k) * pingPong + k * smooth;
-        
-        const virtualTime = easedProgress * maxTime;
-        
-        if (video.readyState >= 2) {
-          video.currentTime = virtualTime;
-        }
+  // Scroll scrubbing for background video
+  const scrollProgress = useTransform(scrollY, [0, 800], [0, 1]);
+  const springProgress = useSpring(scrollProgress, { stiffness: 45, damping: 15 });
+
+  useMotionValueEvent(springProgress, "change", (progress) => {
+    const video = videoRef.current;
+    if (video) {
+      const duration = video.duration || 10;
+      const targetTime = Math.min(Math.max(progress, 0), 1) * duration;
+      if (video.readyState >= 2) {
+        video.currentTime = targetTime;
       }
-      animationFrameId = requestAnimationFrame(updateVideoTime);
-    };
-
-    animationFrameId = requestAnimationFrame(updateVideoTime);
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, []);
+    }
+  });
 
 
   // Background parallax motion values
@@ -169,7 +152,6 @@ export default function Hero({ homepageData, testimonialCard }) {
   const springBgY = useSpring(bgY, { stiffness: 300, damping: 30 });
 
   // Scroll animations for background image (bright initially, darkens on scroll)
-  const { scrollY } = useScroll();
   const opacityVal = useTransform(scrollY, [0, 500], [0.95, 0.3]);
   const filterVal = useTransform(scrollY, [0, 500], ["brightness(1.05) saturate(1.0)", "brightness(0.3) saturate(0.8)"]);
 

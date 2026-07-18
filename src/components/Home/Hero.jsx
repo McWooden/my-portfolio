@@ -9,6 +9,7 @@ import { motion, useMotionValue, useSpring, AnimatePresence, useScroll, useTrans
 import { SiSololearn } from 'react-icons/si';
 import { LiaFreeCodeCamp } from 'react-icons/lia';
 import { HiMiniCodeBracket } from 'react-icons/hi2';
+import { IoPlay, IoPause } from 'react-icons/io5';
 
 function CursorCard({ triggerText, children, imageSrc }) {
   const [hovered, setHovered] = useState(false);
@@ -95,6 +96,105 @@ export default function Hero({ homepageData, testimonialCard }) {
   const [isMobileDevice, setIsMobileDevice] = useState(false);
   const [mobileVideoState, setMobileVideoState] = useState('image'); // 'image' | 'playing'
   const [isScrolledFromTop, setIsScrolledFromTop] = useState(false);
+
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const ytPlayerRef = useRef(null);
+
+  // Close tooltip when clicking outside
+  useEffect(() => {
+    if (!showTooltip) return;
+    const handleOutsideClick = () => {
+      setShowTooltip(false);
+    };
+    window.addEventListener('click', handleOutsideClick);
+    return () => window.removeEventListener('click', handleOutsideClick);
+  }, [showTooltip]);
+
+  // Load YT Player script
+  useEffect(() => {
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      if (firstScriptTag && firstScriptTag.parentNode) {
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      } else {
+        document.head.appendChild(tag);
+      }
+    }
+  }, []);
+
+  // Monitor time to stop exactly at 0:33
+  useEffect(() => {
+    let timer;
+    if (isMusicPlaying) {
+      timer = setInterval(() => {
+        if (ytPlayerRef.current && ytPlayerRef.current.getCurrentTime) {
+          const time = ytPlayerRef.current.getCurrentTime();
+          if (time >= 33) {
+            ytPlayerRef.current.pauseVideo();
+            ytPlayerRef.current.seekTo(0);
+            setIsMusicPlaying(false);
+          }
+        }
+      }, 100);
+    }
+    return () => clearInterval(timer);
+  }, [isMusicPlaying]);
+
+  const handleYoutubeTextClick = (e) => {
+    e.stopPropagation(); // Avoid triggering Polaroid play toggle
+    setShowTooltip(true);
+  };
+
+  const handlePolaroidClick = () => {
+    const initAndPlay = () => {
+      if (window.YT && window.YT.Player) {
+        ytPlayerRef.current = new window.YT.Player('youtube-music-player', {
+          events: {
+            'onReady': (event) => {
+              if (event.target.setPlaybackQuality) {
+                event.target.setPlaybackQuality('tiny');
+              }
+              event.target.unMute();
+              event.target.playVideo();
+              setIsMusicPlaying(true);
+            },
+            'onStateChange': (event) => {
+              if (event.data === window.YT.PlayerState.PLAYING) {
+                setIsMusicPlaying(true);
+              } else if (event.data === window.YT.PlayerState.ENDED) {
+                setIsMusicPlaying(false);
+                ytPlayerRef.current.seekTo(0);
+              } else if (event.data === window.YT.PlayerState.PAUSED) {
+                setIsMusicPlaying(false);
+              }
+            }
+          }
+        });
+      } else {
+        console.warn("YouTube API is not loaded yet.");
+      }
+    };
+
+    if (!ytPlayerRef.current || !ytPlayerRef.current.playVideo) {
+      initAndPlay();
+      return;
+    }
+
+    if (isMusicPlaying) {
+      ytPlayerRef.current.pauseVideo();
+      setIsMusicPlaying(false);
+    } else {
+      if (ytPlayerRef.current.setPlaybackQuality) {
+        ytPlayerRef.current.setPlaybackQuality('tiny');
+      }
+      ytPlayerRef.current.unMute();
+      ytPlayerRef.current.playVideo();
+      setIsMusicPlaying(true);
+    }
+  };
 
   const triggerCloseTransition = () => {
     const video = videoRef.current;
@@ -493,7 +593,7 @@ export default function Hero({ homepageData, testimonialCard }) {
           <div className="room-stage w-full h-full relative z-10 flex flex-col pt-[70px] md:pt-[110px] pb-6 md:pb-6">
             <div 
               ref={contentRef} 
-              className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-8 mt-auto md:flex-1 md:py-6"
+              className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-6 md:gap-8 mt-auto md:flex-1 md:py-6"
             >
               <div className="w-full max-w-[320px] order-2 md:order-1">
                 <p className="text-[0.95rem] sm:text-[1.05rem] text-text-secondary leading-[1.6] w-full">
@@ -525,6 +625,8 @@ export default function Hero({ homepageData, testimonialCard }) {
                 </p>
               </div>
 
+              {/* Spotify embed commented out as requested */}
+              {/*
               <div className={`shrink-0 select-none relative overflow-hidden ${
                 isMobileDevice 
                   ? "w-[112px] h-[141px] order-1 self-end" 
@@ -546,6 +648,97 @@ export default function Hero({ homepageData, testimonialCard }) {
                   allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
                   loading="lazy"
                 ></iframe>
+              </div>
+              */}
+
+              {/* YouTube Polaroid style embed */}
+              <div
+                className={`shrink-0 select-none bg-white border border-neutral-200/80 rounded-[2px] shadow-[0_16px_32px_rgba(0,0,0,0.3),0_2px_6px_rgba(0,0,0,0.15)] flex flex-col gap-2 ${
+                  isMobileDevice
+                    ? "order-1 self-end p-1.5 pb-3 w-[110px]"
+                    : "order-2 self-auto p-2.5 pb-4 w-[160px]"
+                }`}
+                style={{ transform: "rotate(-3deg)" }}
+              >
+                {/* Cover image — click to play/pause */}
+                <div
+                  onClick={handlePolaroidClick}
+                  className="w-full aspect-square rounded-[1px] overflow-hidden bg-neutral-950 relative border border-neutral-300/40 cursor-pointer group/photo"
+                >
+                  <img
+                    src="/struct.webp"
+                    alt="STRUCT Cover"
+                    className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
+                  />
+
+                  {/* Hidden YouTube iframe — audio only */}
+                  <iframe
+                    id="youtube-music-player"
+                    src="https://www.youtube.com/embed/LgMvaRwbEOE?enablejsapi=1&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1"
+                    allow="autoplay; encrypted-media"
+                    frameBorder="0"
+                    className="absolute w-1 h-1 opacity-0 pointer-events-none"
+                    style={{ border: 0 }}
+                  />
+
+                  {/* Hover overlay with play/pause */}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/photo:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                    <div className="w-7 h-7 rounded-full bg-bg-card flex items-center justify-center shadow-lg text-text-primary">
+                      {isMusicPlaying
+                        ? <IoPause className="w-3 h-3 text-current" />
+                        : <IoPlay className="w-3 h-3 text-current translate-x-[0.5px]" />
+                      }
+                    </div>
+                  </div>
+
+                  {/* Live playing pill */}
+                  {isMusicPlaying && (
+                    <div className="absolute top-1 right-1 bg-red-600/90 text-white text-[6.5px] font-bold tracking-wider px-1 py-0.5 rounded-full flex items-center gap-0.5 animate-pulse select-none z-10">
+                      <span className="w-0.5 h-0.5 bg-white rounded-full" />
+                      PLAYING
+                    </div>
+                  )}
+                </div>
+
+                {/* Bottom label row */}
+                <div className="bg-neutral-100 rounded-[3px] px-1.5 py-1 flex flex-row justify-between items-center w-full relative whitespace-nowrap overflow-hidden">
+                  <div className="flex items-center gap-0.5 min-w-0">
+                    <span className="text-[#333] text-[7px] md:text-[9px] font-bold select-none leading-none shrink-0">❇</span>
+                    <span className="text-[#333] font-mono text-[5.5px] md:text-[7.5px] font-bold tracking-wider select-none leading-none truncate">
+                      STRUCT by UDIENNX
+                    </span>
+                  </div>
+                  
+                  <div className="relative shrink-0 ml-0.5">
+                    <span
+                      onClick={handleYoutubeTextClick}
+                      className="text-neutral-500 font-sans text-[5.5px] md:text-[7.5px] font-bold tracking-wide select-none leading-none cursor-pointer hover:text-accent transition-colors px-1 py-0.5 rounded hover:bg-neutral-200/50 block"
+                    >
+                      /Youtube
+                    </span>
+                    {showTooltip && (
+                      <div className="absolute right-0 bottom-full mb-2 bg-[#18181b] border border-neutral-800 text-white rounded-lg p-2.5 shadow-xl flex flex-col gap-2 z-50 min-w-[140px] text-left">
+                        <p className="text-[10px] text-neutral-300 font-medium leading-normal">
+                          Listen to this track on YouTube?
+                        </p>
+                        <div className="flex gap-1.5 justify-end">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setShowTooltip(false); }}
+                            className="text-[9px] font-bold px-2.5 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors"
+                          >
+                            Stay here
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setShowTooltip(false); window.open("https://youtu.be/LgMvaRwbEOE?si=Oudd4EAkxaPRNTcN", "_blank"); }}
+                            className="text-[9px] font-bold px-2.5 py-1 rounded bg-accent hover:bg-accent/90 text-neutral-950 transition-colors"
+                          >
+                            Listen
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
 

@@ -15,7 +15,7 @@ export default function Blog({ posts: initialPosts = staticBlogPosts }) {
   const fetchUpdatedPosts = async () => {
     const { data, error } = await supabase
       .from('stories')
-      .select('*')
+      .select('*, accounts(*)')
       .eq('published', true)
       .eq('type', 'blog')
       .order('date', { ascending: false });

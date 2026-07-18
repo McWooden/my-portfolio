@@ -7,11 +7,18 @@ import Header from '../../components/Utils/Header';
 export default function LoginPage() {
   const [authLoading, setAuthLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  
+  // Tenancy states
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPasswordLogin, setShowPasswordLogin] = useState(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
-        window.location.href = '/me/stories';
+        const searchParams = new URLSearchParams(window.location.search);
+        const target = searchParams.get('redirectTo') || '/me/stories';
+        window.location.href = target;
       }
     });
     return () => subscription.unsubscribe();
@@ -21,13 +28,32 @@ export default function LoginPage() {
     setAuthLoading(true);
     setErrorMsg('');
     try {
+      const searchParams = new URLSearchParams(window.location.search);
+      const target = searchParams.get('redirectTo') || '/me/stories';
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: `${window.location.origin}/me/stories` },
+        options: { redirectTo: `${window.location.origin}${target}` },
       });
       if (error) throw error;
     } catch (err) {
       setErrorMsg(err.message || 'Failed to initialize Google login');
+      setAuthLoading(false);
+    }
+  };
+
+  const handlePasswordLogin = async (e) => {
+    e.preventDefault();
+    if (!email || !password) return;
+    setAuthLoading(true);
+    setErrorMsg('');
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
+    } catch (err) {
+      setErrorMsg(err.message || 'Invalid login credentials');
       setAuthLoading(false);
     }
   };
@@ -86,6 +112,50 @@ export default function LoginPage() {
               <span>{authLoading ? 'Signing In...' : 'Sign In with Google'}</span>
             </button>
           </div>
+
+          {/* Backup Credentials Toggle */}
+          <div className="text-center mt-6">
+            <button
+              onClick={() => setShowPasswordLogin(!showPasswordLogin)}
+              className="text-xs text-neutral-500 hover:text-neutral-300 font-mono tracking-tight transition-all duration-200 cursor-pointer"
+            >
+              {showPasswordLogin ? 'Hide backup authentication' : 'Use backup credentials'}
+            </button>
+          </div>
+
+          {showPasswordLogin && (
+            <div className="w-full bg-bg-card border border-border rounded-2xl p-5 mt-3 shadow-md flex flex-col gap-3 animate-fade-in">
+              <form onSubmit={handlePasswordLogin} className="flex flex-col gap-3">
+                <div>
+                  <label className="block text-[0.7rem] font-mono uppercase tracking-wider text-neutral-500 mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="admin@huddin.dev"
+                    className="w-full px-4 py-2.5 bg-neutral-900 border border-neutral-800 rounded-xl text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-accent/40"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[0.7rem] font-mono uppercase tracking-wider text-neutral-500 mb-1">Password</label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-2.5 bg-neutral-900 border border-neutral-800 rounded-xl text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-accent/40"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={authLoading}
+                  className="w-full mt-2 px-5 py-2.5 bg-accent hover:brightness-110 disabled:bg-neutral-800 text-bg-dark font-semibold rounded-xl transition-all duration-150 cursor-pointer text-xs"
+                >
+                  {authLoading ? 'Signing In...' : 'Sign In'}
+                </button>
+              </form>
+            </div>
+          )}
 
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import huddinConfig from '../../../data/huddinContext.json';
 import { projects, blogPosts } from '../../../data/siteData';
+import { supabase } from '../../../utils/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,11 +9,26 @@ export async function POST(req) {
   try {
     const { messages, currentPath, isApologyEvaluation, isOneRemainingRequest, isQuotaExhausted, randomReason } = await req.json();
 
+    // Retrieve dynamic API keys from database accounts
+    const dbApiKeys = [];
+    try {
+      const { data: accountsData } = await supabase
+        .from('accounts')
+        .select('puter_api_key')
+        .not('puter_api_key', 'is', null);
+      if (accountsData) {
+        dbApiKeys.push(...accountsData.map(a => a.puter_api_key).filter(Boolean));
+      }
+    } catch (dbErr) {
+      console.error('[API CHAT] Failed to retrieve db api keys:', dbErr);
+    }
+
     const apiKeys = [
+      ...dbApiKeys,
       process.env.HUDDIN_LOCAL_LAPTOP_KEY,
       process.env.HUDDIN_BACKUP_KEY,
       process.env.HUDDIN_BACKUP_KEY_2
-    ].filter(Boolean).sort(() => Math.random() - 0.5);
+    ].filter(Boolean);
 
     if (apiKeys.length === 0) {
       return NextResponse.json(

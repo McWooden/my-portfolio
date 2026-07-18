@@ -19,7 +19,7 @@ export const metadata = {
 export default async function Page() {
   const { data: dbProjects, error } = await supabase
     .from('stories')
-    .select('*')
+    .select('*, accounts(*)')
     .eq('published', true)
     .eq('type', 'project')
     .order('date', { ascending: false });

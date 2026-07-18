@@ -82,13 +82,19 @@ export function mapStory(dbStory) {
     category: dbStory.category || '',
     
     // Extracted custom fields
-    author: meta?.author || {
+    author: dbStory.accounts ? {
+      name: dbStory.accounts.name || 'Huddin',
+      username: dbStory.accounts.username || 'huddin',
+      avatar: dbStory.accounts.avatar_url || 'https://framerusercontent.com/images/NkL1zDB0ea9KmqIpMf80b6TCw.png',
+      bio: dbStory.accounts.bio || '',
+      id: dbStory.account_id
+    } : (meta?.author || {
       name: 'Huddin',
       username: 'huddin',
       avatar: 'https://framerusercontent.com/images/NkL1zDB0ea9KmqIpMf80b6TCw.png',
       email: 'halohuddin@gmail.com',
       id: 'admin'
-    },
+    }),
     claps: meta?.claps || 0,
     claps_by_user: meta?.claps_by_user || {}
   };

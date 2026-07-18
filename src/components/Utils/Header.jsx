@@ -110,9 +110,9 @@ export default function Header({ availabilityStatus = 'available' }) {
           <button 
             onClick={() => setIsBrandMenuOpen(!isBrandMenuOpen)}
             className={`font-bebas font-normal uppercase tracking-[-0.05em] text-text-primary transition-all duration-300 cursor-pointer select-none leading-[0.8] origin-left flex items-start -ml-[0.04em] ${
-              isScrolled 
-                ? 'text-[2rem] md:text-[2.5rem]' 
-                : 'text-[2.5rem] md:text-[13rem]'
+              pathname === '/' && !isScrolled 
+                ? 'text-[2.5rem] md:text-[13rem]' 
+                : 'text-[2rem] md:text-[2.5rem]'
             }`}
           >
             <span className="relative">

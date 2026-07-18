@@ -9,7 +9,7 @@ export default async function Page() {
   // 1. Fetch raw data from Supabase stories table
   const { data: dbStories, error: storiesError } = await supabase
     .from('stories')
-    .select('*')
+    .select('*, accounts(*)')
     .eq('published', true)
     .order('date', { ascending: false });
 

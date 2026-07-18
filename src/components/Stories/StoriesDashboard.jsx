@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import { supabase, mapStory } from '../../utils/supabase';
 import { 
   FiFileText, FiEdit, FiTrash2, FiGlobe, FiArchive, 
-  FiHome, FiUser, FiLogOut, FiPlus, FiMenu, FiBookOpen, FiGrid, FiCpu 
+  FiHome, FiUser, FiLogOut, FiPlus, FiMenu, FiBookOpen, FiGrid, FiCpu,
+  FiUsers, FiSettings
 } from 'react-icons/fi';
 
 const ALLOWED_EMAILS = ['huddin8876@gmail.com', 'halohuddin@gmail.com'];
@@ -110,7 +111,7 @@ export default function StoriesDashboard({ username = 'me' }) {
     try {
       const { data, error } = await supabase
         .from('stories')
-        .select('*')
+        .select('*, accounts(*)')
         .order('date', { ascending: false });
 
       if (error) throw error;
@@ -200,6 +201,11 @@ export default function StoriesDashboard({ username = 'me' }) {
   const selectedUserStories = React.useMemo(() => {
     if (!selectedUser) return [];
     
+    // If viewing own dashboard, display all stories (already filtered by account RLS)
+    if (username === 'me') {
+      return allStories;
+    }
+    
     return allStories.filter(story => {
       // If we have an author id, match by id. Otherwise match by username
       if (selectedUser.id && story.author?.id) {
@@ -207,7 +213,7 @@ export default function StoriesDashboard({ username = 'me' }) {
       }
       return story.author?.username?.toLowerCase() === selectedUser.username?.toLowerCase();
     });
-  }, [selectedUser, allStories]);
+  }, [selectedUser, allStories, username]);
 
   // Filter based on selected Tab (drafts vs published)
   const filteredStories = React.useMemo(() => {
@@ -474,6 +480,42 @@ export default function StoriesDashboard({ username = 'me' }) {
           >
             <FiEdit className="w-4 h-4 text-text-muted" />
             <span>Write</span>
+          </Link>
+        )}
+
+        {/* Profile */}
+        {currentUser && (
+          <Link
+            href="/me/profile"
+            className="flex items-center gap-3 py-1.5 text-[14px] text-text-secondary hover:text-accent transition-all duration-150 cursor-pointer font-mono uppercase tracking-wider pl-1"
+            onClick={() => setIsLeftDrawerOpen(false)}
+          >
+            <FiUser className="w-4 h-4 text-text-muted" />
+            <span>Profile</span>
+          </Link>
+        )}
+
+        {/* Account */}
+        {currentUser && (
+          <Link
+            href="/me/account"
+            className="flex items-center gap-3 py-1.5 text-[14px] text-text-secondary hover:text-accent transition-all duration-150 cursor-pointer font-mono uppercase tracking-wider pl-1"
+            onClick={() => setIsLeftDrawerOpen(false)}
+          >
+            <FiUsers className="w-4 h-4 text-text-muted" />
+            <span>Account</span>
+          </Link>
+        )}
+
+        {/* API */}
+        {currentUser && (
+          <Link
+            href="/me/api"
+            className="flex items-center gap-3 py-1.5 text-[14px] text-text-secondary hover:text-accent transition-all duration-150 cursor-pointer font-mono uppercase tracking-wider pl-1"
+            onClick={() => setIsLeftDrawerOpen(false)}
+          >
+            <FiSettings className="w-4 h-4 text-text-muted" />
+            <span>API Settings</span>
           </Link>
         )}
       </div>
@@ -760,7 +802,7 @@ export default function StoriesDashboard({ username = 'me' }) {
       <div className="flex-1 max-w-[1600px] w-full mx-auto px-6 md:px-12 py-6 md:py-10 z-10 grid grid-cols-1 lg:grid-cols-4 gap-[30px]">
         
         {/* Left Column (Desktop) */}
-        <aside className="hidden lg:flex lg:col-span-1 flex-col gap-6">
+        <aside className="hidden lg:flex lg:col-span-1 flex-col gap-6 lg:sticky lg:top-[130px] lg:max-h-[calc(100vh-160px)] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-neutral-800">
           {renderLeftSidebar(false)}
         </aside>
 

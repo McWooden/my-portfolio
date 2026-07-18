@@ -50,7 +50,7 @@ export default function StoryDetailPage({ params }) {
       
       const { data, error } = await supabase
         .from('stories')
-        .select('*')
+        .select('*, accounts(*)')
         .eq('slug', unwrappedParams.slug)
         .eq('published', true)
         .single();

@@ -8,6 +8,7 @@ import { FiUser, FiCode, FiArrowLeft, FiLogOut, FiActivity, FiCopy, FiCheck } fr
 export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [accountId, setAccountId] = useState(null);
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
@@ -33,14 +34,31 @@ export default function ProfilePage() {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
-        const u = session.user;
-        setUser(u);
-        setName(u.user_metadata?.name || u.user_metadata?.full_name || '');
-        setUsername(u.user_metadata?.username || '');
-        setAvatarUrl(u.user_metadata?.avatar_url || '');
-        setBio(u.user_metadata?.bio || '');
+        setUser(session.user);
+        
+        try {
+          const { data: member, error: memberErr } = await supabase
+            .from('account_members')
+            .select('account_id, accounts(name, username, avatar_url, bio)')
+            .eq('user_id', session.user.id)
+            .limit(1)
+            .maybeSingle();
+
+          if (memberErr) throw memberErr;
+
+          if (member) {
+            setAccountId(member.account_id);
+            setName(member.accounts?.name || '');
+            setUsername(member.accounts?.username || '');
+            setAvatarUrl(member.accounts?.avatar_url || '');
+            setBio(member.accounts?.bio || '');
+          }
+        } catch (err) {
+          console.error('Failed to load profile settings:', err);
+          setStatusMsg({ type: 'error', text: 'Failed to load profile details.' });
+        }
       } else {
         window.location.href = '/login';
       }
@@ -96,20 +114,23 @@ export default function ProfilePage() {
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     setStatusMsg({ type: '', text: '' });
+    if (!accountId) return;
 
     try {
-      const { data, error } = await supabase.auth.updateUser({
-        data: {
+      const { error } = await supabase
+        .from('accounts')
+        .update({
           name,
           username,
           avatar_url: avatarUrl,
           bio
-        }
-      });
+        })
+        .eq('id', accountId);
+
       if (error) throw error;
-      setStatusMsg({ type: 'success', text: 'Profile updated successfully!' });
+      setStatusMsg({ type: 'success', text: 'Account profile updated successfully!' });
     } catch (err) {
-      setStatusMsg({ type: 'error', text: err.message || 'Failed to update profile.' });
+      setStatusMsg({ type: 'error', text: err.message || 'Failed to update account profile.' });
     }
   };
 

@@ -211,6 +211,7 @@ const deleteStorageImageByUrl = async (url) => {
 export default function Editor({ type }) {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [accountId, setAccountId] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [publishSuccess, setPublishSuccess] = useState(false);
 
@@ -220,9 +221,6 @@ export default function Editor({ type }) {
   const [author, setAuthor] = useState(null);
 
   // Auth fields
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPasswordLogin, setShowPasswordLogin] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
 
   // Modal control
@@ -831,13 +829,61 @@ export default function Editor({ type }) {
 
 
 
+  const fetchAccountId = async (userId, userEmail) => {
+    try {
+      const { data: member, error: memberErr } = await supabase
+        .from('account_members')
+        .select('account_id')
+        .eq('user_id', userId)
+        .limit(1)
+        .maybeSingle();
+
+      if (!memberErr && member) {
+        setAccountId(member.account_id);
+        return member.account_id;
+      }
+
+      // Automatically create a default account if they have none
+      const accountName = userEmail ? `${userEmail.split('@')[0]}'s Workspace` : 'Default Workspace';
+      const { data: account, error: accountErr } = await supabase
+        .from('accounts')
+        .insert({ name: accountName })
+        .select()
+        .single();
+
+      if (accountErr) throw accountErr;
+
+      const { data: newMember, error: newMemberErr } = await supabase
+        .from('account_members')
+        .insert({
+          account_id: account.id,
+          user_id: userId,
+          role: 'owner'
+        })
+        .select()
+        .single();
+
+      if (newMemberErr) throw newMemberErr;
+
+      setAccountId(account.id);
+      return account.id;
+    } catch (err) {
+      console.error('Error fetching/creating account:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     // 1. Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         setUser(session.user);
+        fetchAccountId(session.user.id, session.user.email);
+      } else {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     // 2. Listen for auth changes
@@ -845,16 +891,26 @@ export default function Editor({ type }) {
       if (session) {
         setUser(session.user);
         setErrorMsg('');
+        fetchAccountId(session.user.id, session.user.email);
       } else {
         setUser(null);
+        setAccountId(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => {
       subscription.unsubscribe();
     };
   }, []);
+
+  // Redirect to login if user is not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      const currentUrl = encodeURIComponent(window.location.pathname + window.location.search);
+      window.location.href = `/login?redirectTo=${currentUrl}`;
+    }
+  }, [loading, user]);
 
   // Fetch story if ID is present in URL query
   useEffect(() => {
@@ -870,7 +926,6 @@ export default function Editor({ type }) {
           .from('stories')
           .select('*')
           .eq('id', id)
-          .eq('user_id', user.id)
           .single();
         if (!error && data) {
           setTitle(data.title || '');
@@ -1331,10 +1386,10 @@ export default function Editor({ type }) {
         .replace(/\s+/g, '---');
       const authorMeta = user ? {
         id: user.id,
-        name: user.user_metadata?.name || user.user_metadata?.full_name || user.email,
-        username: user.user_metadata?.username || user.email.split('@')[0],
-        avatar: user.user_metadata?.avatar_url || '',
-        email: user.email
+        name: 'Huddin',
+        username: 'huddin',
+        avatar: 'https://framerusercontent.com/images/NkL1zDB0ea9KmqIpMf80b6TCw.png',
+        email: 'halohuddin@gmail.com'
       } : null;
 
       const finalTestimonialCompany = storyType === 'blog' && authorMeta
@@ -1374,6 +1429,7 @@ export default function Editor({ type }) {
         // Insert new draft row
         const insertData = {
           user_id: user.id,
+          account_id: accountId,
           title: currentTitle,
           subtitle,
           content: contentHtml,
@@ -1407,6 +1463,7 @@ export default function Editor({ type }) {
       } else {
         // Update existing row
         const updateData = {
+          account_id: accountId,
           title: currentTitle,
           subtitle,
           content: contentHtml,
@@ -1425,8 +1482,7 @@ export default function Editor({ type }) {
         const { error } = await supabase
           .from('stories')
           .update(updateData)
-          .eq('id', currentStoryId)
-          .eq('user_id', user.id);
+          .eq('id', currentStoryId);
 
         if (error) throw error;
       }
@@ -1475,47 +1531,7 @@ export default function Editor({ type }) {
     triggerAutosave();
   }, [title, subtitle, date, featured, location, industry, testimonialQuote, testimonialAuthor, testimonialCompany, category, storyType, isLoaded]);
 
-  const handleGoogleLogin = async () => {
-    setAuthLoading(true);
-    setErrorMsg('');
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/new-story` : undefined,
-        },
-      });
-      if (error) throw error;
-    } catch (err) {
-      setErrorMsg(err.message || 'Failed to initialize Google login');
-      setAuthLoading(false);
-    }
-  };
 
-  const handlePasswordLogin = async (e) => {
-    e.preventDefault();
-    if (!email || !password) return;
-    setAuthLoading(true);
-    setErrorMsg('');
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) throw error;
-      
-      const currentUser = data.user;
-      if (currentUser && !ALLOWED_EMAILS.includes(currentUser.email)) {
-        setErrorMsg(`Access Denied: ${currentUser.email} is not authorized.`);
-        await supabase.auth.signOut();
-        setUser(null);
-      }
-    } catch (err) {
-      setErrorMsg(err.message || 'Invalid login credentials');
-    } finally {
-      setAuthLoading(false);
-    }
-  };
 
   // Editor Actions
   const formatText = (command, value = null) => {
@@ -3003,13 +3019,26 @@ export default function Editor({ type }) {
     const contentHtml = cleanHtmlStyles(rawContentHtml);
     const coverImage = getCoverImage();
 
+    let finalCategory = category;
+    if (categoryInput.trim() !== '') {
+      const trimmed = categoryInput.trim();
+      const updatedCategories = [...categories];
+      if (!updatedCategories.includes(trimmed)) {
+        updatedCategories.push(trimmed);
+        finalCategory = updatedCategories.join(', ');
+        setCategories(updatedCategories);
+        setCategory(finalCategory);
+        setCategoryInput('');
+      }
+    }
+
     try {
       const authorMeta = user ? {
         id: user.id,
-        name: user.user_metadata?.name || user.user_metadata?.full_name || user.email,
-        username: user.user_metadata?.username || user.email.split('@')[0],
-        avatar: user.user_metadata?.avatar_url || '',
-        email: user.email
+        name: 'Huddin',
+        username: 'huddin',
+        avatar: 'https://framerusercontent.com/images/NkL1zDB0ea9KmqIpMf80b6TCw.png',
+        email: 'halohuddin@gmail.com'
       } : null;
 
       const finalTestimonialCompany = storyType === 'blog' && authorMeta
@@ -3022,6 +3051,7 @@ export default function Editor({ type }) {
 
       const publishData = {
         user_id: user.id,
+        account_id: accountId,
         title,
         slug,
         subtitle,
@@ -3036,15 +3066,14 @@ export default function Editor({ type }) {
         testimonial_quote: testimonialQuote,
         testimonial_author: testimonialAuthor,
         testimonial_company: finalTestimonialCompany,
-        category,
+        category: finalCategory,
       };
 
       if (storyId) {
         const { error } = await supabase
           .from('stories')
           .update(publishData)
-          .eq('id', storyId)
-          .eq('user_id', user.id);
+          .eq('id', storyId);
         if (error) throw error;
       } else {
         const { error } = await supabase
@@ -3088,79 +3117,12 @@ export default function Editor({ type }) {
     );
   }
 
-  // Not authenticated or access denied
+  // Not authenticated or access denied -> redirecting
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#0a0a0c] flex items-center justify-center p-6 relative overflow-hidden font-sans">
-        <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] rounded-full bg-accent/5 blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] rounded-full bg-purple-600/5 blur-[120px] pointer-events-none" />
-
-        <div className="w-full max-w-[440px] bg-neutral-950/60 backdrop-blur-xl border border-neutral-800/80 rounded-3xl p-8 md:p-10 shadow-2xl relative z-10">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-accent/20 to-accent/5 border border-accent/30 text-accent font-mono text-2xl font-bold tracking-tight mb-4 shadow-[0_0_20px_rgba(224,255,111,0.15)]">
-              W
-            </div>
-            <h2 className="text-2xl font-semibold text-white tracking-tight">Publisher</h2>
-            <p className="text-sm text-neutral-400 mt-1.5">Sign in to write portfolio and blogs</p>
-          </div>
-
-          {errorMsg && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs font-mono leading-relaxed text-center">
-              {errorMsg}
-            </div>
-          )}
-
-          <div className="flex flex-col gap-4">
-            <button
-              onClick={handleGoogleLogin}
-              disabled={authLoading}
-              className="w-full flex items-center justify-center gap-3 px-5 py-3.5 bg-white text-black hover:bg-neutral-100 disabled:bg-neutral-800 disabled:text-neutral-500 rounded-xl font-medium transition-all duration-200 shadow-lg shadow-white/5 active:scale-[0.98] cursor-pointer"
-            >
-              Sign In with Google
-            </button>
-
-            <div className="text-center mt-4">
-              <button
-                onClick={() => setShowPasswordLogin(!showPasswordLogin)}
-                className="text-xs text-neutral-500 hover:text-neutral-300 font-mono tracking-tight transition-all duration-200 cursor-pointer"
-              >
-                {showPasswordLogin ? 'Hide backup authentication' : 'Use backup credentials'}
-              </button>
-            </div>
-
-            {showPasswordLogin && (
-              <form onSubmit={handlePasswordLogin} className="mt-4 border-t border-neutral-800/80 pt-4 flex flex-col gap-3">
-                <div>
-                  <label className="block text-[0.7rem] font-mono uppercase tracking-wider text-neutral-500 mb-1.5">Email</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@huddin.dev"
-                    className="w-full px-4 py-2.5 bg-neutral-900 border border-neutral-800 rounded-xl text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-accent/40"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[0.7rem] font-mono uppercase tracking-wider text-neutral-500 mb-1.5">Password</label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full px-4 py-2.5 bg-neutral-900 border border-neutral-800 rounded-xl text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-accent/40"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={authLoading}
-                  className="w-full mt-2 py-3 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-white rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer"
-                >
-                  Sign In
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
+      <div className="min-h-screen bg-[#0a0a0c] flex flex-col items-center justify-center text-white">
+        <div className="w-12 h-12 border-4 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+        <p className="mt-6 font-mono text-sm tracking-widest text-neutral-400 uppercase">Redirecting to Login...</p>
       </div>
     );
   }

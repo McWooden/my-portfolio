@@ -31,8 +31,8 @@ const bebasNeue = Bebas_Neue({
 
 export const metadata = {
   title: {
-    default: 'Huddin | Magelang Full-Stack Developer & UI/UX Designer',
-    template: '%s | Huddin - Magelang Developer'
+    default: 'HaloHuddin | Magelang Full-Stack Developer & UI/UX Designer',
+    template: '%s | HaloHuddin - Magelang Developer'
   },
   description: 'Huddin (Sholahuddin Ahmad) — Full-Stack Developer & UI/UX Designer di Magelang. Spesialisasi Brand Systems, Web & App Development, dan UI/UX Design.',
   keywords: [

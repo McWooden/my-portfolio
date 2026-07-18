@@ -94,21 +94,19 @@ export default function Hero({ homepageData, testimonialCard }) {
 
   const [isMobileDevice, setIsMobileDevice] = useState(false);
   const [mobileVideoState, setMobileVideoState] = useState('image'); // 'image' | 'playing'
-  const [isFlashActive, setIsFlashActive] = useState(false);
+  const [isScrolledFromTop, setIsScrolledFromTop] = useState(false);
 
-  const triggerFlashTransition = () => {
+  const triggerCloseTransition = () => {
     const video = videoRef.current;
-    setIsFlashActive(true);
     setMobileVideoState('image');
     
-    if (video) {
-      video.pause();
-      video.currentTime = 0;
-    }
-    
+    // Wait for the 500ms CSS transition-opacity to finish before pausing/resetting
     setTimeout(() => {
-      setIsFlashActive(false);
-    }, 400);
+      if (video) {
+        video.pause();
+        video.currentTime = 0;
+      }
+    }, 500);
   };
 
   const handleHeroClickMobile = (e) => {
@@ -126,13 +124,13 @@ export default function Hero({ homepageData, testimonialCard }) {
       video.currentTime = 0;
       video.play().catch(() => {});
     } else if (mobileVideoState === 'playing') {
-      triggerFlashTransition();
+      triggerCloseTransition();
     }
   };
 
   const handleVideoEnded = () => {
     if (isMobileDevice) {
-      triggerFlashTransition();
+      triggerCloseTransition();
     }
   };
 
@@ -187,6 +185,14 @@ export default function Hero({ homepageData, testimonialCard }) {
 
   // Scroll animations and scrubbing setup
   const { scrollY } = useScroll();
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    if (latest > 5) {
+      setIsScrolledFromTop(true);
+    } else {
+      setIsScrolledFromTop(false);
+    }
+  });
 
   // Scroll scrubbing for background video
   const scrollProgress = useTransform(scrollY, [0, 800], [0, 1]);
@@ -445,12 +451,14 @@ export default function Hero({ homepageData, testimonialCard }) {
           <motion.img 
             src="/hero-bg.webp"
             alt="Hero Background Static"
-            className="absolute inset-0 w-full h-full object-cover object-center md:object-left"
+            className="absolute inset-0 w-full h-full object-cover object-center md:object-left transition-opacity duration-500"
             style={{
               x: springBgX,
               y: springBgY,
               scale: 1.12,
-              opacity: isMobileDevice && mobileVideoState === 'playing' ? 0 : opacityVal,
+              opacity: isMobileDevice 
+                ? (mobileVideoState === 'playing' ? 0 : opacityVal)
+                : (isScrolledFromTop ? 0 : opacityVal),
               filter: filterVal,
             }}
           />
@@ -469,19 +477,12 @@ export default function Hero({ homepageData, testimonialCard }) {
               scale: 1.12,
               opacity: isMobileDevice 
                 ? (mobileVideoState === 'playing' ? opacityVal : 0)
-                : opacityVal,
+                : (isScrolledFromTop ? opacityVal : 0),
               filter: filterVal,
             }}
           />
 
-          {/* Flash transition overlay (mobile only) */}
-          {isMobileDevice && (
-            <div 
-              className={`absolute inset-0 bg-[#f5ebd6] transition-opacity duration-300 pointer-events-none z-30 ${
-                isFlashActive ? 'opacity-100' : 'opacity-0'
-              }`} 
-            />
-          )}
+
 
           {/* Subtle vertical and horizontal gradient overlays to blend text readability with dark theme */}
           <div className="absolute inset-0 bg-gradient-to-t from-bg-dark via-transparent to-transparent z-20" />
@@ -492,35 +493,60 @@ export default function Hero({ homepageData, testimonialCard }) {
           <div className="room-stage w-full h-full relative z-10 flex flex-col pt-[70px] md:pt-[110px] pb-6 md:pb-6">
             <div 
               ref={contentRef} 
-              className="w-full flex flex-col items-start text-left mt-auto md:flex-1 md:justify-center"
+              className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-8 mt-auto md:flex-1 md:py-6"
             >
-              <p className="text-[1rem] sm:text-[1.15rem] text-text-secondary leading-[1.6] w-full max-w-[300px] sm:max-w-[340px]">
-                <CursorCard 
-                  triggerText="Huddin" 
-                  imageSrc="/images/huddin.webp"
-                >
-                  <span className="flex flex-col gap-0.5 text-left">
-                    <span className="font-mono text-[0.8rem] font-bold text-white uppercase tracking-wider">Sholahuddin Ahmad</span>
-                    <span className="text-[0.7rem] text-text-secondary font-medium">Full-Stack Coder & Designer</span>
-                    <span className="text-[0.65rem] text-text-muted leading-snug mt-1">
-                      Building premium web applications with clean code and visual systems.
+              <div className="w-full max-w-[340px] order-2 md:order-1">
+                <p className="text-[0.95rem] sm:text-[1.05rem] text-text-secondary leading-[1.6] w-full">
+                  <CursorCard 
+                    triggerText="Huddin" 
+                    imageSrc="/images/huddin.webp"
+                  >
+                    <span className="flex flex-col gap-0.5 text-left">
+                      <span className="font-mono text-[0.8rem] font-bold text-white uppercase tracking-wider">Sholahuddin Ahmad</span>
+                      <span className="text-[0.7rem] text-text-secondary font-medium">Full-Stack Coder & Designer</span>
+                      <span className="text-[0.65rem] text-text-muted leading-snug mt-1">
+                        Building premium web applications with clean code and visual systems.
+                      </span>
                     </span>
-                  </span>
-                </CursorCard> is a{" "}
-                <CursorCard 
-                  triggerText="Magelang" 
-                  imageSrc="/images/magelang.webp"
-                >
-                  <span className="flex flex-col gap-0.5 text-left">
-                    <span className="font-mono text-[0.8rem] font-bold text-white uppercase tracking-wider">Magelang</span>
-                    <span className="text-[0.7rem] text-text-secondary font-medium">Central Java, ID</span>
-                    <span className="text-[0.65rem] text-text-muted leading-snug mt-1">
-                      Home of Candi Borobudur and surrounded by beautiful volcanic peaks.
+                  </CursorCard> is a{" "}
+                  <CursorCard 
+                    triggerText="Magelang" 
+                    imageSrc="/images/magelang.webp"
+                  >
+                    <span className="flex flex-col gap-0.5 text-left">
+                      <span className="font-mono text-[0.8rem] font-bold text-white uppercase tracking-wider">Magelang</span>
+                      <span className="text-[0.7rem] text-text-secondary font-medium">Central Java, ID</span>
+                      <span className="text-[0.65rem] text-text-muted leading-snug mt-1">
+                        Home of Candi Borobudur and surrounded by beautiful volcanic peaks.
+                      </span>
                     </span>
-                  </span>
-                </CursorCard>{" "}
-                programmer, known for clean and expressive code — who also designs the brand
-              </p>
+                  </CursorCard>{" "}
+                  programmer, known for clean and expressive code — who also designs the brand
+                </p>
+              </div>
+
+              <div className={`shrink-0 select-none relative overflow-hidden ${
+                isMobileDevice 
+                  ? "w-[112px] h-[141px] order-1 self-end" 
+                  : "w-[140px] h-[176px] order-2 self-auto"
+              }`}>
+                <iframe 
+                  data-testid="embed-iframe" 
+                  style={{ 
+                    borderRadius: "12px",
+                    transform: isMobileDevice ? "scale(0.4)" : "scale(0.5)",
+                    transformOrigin: "top left",
+                    width: "280px",
+                    height: "352px",
+                    border: 0
+                  }} 
+                  src="https://open.spotify.com/embed/track/0fBEsqcT3oMfhEGtJxEZxK?utm_source=generator&theme=0&si=dc61b0ff8126424b" 
+                  frameBorder="0" 
+                  allowFullScreen="" 
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                  loading="lazy"
+                ></iframe>
+              </div>
             </div>
 
             {/* Bottom Row Panel (Trusted by on the left, Buttons on the right) */}

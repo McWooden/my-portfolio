@@ -495,7 +495,7 @@ export default function Hero({ homepageData, testimonialCard }) {
               ref={contentRef} 
               className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-8 mt-auto md:flex-1 md:py-6"
             >
-              <div className="w-full max-w-[340px] order-2 md:order-1">
+              <div className="w-full max-w-[320px] order-2 md:order-1">
                 <p className="text-[0.95rem] sm:text-[1.05rem] text-text-secondary leading-[1.6] w-full">
                   <CursorCard 
                     triggerText="Huddin" 

@@ -596,32 +596,73 @@ export default function Hero({ homepageData, testimonialCard }) {
               className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-6 md:gap-8 mt-auto md:flex-1 md:py-6"
             >
               <div className="w-full max-w-[320px] order-2 md:order-1">
-                <p className="text-[0.95rem] sm:text-[1.05rem] text-text-secondary leading-[1.6] w-full">
-                  <CursorCard 
-                    triggerText="Huddin" 
-                    imageSrc="/images/huddin.webp"
+                <p className="text-[0.95rem] sm:text-[1.05rem] text-text-secondary leading-[1.6] w-full flex flex-wrap gap-y-1">
+                  <motion.span
+                    initial={{ opacity: 0, y: 10, filter: "blur(6px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    transition={{ duration: 0.56, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                    style={{ display: "inline-block", marginRight: "0.25rem" }}
                   >
-                    <span className="flex flex-col gap-0.5 text-left">
-                      <span className="font-mono text-[0.8rem] font-bold text-white uppercase tracking-wider">Sholahuddin Ahmad</span>
-                      <span className="text-[0.7rem] text-text-secondary font-medium">Full-Stack Coder & Designer</span>
-                      <span className="text-[0.65rem] text-text-muted leading-snug mt-1">
-                        Building premium web applications with clean code and visual systems.
+                    <CursorCard 
+                      triggerText="Huddin" 
+                      imageSrc="/images/huddin.webp"
+                    >
+                      <span className="flex flex-col gap-0.5 text-left">
+                        <span className="font-mono text-[0.8rem] font-bold text-white uppercase tracking-wider">Sholahuddin Ahmad</span>
+                        <span className="text-[0.7rem] text-text-secondary font-medium">Full-Stack Coder & Designer</span>
+                        <span className="text-[0.65rem] text-text-muted leading-snug mt-1">
+                          Building premium web applications with clean code and visual systems.
+                        </span>
                       </span>
-                    </span>
-                  </CursorCard> is a{" "}
-                  <CursorCard 
-                    triggerText="Magelang" 
-                    imageSrc="/images/magelang.webp"
+                    </CursorCard>
+                  </motion.span>
+
+                  <motion.span
+                    initial={{ opacity: 0, y: 10, filter: "blur(6px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    transition={{ duration: 0.56, delay: 0.228, ease: [0.22, 1, 0.36, 1] }}
+                    style={{ display: "inline-block", marginRight: "0.25rem" }}
                   >
-                    <span className="flex flex-col gap-0.5 text-left">
-                      <span className="font-mono text-[0.8rem] font-bold text-white uppercase tracking-wider">Magelang</span>
-                      <span className="text-[0.7rem] text-text-secondary font-medium">Central Java, ID</span>
-                      <span className="text-[0.65rem] text-text-muted leading-snug mt-1">
-                        Home of Candi Borobudur and surrounded by beautiful volcanic peaks.
+                    is a
+                  </motion.span>
+
+                  <motion.span
+                    initial={{ opacity: 0, y: 10, filter: "blur(6px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    transition={{ duration: 0.56, delay: 0.256, ease: [0.22, 1, 0.36, 1] }}
+                    style={{ display: "inline-block", marginRight: "0.25rem" }}
+                  >
+                    <CursorCard 
+                      triggerText="Magelang" 
+                      imageSrc="/images/magelang.webp"
+                    >
+                      <span className="flex flex-col gap-0.5 text-left">
+                        <span className="font-mono text-[0.8rem] font-bold text-white uppercase tracking-wider">Magelang</span>
+                        <span className="text-[0.7rem] text-text-secondary font-medium">Central Java, ID</span>
+                        <span className="text-[0.65rem] text-text-muted leading-snug mt-1">
+                          Home of Candi Borobudur and surrounded by beautiful volcanic peaks.
+                        </span>
                       </span>
-                    </span>
-                  </CursorCard>{" "}
-                  programmer, known for clean and expressive code — who also designs the brand
+                    </CursorCard>
+                  </motion.span>
+
+                  {"programmer, known for clean and expressive code — who also designs the brand"
+                    .split(" ")
+                    .map((word, index) => (
+                      <motion.span
+                        key={index}
+                        initial={{ opacity: 0, y: 10, filter: "blur(6px)" }}
+                        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                        transition={{ 
+                          duration: 0.56, 
+                          delay: 0.284 + index * 0.028, 
+                          ease: [0.22, 1, 0.36, 1] 
+                        }}
+                        style={{ display: "inline-block", marginRight: "0.25rem" }}
+                      >
+                        {word}
+                      </motion.span>
+                    ))}
                 </p>
               </div>
 
@@ -652,13 +693,30 @@ export default function Hero({ homepageData, testimonialCard }) {
               */}
 
               {/* YouTube Polaroid style embed */}
-              <div
+              <motion.div
+                initial={{ 
+                  opacity: 0, 
+                  y: -50, 
+                  scale: 0.8,
+                  rotate: 6 
+                }}
+                animate={{ 
+                  opacity: 1, 
+                  y: 0, 
+                  scale: 1,
+                  rotate: -3 
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 60,
+                  damping: 12,
+                  delay: 0.6
+                }}
                 className={`shrink-0 select-none bg-white border border-neutral-200/80 rounded-[2px] shadow-[0_16px_32px_rgba(0,0,0,0.3),0_2px_6px_rgba(0,0,0,0.15)] flex flex-col gap-2 ${
                   isMobileDevice
                     ? "order-1 self-end p-1.5 pb-3 w-[110px]"
                     : "order-2 self-auto p-2.5 pb-4 w-[160px]"
                 }`}
-                style={{ transform: "rotate(-3deg)" }}
               >
                 {/* Cover image — click to play/pause */}
                 <div
@@ -685,8 +743,8 @@ export default function Hero({ homepageData, testimonialCard }) {
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/photo:opacity-100 transition-opacity duration-200 flex items-center justify-center">
                     <div className="w-7 h-7 rounded-full bg-bg-card flex items-center justify-center shadow-lg text-text-primary">
                       {isMusicPlaying
-                        ? <IoPause className="w-3 h-3 text-current" />
-                        : <IoPlay className="w-3 h-3 text-current translate-x-[0.5px]" />
+                        ? <IoPause className="w-3.5 h-3.5 text-current" />
+                        : <IoPlay className="w-3.5 h-3.5 text-current translate-x-[0.5px]" />
                       }
                     </div>
                   </div>
@@ -700,19 +758,19 @@ export default function Hero({ homepageData, testimonialCard }) {
                   )}
                 </div>
 
-                {/* Bottom label row */}
-                <div className="bg-neutral-100 rounded-[3px] px-1.5 py-1 flex flex-row justify-between items-center w-full relative whitespace-nowrap overflow-hidden">
+                {/* Bottom label row (stacked vertically in 2 lines) */}
+                <div className="bg-neutral-100 rounded-[3px] px-1.5 py-1 flex flex-col gap-1 w-full relative">
                   <div className="flex items-center gap-0.5 min-w-0">
-                    <span className="text-[#333] text-[7px] md:text-[9px] font-bold select-none leading-none shrink-0">❇</span>
-                    <span className="text-[#333] font-mono text-[5.5px] md:text-[7.5px] font-bold tracking-wider select-none leading-none truncate">
+                    <span className="text-[#333] text-[8px] md:text-[9px] font-bold select-none leading-none shrink-0">❇</span>
+                    <span className="text-[#333] font-mono text-[7px] md:text-[8px] font-bold tracking-wider select-none leading-tight">
                       STRUCT by UDIENNX
                     </span>
                   </div>
                   
-                  <div className="relative shrink-0 ml-0.5">
+                  <div className="relative self-end">
                     <span
                       onClick={handleYoutubeTextClick}
-                      className="text-neutral-500 font-sans text-[5.5px] md:text-[7.5px] font-bold tracking-wide select-none leading-none cursor-pointer hover:text-accent transition-colors px-1 py-0.5 rounded hover:bg-neutral-200/50 block"
+                      className="text-neutral-500 font-sans text-[7px] md:text-[8px] font-bold tracking-wide select-none leading-none cursor-pointer block"
                     >
                       /Youtube
                     </span>
@@ -739,14 +797,19 @@ export default function Hero({ homepageData, testimonialCard }) {
                     )}
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </div>
 
             {/* Bottom Row Panel (Trusted by on the left, Buttons on the right) */}
             <div className="w-full flex flex-col md:flex-row md:justify-between md:items-end gap-6 mt-6 md:mt-0">
               
               {/* Left Side: Trusted By Marquee (35% width on desktop, bottom order on mobile) */}
-              <div className="flex items-center gap-4 w-full md:w-[35vw] max-w-full overflow-hidden order-2 md:order-1">
+              <motion.div 
+                initial={{ opacity: 0, x: -15 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut", delay: 0.7 }}
+                className="flex items-center gap-4 w-full md:w-[35vw] max-w-full overflow-hidden order-2 md:order-1"
+              >
                 <span className="font-mono text-[0.7rem] font-bold text-text-muted uppercase tracking-wider shrink-0 select-none">
                   Trusted by:
                 </span>
@@ -779,10 +842,15 @@ export default function Hero({ homepageData, testimonialCard }) {
                     </div>
                   </div>
                 </Marquee>
-              </div>
+              </motion.div>
 
               {/* Right Side: Buttons (flex row side-by-side, Get Started stretches to fill) */}
-              <div className="flex flex-row gap-4 shrink-0 justify-center md:justify-end items-center md:items-end w-full md:w-auto order-1 md:order-2">
+              <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
+                className="flex flex-row gap-4 shrink-0 justify-center md:justify-end items-center md:items-end w-full md:w-auto order-1 md:order-2"
+              >
                 <a 
                   href="#portfolio" 
                   className="bg-bg-card text-text-primary text-[1.05rem] font-medium px-7 py-[14px] rounded-full select-none text-center flex items-center justify-center whitespace-nowrap"
@@ -800,7 +868,7 @@ export default function Hero({ homepageData, testimonialCard }) {
                     </svg>
                   </span>
                 </a>
-              </div>
+              </motion.div>
 
             </div>
           </div>

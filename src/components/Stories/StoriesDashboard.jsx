@@ -326,10 +326,10 @@ export default function StoriesDashboard({ username = 'me' }) {
     const cleanText = story.content.replace(/<[^>]+>/g, '').trim();
     if (!cleanText) return '';
     
-    if (cleanText.length <= 150) {
+    if (cleanText.length <= 300) {
       return cleanText;
     }
-    return cleanText.substring(0, 150) + '...';
+    return cleanText.substring(0, 300) + '...';
   };
 
   const formatRelativeTime = (dateString) => {
@@ -472,7 +472,7 @@ export default function StoriesDashboard({ username = 'me' }) {
             className="flex items-center gap-3 py-1.5 text-[14px] text-text-secondary hover:text-accent transition-all duration-150 cursor-pointer font-mono uppercase tracking-wider pl-1"
             onClick={() => setIsLeftDrawerOpen(false)}
           >
-            <FiPlus className="w-4 h-4 text-text-muted" />
+            <FiEdit className="w-4 h-4 text-text-muted" />
             <span>Write</span>
           </Link>
         )}
@@ -522,9 +522,9 @@ export default function StoriesDashboard({ username = 'me' }) {
       {/* Puter connection reminder card (pushed to bottom, dark background, sans font, bot icon) */}
       {isOwnDashboard && !isPuterSignedIn && (
         <div className="mt-auto pt-6 pl-1">
-          <div className="w-full p-4 rounded-[20px] bg-neutral-950/90 border border-neutral-900 text-text-secondary text-[12px] font-sans leading-relaxed text-left flex flex-col gap-2 animate-pulse-slow">
-            <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-accent text-[11px]">
-              <FiCpu className="w-3.5 h-3.5 text-accent" />
+          <div className="w-full p-4 rounded-[20px] bg-neutral-950/90 border border-neutral-900 text-text-secondary text-[12px] font-sans leading-relaxed text-left flex flex-col gap-2">
+            <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-text-primary text-[11px]">
+              <FiCpu className="w-3.5 h-3.5 text-text-muted" />
               <span>Connect Puter.js</span>
             </div>
             <p className="leading-normal text-text-secondary/80 font-normal">
@@ -545,14 +545,8 @@ export default function StoriesDashboard({ username = 'me' }) {
 
   const renderRightSidebar = (isDrawer) => (
     <div className="flex flex-col gap-6">
-      {!isDrawer && (
-        <h2 className="text-[12px] font-mono tracking-[0.05em] uppercase text-text-muted border-b border-border pb-3 flex items-center gap-2">
-          Profile Info
-        </h2>
-      )}
-      
       {selectedUser ? (
-        <div className="bg-bg-card rounded-[30px] p-6 md:p-8 flex flex-col gap-5">
+        <div className="flex flex-col gap-5 py-2">
           {/* Avatar and Name/Username Row */}
           <div className="flex items-center gap-4 w-full text-left">
             <div className="w-16 h-16 rounded-full overflow-hidden border border-border bg-bg-dark shrink-0">
@@ -574,24 +568,6 @@ export default function StoriesDashboard({ username = 'me' }) {
               {selectedUser.bio || 'No bio written yet.'}
             </p>
           </div>
-
-          {/* Puter.js Connection Warning Box under Bio */}
-          {isOwnDashboard && !isPuterSignedIn && (
-            <div className="w-full mt-2 p-4 rounded-[20px] bg-accent/5 border border-accent/20 text-text-secondary text-[11px] font-mono leading-relaxed text-left flex flex-col gap-2 animate-pulse-slow">
-              <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-accent text-xs">
-                <span>⚠️ AI Assistant Offline</span>
-              </div>
-              <p className="leading-normal text-text-secondary/80">
-                Puter.js is not connected. Connect your account to enable story writing AI assistance.
-              </p>
-              <Link 
-                href="/me/profile" 
-                className="text-accent underline font-semibold mt-1 block"
-              >
-                Connect Puter.js →
-              </Link>
-            </div>
-          )}
 
           {/* Edit Profile & Log Out inline inside Profile Panel */}
           {isOwnDashboard && (
@@ -800,7 +776,7 @@ export default function StoriesDashboard({ username = 'me' }) {
           </div>
 
           {/* Tabs Switcher Inline (One Linear) with Write Button */}
-          <div className="flex justify-between items-center border-b border-border pb-px font-mono text-[12px] tracking-[0.05em] uppercase">
+          <div className="flex justify-between items-center border-b border-border pb-px text-[14px] font-sans">
             <div className="flex gap-6">
               <button
                 onClick={() => setActiveTab('drafts')}
@@ -831,7 +807,7 @@ export default function StoriesDashboard({ username = 'me' }) {
                 onClick={() => router.push('/new-story')}
                 className="px-4 py-2 bg-accent hover:bg-white text-bg-dark font-semibold rounded-full text-[11px] font-mono transition-all duration-200 uppercase tracking-widest flex items-center gap-1 shadow-[0_0_10px_rgba(224,255,111,0.15)] active:scale-95 mb-2 cursor-pointer"
               >
-                <FiPlus className="w-3.5 h-3.5" /> <span>Write</span>
+                <FiEdit className="w-3.5 h-3.5" /> <span>Write</span>
               </button>
             )}
           </div>
@@ -855,7 +831,7 @@ export default function StoriesDashboard({ username = 'me' }) {
               </p>
             </div>
           ) : (
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col">
               {filteredStories.map((story) => {
                 const imageUrl = getFirstImage(story);
                 
@@ -867,11 +843,11 @@ export default function StoriesDashboard({ username = 'me' }) {
                     onTouchStart={(e) => handleTouchStart(e, story.id)}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
-                    className={`bg-bg-card border border-border rounded-[30px] p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-border-focus hover:bg-bg-card-hover transition-all duration-200 select-none relative group w-full md:h-[148px] ${
+                    className={`py-6 md:py-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 transition-all duration-200 select-none relative group w-full ${
                       isOwnDashboard ? 'cursor-pointer' : 'cursor-default'
                     }`}
                   >
-                    <div className="flex-1 text-left min-w-0 flex flex-col md:flex-row gap-6 items-start md:items-center w-full h-full">
+                    <div className="flex-1 text-left min-w-0 flex flex-col md:flex-row gap-6 items-start md:items-center w-full">
                       <div className="w-full md:w-32 h-36 md:h-24 shrink-0 rounded-[20px] overflow-hidden border border-border bg-bg-dark flex items-center justify-center">
                         {imageUrl ? (
                           <img 

@@ -286,6 +286,7 @@ export default function Editor({ type }) {
   const isMouseDownRef = useRef(false);
   const isTouchActiveRef = useRef(false);
   const clickStartPosRef = useRef({ x: 0, y: 0 });
+  const gutterDragStartRef = useRef(null);
   const lastMergeTimeRef = useRef(0);
   const isSavingRef = useRef(false);
   const hasPendingSaveRef = useRef(false);
@@ -604,20 +605,96 @@ export default function Editor({ type }) {
     const handleMouseDownGlobal = (e) => {
       isMouseDownRef.current = true;
       clickStartPosRef.current = { x: e.clientX, y: e.clientY };
+
+      // If the mousedown was outside the editor's child content (i.e. in the gutter / empty area)
+      const isInsideEditorContent =
+        editorRef.current &&
+        e.target !== editorRef.current &&
+        editorRef.current.contains(e.target);
+
+      if (!isInsideEditorContent) {
+        gutterDragStartRef.current = { x: e.clientX, y: e.clientY };
+      } else {
+        gutterDragStartRef.current = null;
+      }
     };
+
+    const handleMouseMoveGlobal = (e) => {
+      if (!isMouseDownRef.current || !gutterDragStartRef.current) return;
+      
+      const start = gutterDragStartRef.current;
+      const dist = Math.sqrt((e.clientX - start.x) ** 2 + (e.clientY - start.y) ** 2);
+      
+      // Only treat it as dragging if they moved the mouse a little bit
+      if (dist < 5) return;
+      
+      let startRange = null;
+      let currentRange = null;
+      
+      if (typeof document !== 'undefined') {
+        try {
+          if (document.caretRangeFromPoint) {
+            startRange = document.caretRangeFromPoint(start.x, start.y);
+            currentRange = document.caretRangeFromPoint(e.clientX, e.clientY);
+          } else if (document.caretPositionFromPoint) {
+            const startPos = document.caretPositionFromPoint(start.x, start.y);
+            if (startPos && startPos.offsetNode) {
+              startRange = document.createRange();
+              startRange.setStart(startPos.offsetNode, startPos.offset);
+              startRange.collapse(true);
+            }
+            const currentPos = document.caretPositionFromPoint(e.clientX, e.clientY);
+            if (currentPos && currentPos.offsetNode) {
+              currentRange = document.createRange();
+              currentRange.setStart(currentPos.offsetNode, currentPos.offset);
+              currentRange.collapse(true);
+            }
+          }
+        } catch (_) {}
+      }
+      
+      if (
+        startRange && 
+        currentRange && 
+        editorRef.current &&
+        editorRef.current.contains(startRange.startContainer) &&
+        editorRef.current.contains(currentRange.startContainer)
+      ) {
+        const selection = window.getSelection();
+        if (selection) {
+          try {
+            selection.removeAllRanges();
+            selection.collapse(startRange.startContainer, startRange.startOffset);
+            selection.extend(currentRange.startContainer, currentRange.startOffset);
+          } catch (_) {}
+        }
+      }
+    };
+
     const handleMouseUpGlobal = (e) => {
       isMouseDownRef.current = false;
+      gutterDragStartRef.current = null;
       const start = clickStartPosRef.current;
       const dist = Math.sqrt((e.clientX - start.x) ** 2 + (e.clientY - start.y) ** 2);
 
       if (dist < 5 && e.detail === 1) {
-        // Delay gutter click so a rapid double/triple click can cancel it first.
-        // This prevents the cursor collapsing to position 0 on the first click
-        // of a multi-click sequence (word/paragraph selection).
-        singleClickTimerRef.current = setTimeout(() => {
-          singleClickTimerRef.current = null;
-          handleGutterClick(e);
-        }, 250);
+        // Only schedule gutter click if the click landed outside the editor's
+        // child content (i.e. on the gutter / background area). Clicks inside
+        // the editor text should rely on the browser's native cursor placement.
+        const isInsideEditorContent =
+          editorRef.current &&
+          e.target !== editorRef.current &&
+          editorRef.current.contains(e.target);
+
+        if (!isInsideEditorContent) {
+          // Delay gutter click so a rapid double/triple click can cancel it first.
+          // This prevents the cursor collapsing to position 0 on the first click
+          // of a multi-click sequence (word/paragraph selection).
+          singleClickTimerRef.current = setTimeout(() => {
+            singleClickTimerRef.current = null;
+            handleGutterClick(e);
+          }, 250);
+        }
       } else if (dist < 5) {
         // Double/triple click: cancel any pending gutter single-click action
         if (singleClickTimerRef.current) {
@@ -655,7 +732,17 @@ export default function Editor({ type }) {
       }
       
       if (dist < 5) {
-        handleGutterClick(e.changedTouches ? e.changedTouches[0] : e);
+        // Only trigger gutter click if the tap landed outside the editor's
+        // child content (i.e. on the gutter / background area).
+        const touchTarget = e.changedTouches ? e.changedTouches[0] : e;
+        const isInsideEditorContent =
+          editorRef.current &&
+          touchTarget.target !== editorRef.current &&
+          editorRef.current.contains(touchTarget.target);
+
+        if (!isInsideEditorContent) {
+          handleGutterClick(touchTarget);
+        }
       } else {
         setTimeout(() => {
           handleSelectionChange();
@@ -672,6 +759,7 @@ export default function Editor({ type }) {
     };
 
     document.addEventListener('mousedown', handleMouseDownGlobal);
+    document.addEventListener('mousemove', handleMouseMoveGlobal);
     document.addEventListener('mouseup', handleMouseUpGlobal);
     document.addEventListener('touchstart', handleTouchStartGlobal);
     document.addEventListener('touchend', handleTouchEndGlobal);
@@ -680,6 +768,7 @@ export default function Editor({ type }) {
       document.removeEventListener('selectionchange', onSelection);
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('mousedown', handleMouseDownGlobal);
+      document.removeEventListener('mousemove', handleMouseMoveGlobal);
       document.removeEventListener('mouseup', handleMouseUpGlobal);
       document.removeEventListener('touchstart', handleTouchStartGlobal);
       document.removeEventListener('touchend', handleTouchEndGlobal);
@@ -3105,6 +3194,45 @@ export default function Editor({ type }) {
     if (clickedOnGutter) {
       if (!editorRef.current || !editorRef.current.children || editorRef.current.children.length === 0) return;
       
+      // Try to find caret position from point first (more precise for side clicks)
+      let pointRange = null;
+      if (typeof document !== 'undefined') {
+        try {
+          if (document.caretRangeFromPoint) {
+            pointRange = document.caretRangeFromPoint(clickX, clickY);
+          } else if (document.caretPositionFromPoint) {
+            const pos = document.caretPositionFromPoint(clickX, clickY);
+            if (pos && pos.offsetNode) {
+              pointRange = document.createRange();
+              pointRange.setStart(pos.offsetNode, pos.offset);
+              pointRange.collapse(true);
+            }
+          }
+        } catch (_) {}
+      }
+
+      if (pointRange && editorRef.current.contains(pointRange.startContainer)) {
+        const selection = window.getSelection();
+        if (selection) {
+          try {
+            selection.removeAllRanges();
+            selection.addRange(pointRange);
+            
+            // Focus the parent element if needed
+            let parentNode = pointRange.startContainer;
+            if (parentNode.nodeType === 3) { // Text node
+              parentNode = parentNode.parentNode;
+            }
+            if (parentNode && typeof parentNode.focus === 'function') {
+              parentNode.focus();
+            }
+            handleSelectionChange();
+            return;
+          } catch (_) {}
+        }
+      }
+
+      // Fallback to closest child block if range selection from point is not available
       let closestChild = null;
       let minDistance = Infinity;
       let isBelowLastChild = false;

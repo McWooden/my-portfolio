@@ -208,6 +208,21 @@ export default function Header({ availabilityStatus = 'available' }) {
         <div className="flex items-center gap-6 max-md:gap-3 shrink-0">
           {mounted && (
             <>
+              {/* Mobile Status & Time Indicators (Fades out when hamburger menu is open) */}
+              <div 
+                className={`hidden max-md:flex items-center gap-1.5 transition-all duration-300 ${
+                  isMenuOpen ? 'opacity-0 pointer-events-none translate-x-2' : 'opacity-100 translate-x-0'
+                }`}
+              >
+                <div className="flex items-center gap-1.5 text-[0.65rem] font-sans font-semibold text-text-primary bg-white/5 border border-white/10 rounded-full px-2 py-0.5 select-none">
+                  <span className={`pulse-dot status-${availabilityStatus} shrink-0`}></span>
+                  <span>{availabilityStatus === 'available' ? '2 Open' : 'Busy'}</span>
+                </div>
+                <div className="text-[0.65rem] font-sans font-semibold text-text-primary bg-white/5 border border-white/10 rounded-full px-2 py-0.5 select-none">
+                  {time}
+                </div>
+              </div>
+
               {/* Availability status badge */}
               <div className="flex flex-col items-end text-[0.75rem] select-none max-md:hidden">
                 <span className="font-sans font-semibold text-text-primary flex items-center gap-1.5 tracking-[-0.02em] leading-tight">

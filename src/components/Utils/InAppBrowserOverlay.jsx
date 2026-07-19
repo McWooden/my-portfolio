@@ -49,55 +49,57 @@ export default function InAppBrowserOverlay() {
   if (!isInAppBrowser) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 max-w-[calc(100%-2rem)] w-[360px] md:w-[380px] z-[9999] bg-bg-dark/95 backdrop-blur-md border border-border/10 rounded-2xl p-5 shadow-2xl flex flex-col gap-4 relative animate-in slide-in-from-bottom-5 duration-300">
-      
-      {/* Close button top right */}
-      <button 
-        onClick={() => setIsInAppBrowser(false)}
-        className="absolute top-4 right-4 text-text-muted hover:text-text-primary transition-colors cursor-pointer"
-        aria-label="Close warning"
-      >
-        <IoClose className="w-5 h-5" />
-      </button>
-
-      {/* Title & Icons */}
-      <div className="flex items-center gap-3 pr-6">
-        <div className="flex gap-1.5 text-text-muted">
-          <SiGooglechrome className="w-4 h-4" />
-          <SiSafari className="w-4 h-4" />
-          <SiBrave className="w-4 h-4" />
-        </div>
-        <h4 className="font-sans font-bold text-text-primary text-[0.85rem] tracking-tight">
-          In-App Browser Alert
-        </h4>
-      </div>
-
-      {/* Description */}
-      <p className="font-sans text-[0.75rem] text-text-secondary leading-relaxed pr-2">
-        Instagram's internal browser limits login and audio capabilities. 
-        {isIOS ? (
-          <span> Tap the <strong className="text-white">three dots (•••)</strong> at the top right of Instagram to select <strong className="text-white">"Open in browser"</strong>.</span>
-        ) : (
-          <span> Open in Chrome or Safari for the full experience.</span>
-        )}
-      </p>
-
-      {/* Buttons */}
-      <div className="flex gap-2 w-full mt-1">
-        {!isIOS && (
-          <button
-            onClick={handleOpenBrowser}
-            className="flex-1 py-2 rounded-lg bg-accent text-[0.75rem] font-bold text-bg-dark hover:opacity-90 transition-opacity cursor-pointer text-center"
-          >
-            Open Browser
-          </button>
-        )}
-        <button
-          onClick={handleCopyLink}
-          className="flex-1 py-2 rounded-lg border border-border/10 text-[0.75rem] font-semibold text-text-primary hover:bg-white/5 transition-colors cursor-pointer text-center"
+    <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-[3px] flex items-end justify-center p-4 pb-10">
+      <div className="bg-bg-dark/95 border border-border/10 rounded-2xl p-5 shadow-2xl flex flex-col gap-4 relative animate-in slide-in-from-bottom-5 duration-300 w-full max-w-[380px] text-left">
+        
+        {/* Close button top right */}
+        <button 
+          onClick={() => setIsInAppBrowser(false)}
+          className="absolute top-4 right-4 text-text-muted hover:text-text-primary transition-colors cursor-pointer"
+          aria-label="Close warning"
         >
-          {copied ? "Link Copied!" : "Copy Link"}
+          <IoClose className="w-5 h-5" />
         </button>
+
+        {/* Title & Icons */}
+        <div className="flex items-center gap-3 pr-6">
+          <div className="flex gap-1.5 text-text-muted">
+            <SiGooglechrome className="w-4 h-4" />
+            <SiSafari className="w-4 h-4" />
+            <SiBrave className="w-4 h-4" />
+          </div>
+          <h4 className="font-sans font-bold text-text-primary text-[0.85rem] tracking-tight">
+            In-App Browser Alert
+          </h4>
+        </div>
+
+        {/* Description */}
+        <p className="font-sans text-[0.75rem] text-text-secondary leading-relaxed pr-2">
+          Instagram's internal browser limits login and audio capabilities. 
+          {isIOS ? (
+            <span> Tap the <strong className="text-white">three dots (•••)</strong> at the top right of Instagram to select <strong className="text-white">"Open in browser"</strong>.</span>
+          ) : (
+            <span> Open in Chrome or Safari for the full experience.</span>
+          )}
+        </p>
+
+        {/* Buttons */}
+        <div className="flex gap-2 w-full mt-1">
+          {!isIOS && (
+            <button
+              onClick={handleOpenBrowser}
+              className="flex-1 py-2 rounded-lg bg-accent text-[0.75rem] font-bold text-bg-dark hover:opacity-90 transition-opacity cursor-pointer text-center"
+            >
+              Open Browser
+            </button>
+          )}
+          <button
+            onClick={handleCopyLink}
+            className="flex-1 py-2 rounded-lg border border-border/10 text-[0.75rem] font-semibold text-text-primary hover:bg-white/5 transition-colors cursor-pointer text-center"
+          >
+            {copied ? "Link Copied!" : "Copy Link"}
+          </button>
+        </div>
       </div>
     </div>
   );

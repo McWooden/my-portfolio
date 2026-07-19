@@ -95,6 +95,7 @@ export default function Hero({ homepageData, testimonialCard }) {
 
   const [isMobileDevice, setIsMobileDevice] = useState(false);
   const [mobileVideoState, setMobileVideoState] = useState('image'); // 'image' | 'playing'
+  const [isFadingMobileBg, setIsFadingMobileBg] = useState(false);
   const [isScrolledFromTop, setIsScrolledFromTop] = useState(false);
 
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
@@ -214,15 +215,17 @@ export default function Hero({ homepageData, testimonialCard }) {
 
   const triggerCloseTransition = () => {
     const video = videoRef.current;
-    setMobileVideoState('image');
+    setIsFadingMobileBg(true);
     
-    // Wait for the 500ms CSS transition-opacity to finish before pausing/resetting
+    // Wait for fade to finish before switching state and pausing
     setTimeout(() => {
+      setMobileVideoState('image');
       if (video) {
         video.pause();
         video.currentTime = 0;
       }
-    }, 500);
+      setIsFadingMobileBg(false);
+    }, 300);
   };
 
   const handleHeroClickMobile = (e) => {
@@ -235,10 +238,16 @@ export default function Hero({ homepageData, testimonialCard }) {
     const video = videoRef.current;
     if (!video) return;
 
+    if (isFadingMobileBg) return;
+
     if (mobileVideoState === 'image') {
-      setMobileVideoState('playing');
-      video.currentTime = 0;
-      video.play().catch(() => {});
+      setIsFadingMobileBg(true);
+      setTimeout(() => {
+        setMobileVideoState('playing');
+        video.currentTime = 0;
+        video.play().catch(() => {});
+        setIsFadingMobileBg(false);
+      }, 300);
     } else if (mobileVideoState === 'playing') {
       triggerCloseTransition();
     }
@@ -598,7 +607,12 @@ export default function Hero({ homepageData, testimonialCard }) {
             }}
           />
 
-
+          {/* Black overlay for smooth background swap on mobile */}
+          <div 
+            className={`absolute inset-0 bg-bg-dark z-25 transition-opacity duration-300 pointer-events-none ${
+              isFadingMobileBg ? 'opacity-100' : 'opacity-0'
+            }`} 
+          />
 
           {/* Subtle vertical and horizontal gradient overlays to blend text readability with dark theme */}
           <div className="absolute inset-0 bg-gradient-to-t from-bg-dark via-transparent to-transparent z-20" />

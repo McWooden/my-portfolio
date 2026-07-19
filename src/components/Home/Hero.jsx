@@ -95,7 +95,7 @@ export default function Hero({ homepageData, testimonialCard }) {
 
   const [isMobileDevice, setIsMobileDevice] = useState(false);
   const [mobileVideoState, setMobileVideoState] = useState('image'); // 'image' | 'playing'
-  const [isFadingMobileBg, setIsFadingMobileBg] = useState(false);
+  const [isMobileBgVisible, setIsMobileBgVisible] = useState(true);
   const [isScrolledFromTop, setIsScrolledFromTop] = useState(false);
 
   const [musicState, setMusicState] = useState('idle'); // 'idle' | 'loading' | 'playing'
@@ -217,7 +217,7 @@ export default function Hero({ homepageData, testimonialCard }) {
 
   const triggerCloseTransition = () => {
     const video = videoRef.current;
-    setIsFadingMobileBg(true);
+    setIsMobileBgVisible(false);
     
     // Wait for fade to finish before switching state and pausing
     setTimeout(() => {
@@ -226,7 +226,7 @@ export default function Hero({ homepageData, testimonialCard }) {
         video.pause();
         video.currentTime = 0;
       }
-      setIsFadingMobileBg(false);
+      setIsMobileBgVisible(true);
     }, 300);
   };
 
@@ -240,15 +240,15 @@ export default function Hero({ homepageData, testimonialCard }) {
     const video = videoRef.current;
     if (!video) return;
 
-    if (isFadingMobileBg) return;
+    if (!isMobileBgVisible) return;
 
     if (mobileVideoState === 'image') {
-      setIsFadingMobileBg(true);
+      setIsMobileBgVisible(false);
       setTimeout(() => {
         setMobileVideoState('playing');
         video.currentTime = 0;
         video.play().catch(() => {});
-        setIsFadingMobileBg(false);
+        setIsMobileBgVisible(true);
       }, 300);
     } else if (mobileVideoState === 'playing') {
       triggerCloseTransition();
@@ -573,7 +573,12 @@ export default function Hero({ homepageData, testimonialCard }) {
         className="perspective-3d-room w-full h-[100svh] min-h-[500px] md:min-h-[600px] relative overflow-hidden bg-bg-dark flex items-end pb-0 md:items-stretch cursor-pointer md:cursor-default"
       >
         {/* Full-screen Background with premium blend gradients */}
-        <div className="absolute top-0 left-0 w-full h-[75%] md:h-full z-0 overflow-hidden pointer-events-none">
+        <div 
+          style={{ transition: 'opacity 300ms ease-in-out' }}
+          className={`absolute top-0 left-0 w-full h-[75%] md:h-full z-0 overflow-hidden pointer-events-none ${
+            isMobileDevice && !isMobileBgVisible ? 'opacity-0' : 'opacity-100'
+          }`}
+        >
           {/* Static WebP Background Image (visible on mobile, and as fallback behind video) */}
           <motion.img 
             src="/hero-bg.webp"
@@ -607,13 +612,6 @@ export default function Hero({ homepageData, testimonialCard }) {
                 : (isScrolledFromTop ? opacityVal : 0),
               filter: filterVal,
             }}
-          />
-
-          {/* Black overlay for smooth background swap on mobile */}
-          <div 
-            className={`absolute inset-0 bg-bg-dark z-25 transition-opacity duration-300 pointer-events-none ${
-              isFadingMobileBg ? 'opacity-100' : 'opacity-0'
-            }`} 
           />
 
           {/* Subtle vertical and horizontal gradient overlays to blend text readability with dark theme */}

@@ -49,7 +49,7 @@ export default function InAppBrowserOverlay() {
   if (!isInAppBrowser) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-[380px] z-[9999] bg-bg-dark/95 backdrop-blur-md border border-border/10 rounded-2xl p-5 shadow-2xl flex flex-col gap-4 relative animate-in slide-in-from-bottom-5 duration-300">
+    <div className="fixed bottom-4 right-4 max-w-[calc(100%-2rem)] w-[360px] md:w-[380px] z-[9999] bg-bg-dark/95 backdrop-blur-md border border-border/10 rounded-2xl p-5 shadow-2xl flex flex-col gap-4 relative animate-in slide-in-from-bottom-5 duration-300">
       
       {/* Close button top right */}
       <button 

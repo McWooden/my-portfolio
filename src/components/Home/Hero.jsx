@@ -98,7 +98,7 @@ export default function Hero({ homepageData, testimonialCard }) {
   const [isFadingMobileBg, setIsFadingMobileBg] = useState(false);
   const [isScrolledFromTop, setIsScrolledFromTop] = useState(false);
 
-  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [musicState, setMusicState] = useState('idle'); // 'idle' | 'loading' | 'playing'
   const [showTooltip, setShowTooltip] = useState(false);
   const ytPlayerRef = useRef(null);
   const youtubeTooltipRef = useRef(null);
@@ -145,20 +145,20 @@ export default function Hero({ homepageData, testimonialCard }) {
   // Monitor time to stop exactly at 0:33
   useEffect(() => {
     let timer;
-    if (isMusicPlaying) {
+    if (musicState === 'playing') {
       timer = setInterval(() => {
         if (ytPlayerRef.current && ytPlayerRef.current.getCurrentTime) {
           const time = ytPlayerRef.current.getCurrentTime();
           if (time >= 33) {
             ytPlayerRef.current.pauseVideo();
             ytPlayerRef.current.seekTo(0);
-            setIsMusicPlaying(false);
+            setMusicState('idle');
           }
         }
       }, 100);
     }
     return () => clearInterval(timer);
-  }, [isMusicPlaying]);
+  }, [musicState]);
 
   const handleYoutubeTextClick = (e) => {
     e.stopPropagation(); // Avoid triggering Polaroid play toggle
@@ -168,6 +168,7 @@ export default function Hero({ homepageData, testimonialCard }) {
   const handlePolaroidClick = () => {
     const initAndPlay = () => {
       if (window.YT && window.YT.Player) {
+        setMusicState('loading');
         ytPlayerRef.current = new window.YT.Player('youtube-music-player', {
           events: {
             'onReady': (event) => {
@@ -176,16 +177,17 @@ export default function Hero({ homepageData, testimonialCard }) {
               }
               event.target.unMute();
               event.target.playVideo();
-              setIsMusicPlaying(true);
             },
             'onStateChange': (event) => {
               if (event.data === window.YT.PlayerState.PLAYING) {
-                setIsMusicPlaying(true);
+                setMusicState('playing');
+              } else if (event.data === window.YT.PlayerState.BUFFERING) {
+                setMusicState('loading');
               } else if (event.data === window.YT.PlayerState.ENDED) {
-                setIsMusicPlaying(false);
+                setMusicState('idle');
                 ytPlayerRef.current.seekTo(0);
               } else if (event.data === window.YT.PlayerState.PAUSED) {
-                setIsMusicPlaying(false);
+                setMusicState('idle');
               }
             }
           }
@@ -200,16 +202,16 @@ export default function Hero({ homepageData, testimonialCard }) {
       return;
     }
 
-    if (isMusicPlaying) {
+    if (musicState === 'playing' || musicState === 'loading') {
       ytPlayerRef.current.pauseVideo();
-      setIsMusicPlaying(false);
+      setMusicState('idle');
     } else {
+      setMusicState('loading');
       if (ytPlayerRef.current.setPlaybackQuality) {
         ytPlayerRef.current.setPlaybackQuality('tiny');
       }
       ytPlayerRef.current.unMute();
       ytPlayerRef.current.playVideo();
-      setIsMusicPlaying(true);
     }
   };
 
@@ -772,16 +774,22 @@ export default function Hero({ homepageData, testimonialCard }) {
                   {/* Hover overlay with play/pause */}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/photo:opacity-100 transition-opacity duration-200 flex items-center justify-center">
                     <div className="w-7 h-7 rounded-full bg-bg-card flex items-center justify-center shadow-lg text-text-primary">
-                      {isMusicPlaying
+                      {musicState === 'playing' || musicState === 'loading'
                         ? <IoPause className="w-3.5 h-3.5 text-current" />
                         : <IoPlay className="w-3.5 h-3.5 text-current translate-x-[0.5px]" />
                       }
                     </div>
                   </div>
 
-                  {/* Live playing pill */}
-                  {isMusicPlaying && (
-                    <div className="absolute top-1 right-1 bg-red-600/90 text-white text-[6.5px] font-bold tracking-wider px-1 py-0.5 rounded-full flex items-center gap-0.5 animate-pulse select-none z-10">
+                  {/* Live playing / loading pill */}
+                  {musicState === 'loading' && (
+                    <div className="absolute top-1 right-1 bg-amber-500/90 text-neutral-950 text-[6.5px] font-bold tracking-wider px-1.5 py-0.5 rounded-full flex items-center gap-0.5 select-none z-10">
+                      <span className="w-0.5 h-0.5 bg-neutral-950 rounded-full" />
+                      LOADING
+                    </div>
+                  )}
+                  {musicState === 'playing' && (
+                    <div className="absolute top-1 right-1 bg-red-600/90 text-white text-[6.5px] font-bold tracking-wider px-1.5 py-0.5 rounded-full flex items-center gap-0.5 select-none z-10">
                       <span className="w-0.5 h-0.5 bg-white rounded-full" />
                       PLAYING
                     </div>

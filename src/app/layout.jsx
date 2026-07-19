@@ -1,5 +1,6 @@
 import React from 'react';
 import { Inter, DM_Mono, Sedgwick_Ave, Bebas_Neue } from 'next/font/google';
+import InAppBrowserOverlay from '../components/Utils/InAppBrowserOverlay';
 import './globals.css';
 
 const inter = Inter({
@@ -250,6 +251,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
+        <InAppBrowserOverlay />
         {children}
       </body>
     </html>

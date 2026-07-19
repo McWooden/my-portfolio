@@ -144,10 +144,91 @@ export default function StoryDetailPage({ params }) {
     notFound();
   }
 
+  // Build dynamic JSON-LD for Search Engines
+  const blogLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": story.title,
+    "description": story.subtitle || story.title,
+    "image": [
+      story.coverImage || "https://halohuddin.vercel.app/hero-bg.webp"
+    ],
+    "datePublished": story.date ? new Date(story.date).toISOString() : new Date().toISOString(),
+    "author": {
+      "@type": "Person",
+      "name": story.author?.name || "Huddin"
+    }
+  };
+
+  if (story.isPremium) {
+    blogLd.isAccessibleForFree = "False";
+    blogLd.hasPart = {
+      "@type": "WebPageElement",
+      "isAccessibleForFree": "False",
+      "cssSelector": ".paywall"
+    };
+
+    if (story.price) {
+      blogLd.offers = {
+        "@type": "Offer",
+        "price": String(story.price),
+        "priceCurrency": story.currency || "USD",
+        "category": "membership"
+      };
+    }
+  }
+
+  if (story.ratingValue) {
+    blogLd.aggregateRating = {
+      "@type": "AggregateRating",
+      "ratingValue": String(story.ratingValue),
+      "bestRating": "5",
+      "worstRating": "1",
+      "ratingCount": String(story.ratingCount || 1)
+    };
+  }
+
   return (
     <>
       <ProgressBar />
       <Header />
+
+      {story && (
+        <>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(blogLd) }}
+          />
+          {/* Also keep VideoObject for rich media results */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "VideoObject",
+                "name": story.title,
+                "description": story.subtitle || story.title,
+                "thumbnailUrl": [
+                  story.coverImage || "https://halohuddin.vercel.app/hero-bg.webp"
+                ],
+                "uploadDate": story.date ? new Date(story.date).toISOString() : new Date().toISOString(),
+                "contentUrl": "https://halohuddin.vercel.app/videos/marketing-ai.webm",
+                "embedUrl": `https://halohuddin.vercel.app/stories/${unwrappedParams?.username}/${unwrappedParams?.slug}`,
+                "duration": "PT0M49S",
+                ...(story.ratingValue ? {
+                  "aggregateRating": {
+                    "@type": "AggregateRating",
+                    "ratingValue": String(story.ratingValue),
+                    "bestRating": "5",
+                    "worstRating": "1",
+                    "ratingCount": String(story.ratingCount || 1)
+                  }
+                } : {})
+              })
+            }}
+          />
+        </>
+      )}
 
       <div ref={containerRef} className="pt-24 bg-bg-dark min-h-screen text-white text-left font-sans">
         <div className="max-w-[800px] mx-auto px-6 md:px-12 py-[80px]">
@@ -202,7 +283,7 @@ export default function StoryDetailPage({ params }) {
           )}
 
           {/* Article Content */}
-          <article className="prose prose-invert max-w-none text-[1.125rem] leading-[1.7] text-neutral-300 mb-16">
+          <article className={`prose prose-invert max-w-none text-[1.125rem] leading-[1.7] text-neutral-300 mb-16 ${story.isPremium ? 'paywall' : ''}`}>
             <div 
               className="blog-document-content"
               dangerouslySetInnerHTML={{ __html: story.content }}

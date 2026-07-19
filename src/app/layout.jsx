@@ -95,10 +95,16 @@ export const metadata = {
     siteName: 'Huddin Portfolio',
     images: [
       {
+        url: '/hero-bg.webp',
+        width: 1200,
+        height: 630,
+        alt: 'Huddin - Magelang Full-Stack Developer & UI/UX Designer Portfolio Hero',
+      },
+      {
         url: '/ico/android-chrome-512x512.png',
         width: 512,
         height: 512,
-        alt: 'Huddin - Magelang Full-Stack Developer & UI/UX Designer',
+        alt: 'Huddin Logo',
       },
     ],
   },
@@ -146,7 +152,7 @@ const jsonLd = {
         closes: '17:00',
       },
       priceRange: '$$',
-      image: 'https://halohuddin.vercel.app/og-image.jpg',
+      image: 'https://halohuddin.vercel.app/hero-bg.webp',
       founder: { '@id': 'https://halohuddin.vercel.app/#person' },
       sameAs: [
         'https://www.linkedin.com/in/sholahuddin-ahmad/',
@@ -164,7 +170,7 @@ const jsonLd = {
       name: 'Sholahuddin Ahmad',
       alternateName: 'Huddin',
       url: 'https://halohuddin.vercel.app',
-      image: 'https://framerusercontent.com/images/NkL1zDB0ea9KmqIpMf80b6TCw.png',
+      image: 'https://halohuddin.vercel.app/hero-bg.webp',
       jobTitle: 'Full-Stack Developer & UI/UX Designer',
       description: 'Full-Stack Developer & UI/UX Designer berbasis di Magelang, Jawa Tengah. Founder HaloHuddin Home Studio.',
       address: {

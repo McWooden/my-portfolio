@@ -96,7 +96,12 @@ export function mapStory(dbStory) {
       id: 'admin'
     }),
     claps: meta?.claps || 0,
-    claps_by_user: meta?.claps_by_user || {}
+    claps_by_user: meta?.claps_by_user || {},
+    isPremium: meta?.isPremium || false,
+    price: meta?.price || null,
+    currency: meta?.currency || 'USD',
+    ratingValue: meta?.ratingValue || null,
+    ratingCount: meta?.ratingCount || null
   };
 }
 

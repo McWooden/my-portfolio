@@ -100,16 +100,32 @@ export default function Hero({ homepageData, testimonialCard }) {
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const ytPlayerRef = useRef(null);
+  const youtubeTooltipRef = useRef(null);
+  
+  const [showTrustedTooltip, setShowTrustedTooltip] = useState(false);
+  const trustedTooltipRef = useRef(null);
 
   // Close tooltip when clicking outside
   useEffect(() => {
-    if (!showTooltip) return;
-    const handleOutsideClick = () => {
-      setShowTooltip(false);
+    const handleClickOutside = (event) => {
+      if (youtubeTooltipRef.current && !youtubeTooltipRef.current.contains(event.target)) {
+        setShowTooltip(false);
+      }
+      if (trustedTooltipRef.current && !trustedTooltipRef.current.contains(event.target)) {
+        setShowTrustedTooltip(false);
+      }
     };
-    window.addEventListener('click', handleOutsideClick);
-    return () => window.removeEventListener('click', handleOutsideClick);
-  }, [showTooltip]);
+
+    if (showTooltip || showTrustedTooltip) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [showTooltip, showTrustedTooltip]);
 
   // Load YT Player script
   useEffect(() => {
@@ -145,7 +161,7 @@ export default function Hero({ homepageData, testimonialCard }) {
 
   const handleYoutubeTextClick = (e) => {
     e.stopPropagation(); // Avoid triggering Polaroid play toggle
-    setShowTooltip(true);
+    setShowTooltip(prev => !prev);
   };
 
   const handlePolaroidClick = () => {
@@ -767,7 +783,7 @@ export default function Hero({ homepageData, testimonialCard }) {
                     </span>
                   </div>
                   
-                  <div className="relative self-end">
+                  <div ref={youtubeTooltipRef} className="relative self-end">
                     <span
                       onClick={handleYoutubeTextClick}
                       className="text-neutral-500 font-sans text-[7px] md:text-[8px] font-bold tracking-wide select-none leading-none cursor-pointer block"
@@ -775,20 +791,28 @@ export default function Hero({ homepageData, testimonialCard }) {
                       /Youtube
                     </span>
                     {showTooltip && (
-                      <div className="absolute right-0 bottom-full mb-2 bg-[#18181b] border border-neutral-800 text-white rounded-lg p-2.5 shadow-xl flex flex-col gap-2 z-50 min-w-[140px] text-left">
-                        <p className="text-[10px] text-neutral-300 font-medium leading-normal">
+                      <div className="absolute right-0 bottom-full mb-3 w-56 p-3 bg-bg-dark/95 backdrop-blur-md border border-border/10 rounded-xl shadow-2xl z-[1010] flex flex-col gap-2.5 origin-bottom-right text-left">
+                        {/* Small arrow pointing down */}
+                        <div className="absolute right-6 -bottom-1 w-2.5 h-2.5 bg-bg-dark border-b border-r border-border/10 rotate-45" />
+                        
+                        <p className="font-sans text-[0.75rem] text-text-secondary leading-relaxed">
                           Listen to this track on YouTube?
                         </p>
-                        <div className="flex gap-1.5 justify-end">
+                        
+                        <div className="flex gap-2 justify-end mt-0.5">
                           <button
                             onClick={(e) => { e.stopPropagation(); setShowTooltip(false); }}
-                            className="text-[9px] font-bold px-2.5 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors"
+                            className="px-2.5 py-1 rounded-lg border border-border/10 text-[0.65rem] font-medium text-text-primary hover:bg-white/5 transition-colors cursor-pointer"
                           >
                             Stay here
                           </button>
                           <button
-                            onClick={(e) => { e.stopPropagation(); setShowTooltip(false); window.open("https://youtu.be/LgMvaRwbEOE?si=Oudd4EAkxaPRNTcN", "_blank"); }}
-                            className="text-[9px] font-bold px-2.5 py-1 rounded bg-accent hover:bg-accent/90 text-neutral-950 transition-colors"
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              setShowTooltip(false); 
+                              window.open("https://youtu.be/LgMvaRwbEOE?si=Oudd4EAkxaPRNTcN", "_blank"); 
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-accent text-[0.65rem] font-semibold text-bg-dark hover:opacity-90 transition-opacity cursor-pointer flex items-center justify-center"
                           >
                             Listen
                           </button>
@@ -808,11 +832,47 @@ export default function Hero({ homepageData, testimonialCard }) {
                 initial={{ opacity: 0, x: -15 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, ease: "easeOut", delay: 0.7 }}
-                className="flex items-center gap-4 w-full md:w-[35vw] max-w-full overflow-hidden order-2 md:order-1"
+                className="flex items-center gap-4 w-full md:w-[35vw] max-w-full overflow-visible order-2 md:order-1"
               >
-                <span className="font-mono text-[0.7rem] font-bold text-text-muted uppercase tracking-wider shrink-0 select-none">
-                  Trusted by:
-                </span>
+                <div ref={trustedTooltipRef} className="relative shrink-0 flex items-center">
+                  <span 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowTrustedTooltip(prev => !prev);
+                    }}
+                    className="font-mono text-[0.7rem] font-bold text-text-muted uppercase tracking-wider select-none cursor-pointer"
+                  >
+                    Trusted by:
+                  </span>
+                  {showTrustedTooltip && (
+                    <div className="absolute left-0 bottom-full mb-3 w-60 p-3 bg-bg-dark/95 backdrop-blur-md border border-border/10 rounded-xl shadow-2xl z-[1010] flex flex-col gap-2.5 origin-bottom-left text-left">
+                      {/* Small arrow pointing down */}
+                      <div className="absolute left-6 -bottom-1 w-2.5 h-2.5 bg-bg-dark border-b border-r border-border/10 rotate-45" />
+                      
+                      <p className="font-sans text-[0.75rem] text-text-secondary leading-relaxed">
+                        Verify 32+ qualifications and certifications on LinkedIn
+                      </p>
+                      
+                      <div className="flex gap-2 justify-end mt-0.5">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setShowTrustedTooltip(false); }}
+                          className="px-2.5 py-1 rounded-lg border border-border/10 text-[0.65rem] font-medium text-text-primary hover:bg-white/5 transition-colors cursor-pointer"
+                        >
+                          Awesome
+                        </button>
+                        <a
+                          href="https://www.linkedin.com/in/sholahuddin-ahmad/details/certifications/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => setShowTrustedTooltip(false)}
+                          className="px-2.5 py-1 rounded-lg bg-accent text-[0.65rem] font-semibold text-bg-dark flex items-center justify-center cursor-pointer"
+                        >
+                          Show Me
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
                 <Marquee gapClass="gap-10" className="w-full">
                   <div className="flex items-center gap-10">
                     <div className="flex items-center gap-1.5 select-none opacity-50 hover:opacity-100 hover:text-accent transition-all duration-300">
@@ -843,7 +903,7 @@ export default function Hero({ homepageData, testimonialCard }) {
                   </div>
                 </Marquee>
               </motion.div>
-
+ 
               {/* Right Side: Buttons (flex row side-by-side, Get Started stretches to fill) */}
               <motion.div 
                 initial={{ opacity: 0, y: 15 }}
@@ -861,7 +921,13 @@ export default function Hero({ homepageData, testimonialCard }) {
                   href="#contact" 
                   className="flex-1 md:flex-none group bg-accent text-bg-dark text-[1.05rem] font-semibold pl-7 pr-3 py-3 rounded-full flex items-center justify-center whitespace-nowrap select-none hover:bg-accent/90 transition-all duration-200"
                 >
-                  Get started
+                  <span className="relative block h-[1.5rem] overflow-hidden text-left min-w-[95px]">
+                    <span className="absolute inset-0 transition-transform duration-300 ease-in-out group-hover:-translate-y-full flex flex-col">
+                      <span className="h-[1.5rem] flex items-center">Get started</span>
+                      <span className="h-[1.5rem] flex items-center">Contact</span>
+                    </span>
+                    <span className="invisible h-[1.5rem] flex items-center">Get started</span>
+                  </span>
                   <span className="w-9 h-9 rounded-full bg-bg-dark text-accent flex items-center justify-center ml-4 shrink-0 shadow-sm">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 transition-transform duration-300 group-hover:rotate-45">
                       <path d="M7 17L17 7M17 7H7M17 7V17" strokeLinecap="round" strokeLinejoin="round" />

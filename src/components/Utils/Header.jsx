@@ -234,13 +234,13 @@ export default function Header({ availabilityStatus = 'available' }) {
               </div>
 
               {/* Desktop Scroll to Top Button (appears before '2 Slots Open' when scrolled) */}
-              <div className={`transition-all duration-300 max-md:hidden ${isScrolled ? 'opacity-100 translate-x-0' : 'opacity-0 pointer-events-none -translate-x-2'}`}>
+              <div className={`transition-all duration-300 max-md:hidden ${isScrolled ? 'opacity-100 translate-x-0' : 'opacity-0 pointer-events-none -translate-x-2'} self-center`}>
                 <button
                   onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  className="flex items-center justify-center text-text-primary hover:text-accent bg-white/5 hover:bg-white/10 border border-white/10 rounded-full w-9 h-9 cursor-pointer select-none transition-all hover:scale-105 active:scale-95"
+                  className="flex items-center justify-center text-text-primary hover:text-accent bg-white/5 hover:bg-white/10 border border-white/10 rounded-full w-7 h-7 cursor-pointer select-none transition-all hover:scale-105 active:scale-95"
                   title="Scroll to top"
                 >
-                  <RxDoubleArrowUp className="w-4.5 h-4.5" />
+                  <RxDoubleArrowUp className="w-3.5 h-3.5" />
                 </button>
               </div>
 

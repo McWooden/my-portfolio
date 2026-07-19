@@ -618,7 +618,7 @@ export default function Hero({ homepageData, testimonialCard }) {
         >
           {/* Static WebP Background Image (visible on mobile, and as fallback behind video) */}
           <motion.img 
-            src={isMobileDevice ? "/hero-bg-mobile.webp" : "/hero-bg.webp"}
+            src="/hero-bg.webp"
             alt="Hero Background Static"
             className="absolute inset-0 w-full h-full object-cover object-center md:object-left transition-opacity duration-250"
             style={{

@@ -130,6 +130,12 @@ export default function Hero({ homepageData, testimonialCard }) {
 
   // Load YT Player script
   useEffect(() => {
+    console.log(
+      "%c[YouTube Embed] Note: If you see net::ERR_BLOCKED_BY_CLIENT errors in the console, " +
+      "this is normal! It means your browser adblocker/shields are blocking YouTube telemetry/analytics endpoints. " +
+      "The player functions normally.",
+      "color: #ff0000; font-weight: bold;"
+    );
     if (!window.YT) {
       const tag = document.createElement('script');
       tag.src = 'https://www.youtube.com/iframe_api';
@@ -219,15 +225,16 @@ export default function Hero({ homepageData, testimonialCard }) {
     const video = videoRef.current;
     setIsMobileBgVisible(false);
     
-    // Wait for fade to finish before switching state and pausing
+    // Wait for fade-out to complete (now 150ms), then switch state while hidden
     setTimeout(() => {
       setMobileVideoState('image');
       if (video) {
         video.pause();
         video.currentTime = 0;
       }
+      // Image is already loaded (it's a static asset), safe to fade in immediately
       setIsMobileBgVisible(true);
-    }, 300);
+    }, 150);
   };
 
   const handleHeroClickMobile = (e) => {
@@ -243,13 +250,43 @@ export default function Hero({ homepageData, testimonialCard }) {
     if (!isMobileBgVisible) return;
 
     if (mobileVideoState === 'image') {
+      // Phase 1: Fade out (now fast)
       setIsMobileBgVisible(false);
+
+      // Phase 2: After fade-out completes (now 150ms), prepare video while still hidden
       setTimeout(() => {
         setMobileVideoState('playing');
         video.currentTime = 0;
-        video.play().catch(() => {});
-        setIsMobileBgVisible(true);
-      }, 300);
+
+        // Wait for the video to be ready at the seeked position before fading in
+        let didFadeIn = false;
+        const fadeIn = () => {
+          if (didFadeIn) return;
+          didFadeIn = true;
+          video.play().catch(() => {});
+          setIsMobileBgVisible(true);
+        };
+
+        // Listen for the video to signal it's ready to render
+        const onReady = () => {
+          video.removeEventListener('canplay', onReady);
+          video.removeEventListener('seeked', onReady);
+          fadeIn();
+        };
+        video.addEventListener('canplay', onReady, { once: true });
+        video.addEventListener('seeked', onReady, { once: true });
+
+        // Safety timeout — don't leave the screen black forever on slow devices
+        setTimeout(fadeIn, 1000);
+
+        // Trigger loading if the video hasn't started buffering yet
+        if (video.readyState >= 3) {
+          // Already has enough data, fade in immediately
+          fadeIn();
+        } else {
+          video.load();
+        }
+      }, 150);
     } else if (mobileVideoState === 'playing') {
       triggerCloseTransition();
     }
@@ -574,16 +611,16 @@ export default function Hero({ homepageData, testimonialCard }) {
       >
         {/* Full-screen Background with premium blend gradients */}
         <div 
-          style={{ transition: 'opacity 300ms ease-in-out' }}
+          style={{ transition: 'opacity 150ms ease-in-out' }}
           className={`absolute top-0 left-0 w-full h-[75%] md:h-full z-0 overflow-hidden pointer-events-none ${
             isMobileDevice && !isMobileBgVisible ? 'opacity-0' : 'opacity-100'
           }`}
         >
           {/* Static WebP Background Image (visible on mobile, and as fallback behind video) */}
           <motion.img 
-            src="/hero-bg.webp"
+            src={isMobileDevice ? "/hero-bg-mobile.webp" : "/hero-bg.webp"}
             alt="Hero Background Static"
-            className="absolute inset-0 w-full h-full object-cover object-center md:object-left transition-opacity duration-500"
+            className="absolute inset-0 w-full h-full object-cover object-center md:object-left transition-opacity duration-250"
             style={{
               x: springBgX,
               y: springBgY,
@@ -601,8 +638,9 @@ export default function Hero({ homepageData, testimonialCard }) {
             src="/hero-bg.webm" 
             muted
             playsInline
+            preload="auto"
             onEnded={handleVideoEnded}
-            className="absolute inset-0 w-full h-full object-cover object-center md:object-left transition-opacity duration-500"
+            className="absolute inset-0 w-full h-full object-cover object-center md:object-left transition-opacity duration-250"
             style={{
               x: springBgX,
               y: springBgY,

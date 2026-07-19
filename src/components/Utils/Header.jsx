@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { SiGithub, SiMedium } from 'react-icons/si';
 import { FaLinkedinIn } from "react-icons/fa";
+import { RxDoubleArrowUp } from 'react-icons/rx';
 import { navigationMenu } from '../../data/siteData';
 import { supabase } from '../../utils/supabase';
 
@@ -214,6 +215,15 @@ export default function Header({ availabilityStatus = 'available' }) {
                   isMenuOpen ? 'opacity-0 pointer-events-none translate-x-2' : 'opacity-100 translate-x-0'
                 }`}
               >
+                {isScrolled && (
+                  <button
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    className="flex items-center justify-center text-text-primary bg-white/5 hover:bg-white/10 active:scale-95 border border-white/10 rounded-full w-6 h-6 select-none transition-all cursor-pointer"
+                    title="Scroll to top"
+                  >
+                    <RxDoubleArrowUp className="w-3.5 h-3.5" />
+                  </button>
+                )}
                 <div className="flex items-center gap-1.5 text-[0.65rem] font-sans font-semibold text-text-primary bg-white/5 border border-white/10 rounded-full px-2 py-0.5 select-none">
                   <span className={`pulse-dot status-${availabilityStatus} shrink-0`}></span>
                   <span>{availabilityStatus === 'available' ? '2 Open' : 'Busy'}</span>
@@ -221,6 +231,17 @@ export default function Header({ availabilityStatus = 'available' }) {
                 <div className="text-[0.65rem] font-sans font-semibold text-text-primary bg-white/5 border border-white/10 rounded-full px-2 py-0.5 select-none">
                   {time}
                 </div>
+              </div>
+
+              {/* Desktop Scroll to Top Button (appears before '2 Slots Open' when scrolled) */}
+              <div className={`transition-all duration-300 max-md:hidden ${isScrolled ? 'opacity-100 translate-x-0' : 'opacity-0 pointer-events-none -translate-x-2'}`}>
+                <button
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className="flex items-center justify-center text-text-primary hover:text-accent bg-white/5 hover:bg-white/10 border border-white/10 rounded-full w-9 h-9 cursor-pointer select-none transition-all hover:scale-105 active:scale-95"
+                  title="Scroll to top"
+                >
+                  <RxDoubleArrowUp className="w-4.5 h-4.5" />
+                </button>
               </div>
 
               {/* Availability status badge */}

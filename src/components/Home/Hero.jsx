@@ -92,7 +92,6 @@ export default function Hero({ homepageData, testimonialCard }) {
   const visualRef = useRef(null);
   const [rightMousePos, setRightMousePos] = useState({ x: 0, y: 0 });
   const videoRef = useRef(null);
-  const imageRef = useRef(null);
 
   const [isMobileDevice, setIsMobileDevice] = useState(false);
   const [mobileVideoState, setMobileVideoState] = useState('image'); // 'image' | 'playing'
@@ -224,40 +223,22 @@ export default function Hero({ homepageData, testimonialCard }) {
 
   const triggerCloseTransition = () => {
     const video = videoRef.current;
-    const img = imageRef.current;
     setIsMobileBgVisible(false);
     
-    // Wait for fade-out to complete (now 150ms), then switch state while hidden
+    // Wait for fade-out to complete (150ms), then switch state while hidden
     setTimeout(() => {
       setMobileVideoState('image');
       if (video) {
         video.pause();
         video.currentTime = 0;
       }
-
-      // Wait for the image to be ready/loaded before fading in (matching the start transition method)
-      let didFadeIn = false;
-      const fadeIn = () => {
-        if (didFadeIn) return;
-        didFadeIn = true;
-        setIsMobileBgVisible(true);
-      };
-
-      if (img) {
-        if (img.complete) {
-          fadeIn();
-        } else {
-          const onImageLoad = () => {
-            img.removeEventListener('load', onImageLoad);
-            fadeIn();
-          };
-          img.addEventListener('load', onImageLoad, { once: true });
-          // Safety timeout
-          setTimeout(fadeIn, 1000);
-        }
-      } else {
-        fadeIn();
-      }
+      // Wait for the browser to paint the image before fading in,
+      // matching the same "settle then reveal" rhythm as the start transition
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setIsMobileBgVisible(true);
+        });
+      });
     }, 150);
   };
 
@@ -642,7 +623,6 @@ export default function Hero({ homepageData, testimonialCard }) {
         >
           {/* Static WebP Background Image (visible on mobile, and as fallback behind video) */}
           <motion.img 
-            ref={imageRef}
             src="/hero-bg.webp"
             alt="Hero Background Static"
             className="absolute inset-0 w-full h-full object-cover object-center md:object-left transition-opacity duration-250"

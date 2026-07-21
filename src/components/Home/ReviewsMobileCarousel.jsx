@@ -121,18 +121,30 @@ export default function ReviewsMobileCarousel({ reviews = staticReviews }) {
   return (
     <div ref={containerRef} className="flex flex-col items-center justify-center w-full px-4">
       {/* Stories Progress Indicators */}
-      <div className="flex gap-2.5 w-full max-w-[360px] mb-8 px-2">
+      <div className="flex gap-2.5 w-full max-w-[360px] mb-8 px-2 relative z-30">
         {reviews.map((_, i) => {
           const initialWidth = i < currentIndex ? '100%' : '0%';
           return (
-            <div key={i} className="h-1 bg-white/10 rounded-full flex-1 overflow-hidden">
-              <div
-                ref={(el) => (progressBarsRef.current[i] = el)}
-                className="h-full bg-[#E0FF6F]"
-                style={{
-                  width: initialWidth,
-                }}
-              />
+            <div
+              key={i}
+              className="h-3 -my-1 flex items-center flex-1 cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                updateProgressBarWidths(i);
+                progressRef.current = 0;
+                lastTimeRef.current = null;
+                setCurrentIndex(i);
+              }}
+            >
+              <div className="h-1 bg-white/10 rounded-full w-full overflow-hidden">
+                <div
+                  ref={(el) => (progressBarsRef.current[i] = el)}
+                  className="h-full bg-[#E0FF6F]"
+                  style={{
+                    width: initialWidth,
+                  }}
+                />
+              </div>
             </div>
           );
         })}

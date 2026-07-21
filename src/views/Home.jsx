@@ -14,7 +14,7 @@ export default function Home({ projects, blogPosts, faqs, reviews, homepageData,
       <Hero homepageData={homepageData} testimonialCard={testimonialCard} />
 
       {/* 2. Services */}
-      <ServicesSection />
+      {/* <ServicesSection /> */}
 
       {/* 4. Projects */}
       <PortfolioSection projects={projects} />
@@ -26,7 +26,7 @@ export default function Home({ projects, blogPosts, faqs, reviews, homepageData,
       <BlogSection posts={blogPosts} />
 
       {/* 7. FAQ */}
-      <FAQ faqs={faqs} labelIndex="05" />
+      {/* <FAQ faqs={faqs} labelIndex="05" /> */}
 
       {/* 8. Contact */}
       <Contact />

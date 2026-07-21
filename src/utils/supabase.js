@@ -74,6 +74,7 @@ export function mapStory(dbStory) {
     location: dbStory.location || '',
     industry: dbStory.industry || '',
     featured: dbStory.featured || false,
+    featured_order: dbStory.featured_order ?? null,
     testimonial: dbStory.testimonial_quote ? {
       quote: dbStory.testimonial_quote,
       author: dbStory.testimonial_author,

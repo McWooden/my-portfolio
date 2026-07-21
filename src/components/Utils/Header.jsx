@@ -8,8 +8,32 @@ import { RxDoubleArrowUp } from 'react-icons/rx';
 import { navigationMenu } from '../../data/siteData';
 import { supabase } from '../../utils/supabase';
 
-export default function Header({ availabilityStatus = 'available' }) {
+export default function Header({ partitions = ['open', 'open', 'working', 'campus'] }) {
+  const getSummaryText = (parts) => {
+    const openCount = parts.filter(p => p === 'open').length;
+    const workingCount = parts.filter(p => p === 'working').length;
+    const campusCount = parts.filter(p => p === 'campus').length;
+    const meCount = parts.filter(p => p === 'me').length;
+    
+    const segments = [];
+    if (openCount > 0) segments.push(`${openCount} Open`);
+    if (workingCount > 0) segments.push(`${workingCount} Working`);
+    if (campusCount > 0) segments.push(`${campusCount} Campus`);
+    if (meCount > 0) segments.push(`${meCount} Me Time`);
+    
+    return segments.length > 0 ? segments.join(' • ') : 'Busy';
+  };
   const pathname = usePathname();
+  const openCount = partitions.filter(p => p === 'open').length;
+  const meCount = partitions.filter(p => p === 'me').length;
+  const workingCount = partitions.filter(p => p === 'working').length;
+  const campusCount = partitions.filter(p => p === 'campus').length;
+  const getSegmentStyle = (val) => {
+    if (val === 'open') return { className: '', style: { backgroundColor: '#c6ff34' } };
+    if (val === 'me') return { className: '', style: { backgroundColor: '#6CCFF6' } };
+    if (val === 'working') return { className: '', style: { backgroundColor: '#FE7F2D' } };
+    return { className: '', style: { backgroundColor: '#AC58E9' } };
+  };
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isBrandMenuOpen, setIsBrandMenuOpen] = useState(false);
   const [session, setSession] = useState(null);
@@ -224,9 +248,29 @@ export default function Header({ availabilityStatus = 'available' }) {
                     <RxDoubleArrowUp className="w-3.5 h-3.5" />
                   </button>
                 )}
-                <div className="flex items-center gap-1.5 text-[0.65rem] font-sans font-semibold text-text-primary bg-white/5 border border-white/10 rounded-full px-2 py-0.5 select-none">
-                  <span className={`pulse-dot status-${availabilityStatus} shrink-0`}></span>
-                  <span>{availabilityStatus === 'available' ? '2 Open' : 'Busy'}</span>
+                <div className="relative group flex items-center gap-1.5 text-[0.65rem] font-sans font-semibold text-text-primary bg-white/5 border border-white/10 rounded-full px-2 py-0.5 select-none shrink-0 cursor-pointer">
+                  <div className="flex w-5 h-1.5 rounded-full overflow-hidden shrink-0 border border-white/10">
+                    {partitions.map((val, idx) => {
+                      const styleInfo = getSegmentStyle(val);
+                      return (
+                        <span 
+                          key={idx}
+                          className={`flex-1 h-full ${styleInfo.className}`}
+                          style={styleInfo.style}
+                        />
+                      );
+                    })}
+                  </div>
+                  <span>{openCount} Slots Open</span>
+                  
+                  {/* Tooltip */}
+                  <div className="absolute top-full mt-2 right-0 bg-neutral-900 border border-neutral-800/80 px-3 py-2.5 rounded-xl text-[10px] font-mono text-neutral-400 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 shadow-2xl whitespace-nowrap z-50 text-left flex flex-col gap-1">
+                    <div className="font-sans font-normal text-white border-b border-neutral-800 pb-1 mb-0.5">Status Details</div>
+                    <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#c6ff34' }} />{openCount} Open Slot{openCount !== 1 ? 's' : ''}</div>
+                    <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#FE7F2D' }} />{workingCount} Working</div>
+                    <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#AC58E9' }} />{campusCount} Campus/Org</div>
+                    <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#6CCFF6' }} />{meCount} Me Time</div>
+                  </div>
                 </div>
                 <div className="text-[0.65rem] font-sans font-semibold text-text-primary bg-white/5 border border-white/10 rounded-full px-2 py-0.5 select-none">
                   {time}
@@ -245,14 +289,34 @@ export default function Header({ availabilityStatus = 'available' }) {
               </div>
 
               {/* Availability status badge */}
-              <div className="flex flex-col items-end text-[0.75rem] select-none max-md:hidden">
+              <div className="relative group flex flex-col items-end text-[0.75rem] select-none max-md:hidden cursor-pointer">
                 <span className="font-sans font-semibold text-text-primary flex items-center gap-1.5 tracking-[-0.02em] leading-tight">
-                  <span className="pulse-dot status-available shrink-0"></span>
-                  2 Slots Open
+                  <div className="flex w-7 h-2 rounded-full overflow-hidden shrink-0 border border-white/10">
+                    {partitions.map((val, idx) => {
+                      const styleInfo = getSegmentStyle(val);
+                      return (
+                        <span 
+                          key={idx}
+                          className={`flex-1 h-full ${styleInfo.className}`}
+                          style={styleInfo.style}
+                        />
+                      );
+                    })}
+                  </div>
+                  <span>{openCount} Slots Open</span>
                 </span>
                 <span className="font-mono text-text-muted text-[0.65rem] tracking-[0.06em] leading-none mt-1 uppercase">
                   for {new Date().toLocaleString('en-US', { month: 'long' })}
                 </span>
+
+                {/* Tooltip */}
+                <div className="absolute top-full mt-2 right-0 bg-neutral-900 border border-neutral-800/80 px-3 py-2.5 rounded-xl text-[10px] font-mono text-neutral-400 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 shadow-2xl whitespace-nowrap z-50 text-left flex flex-col gap-1">
+                  <div className="font-sans font-normal text-white border-b border-neutral-800 pb-1 mb-0.5">Status Details</div>
+                  <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#c6ff34' }} />{openCount} Open Slot{openCount !== 1 ? 's' : ''}</div>
+                  <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#FE7F2D' }} />{workingCount} Working</div>
+                  <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#AC58E9' }} />{campusCount} Campus/Org</div>
+                  <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#6CCFF6' }} />{meCount} Me Time</div>
+                </div>
               </div>
 
               {/* Timezone clock */}
@@ -434,11 +498,33 @@ export default function Header({ availabilityStatus = 'available' }) {
             }}
           >
             {/* Availability status badge */}
-            <div className="flex items-center gap-1.5 select-none shrink-0">
-              <span className="pulse-dot status-available shrink-0"></span>
+            <div className="relative group flex items-center gap-2 select-none shrink-0 cursor-pointer">
+              <div className="flex w-6 h-1.5 rounded-full overflow-hidden shrink-0 border border-white/10">
+                {partitions.map((val, idx) => {
+                  const styleInfo = getSegmentStyle(val);
+                  return (
+                    <span 
+                      key={idx}
+                      className={`flex-1 h-full ${styleInfo.className}`}
+                      style={styleInfo.style}
+                    />
+                  );
+                })}
+              </div>
               <div className="flex flex-col text-left">
-                <span className="font-sans font-semibold text-text-primary text-[0.75rem] leading-none">2 Slots Open</span>
+                <span className="font-sans font-semibold text-text-primary text-[0.75rem] leading-none">
+                  {openCount} Slots Open
+                </span>
                 <span className="font-mono text-text-muted text-[0.6rem] tracking-[0.04em] uppercase mt-1">for {new Date().toLocaleString('en-US', { month: 'short' })}</span>
+              </div>
+
+              {/* Tooltip */}
+              <div className="absolute bottom-full mb-2 left-0 bg-neutral-900 border border-neutral-800/80 px-3 py-2.5 rounded-xl text-[10px] font-mono text-neutral-400 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 shadow-2xl whitespace-nowrap z-50 text-left flex flex-col gap-1">
+                <div className="font-sans font-normal text-white border-b border-neutral-800 pb-1 mb-0.5">Status Details</div>
+                <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#c6ff34' }} />{openCount} Open Slot{openCount !== 1 ? 's' : ''}</div>
+                <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#FE7F2D' }} />{workingCount} Working</div>
+                <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#AC58E9' }} />{campusCount} Campus/Org</div>
+                <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#6CCFF6' }} />{meCount} Me Time</div>
               </div>
             </div>
 

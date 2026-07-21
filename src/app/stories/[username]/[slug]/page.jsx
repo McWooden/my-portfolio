@@ -9,7 +9,32 @@ import Header from '../../../../components/Utils/Header';
 import Footer from '../../../../components/Utils/Footer';
 import ProgressBar from '../../../../components/Utils/ProgressBar';
 import { FiArrowLeft } from 'react-icons/fi';
+import { PiHandsClappingFill, PiHandsClappingLight } from 'react-icons/pi';
 import { preventOrphans } from '../../../../utils/text';
+
+const isSubtitleDuplicate = (subtitle, content) => {
+  if (!subtitle || !content) return false;
+  const match = content.match(/<p[^>]*>([\s\S]*?)<\/p>/i);
+  if (!match) return false;
+  const firstParaText = match[1]
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lh;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .trim();
+  return firstParaText === subtitle.trim();
+};
+
+const getReadTime = (htmlContent) => {
+  if (!htmlContent) return '1 min read';
+  const text = htmlContent.replace(/<[^>]*>/g, '');
+  const words = text.trim().split(/\s+/).length;
+  const readTime = Math.ceil(words / 200);
+  return `${readTime} min read`;
+};
 
 export default function StoryDetailPage({ params }) {
   const containerRef = useRef(null);
@@ -20,6 +45,42 @@ export default function StoryDetailPage({ params }) {
   const [clapping, setClapping] = useState(false);
   const [localClaps, setLocalClaps] = useState(0);
   const [userClaps, setUserClaps] = useState(0);
+  const [isClapPopping, setIsClapPopping] = useState(false);
+  const [showPlus, setShowPlus] = useState(false);
+
+  const clapIntervalRef = useRef(null);
+  const plusTimeoutRef = useRef(null);
+  const userRef = useRef(user);
+  const localClapsRef = useRef(localClaps);
+  const userClapsRef = useRef(userClaps);
+  const storyRef = useRef(story);
+
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
+
+  useEffect(() => {
+    localClapsRef.current = localClaps;
+  }, [localClaps]);
+
+  useEffect(() => {
+    userClapsRef.current = userClaps;
+  }, [userClaps]);
+
+  useEffect(() => {
+    storyRef.current = story;
+  }, [story]);
+
+  useEffect(() => {
+    return () => {
+      if (clapIntervalRef.current) {
+        clearInterval(clapIntervalRef.current);
+      }
+      if (plusTimeoutRef.current) {
+        clearTimeout(plusTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -84,33 +145,24 @@ export default function StoryDetailPage({ params }) {
     fetchStory();
   }, [unwrappedParams]);
 
-  const handleClap = async () => {
-    if (!user) {
-      alert('Please log in to clap!');
-      return;
-    }
-    if (userClaps >= 50) {
-      alert('You have reached the maximum of 50 claps for this story.');
-      return;
-    }
-    if (clapping) return;
+  const saveClapsToDatabase = async () => {
+    const finalLocalClaps = localClapsRef.current;
+    const finalUserClaps = userClapsRef.current;
+    const currentUser = userRef.current;
+    const currentStory = storyRef.current;
 
-    setClapping(true);
-    const newClaps = localClaps + 1;
-    const newUserClaps = userClaps + 1;
-    setLocalClaps(newClaps);
-    setUserClaps(newUserClaps);
+    if (!currentUser || !currentStory) return;
 
     try {
       const updatedClapsByUser = {
-        ...(story.claps_by_user || {}),
-        [user.id]: newUserClaps
+        ...(currentStory.claps_by_user || {}),
+        [currentUser.id]: finalUserClaps
       };
 
       const updatedMeta = {
-        claps: newClaps,
+        claps: finalLocalClaps,
         claps_by_user: updatedClapsByUser,
-        author: story.author
+        author: currentStory.author
       };
 
       const { error } = await supabase
@@ -118,16 +170,64 @@ export default function StoryDetailPage({ params }) {
         .update({
           testimonial_company: JSON.stringify(updatedMeta)
         })
-        .eq('id', story.id);
+        .eq('id', currentStory.id);
 
       if (error) throw error;
     } catch (err) {
-      console.error('Failed to update clap:', err);
-      // rollback
-      setLocalClaps(localClaps);
-      setUserClaps(userClaps);
-    } finally {
-      setClapping(false);
+      console.error('Failed to update clap in database:', err);
+    }
+  };
+
+  const startClapping = () => {
+    if (!userRef.current) {
+      alert('Please log in to clap!');
+      return;
+    }
+
+    if (userClapsRef.current >= 50) {
+      alert('You have reached the maximum of 50 claps for this story.');
+      return;
+    }
+
+    // Do one immediate clap
+    incrementClap();
+
+    // Start interval for rapid claps
+    clapIntervalRef.current = setInterval(() => {
+      if (userClapsRef.current >= 50) {
+        stopClapping();
+        alert('You have reached the maximum of 50 claps for this story.');
+        return;
+      }
+      incrementClap();
+    }, 300);
+  };
+
+  const incrementClap = () => {
+    const nextLocal = localClapsRef.current + 1;
+    const nextUser = userClapsRef.current + 1;
+
+    setLocalClaps(nextLocal);
+    setUserClaps(nextUser);
+
+    setIsClapPopping(true);
+    setTimeout(() => setIsClapPopping(false), 200);
+
+    // Show "+" sign next to count and hide it 3 seconds after the last action
+    setShowPlus(true);
+    if (plusTimeoutRef.current) {
+      clearTimeout(plusTimeoutRef.current);
+    }
+    plusTimeoutRef.current = setTimeout(() => {
+      setShowPlus(false);
+    }, 3000);
+  };
+
+  const stopClapping = () => {
+    if (clapIntervalRef.current) {
+      clearInterval(clapIntervalRef.current);
+      clapIntervalRef.current = null;
+      saveClapsToDatabase();
     }
   };
 
@@ -242,14 +342,14 @@ export default function StoryDetailPage({ params }) {
           </Link>
 
           {/* Article Header */}
-          <header className="mb-10 pb-8 border-b border-neutral-900">
+          <header className="mb-0 pb-6">
             <div className="flex items-center gap-3 font-mono text-xs text-accent mb-4 uppercase tracking-widest">
               <span>{story.category || 'Story'}</span>
             </div>
             <h1 className="text-[2.2rem] md:text-[3.2rem] font-bold leading-tight text-white mb-4 tracking-tight">
               {story.title}
             </h1>
-            {story.subtitle && (
+            {story.subtitle && !isSubtitleDuplicate(story.subtitle, story.content) && (
               <p className="text-lg md:text-xl text-neutral-400 leading-normal font-light mb-6">
                 {story.subtitle}
               </p>
@@ -264,23 +364,62 @@ export default function StoryDetailPage({ params }) {
                   <div className="w-full h-full flex items-center justify-center text-sm text-neutral-600">👤</div>
                 )}
               </div>
-              <div className="flex flex-col">
-                <span className="text-sm font-semibold text-neutral-200">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-neutral-400">
+                <span className="font-semibold text-neutral-200 hover:text-white transition-colors">
                   {story.author?.name || 'Huddin'}
                 </span>
-                <span className="text-xs text-neutral-500 font-mono">
-                  {formatDate(story.date)}
-                </span>
+                <span className="text-neutral-700 font-mono">·</span>
+                <span className="font-mono text-neutral-400">{getReadTime(story.content)}</span>
+                <span className="text-neutral-700 font-mono">·</span>
+                <span className="font-mono text-neutral-400">{formatDate(story.date)}</span>
               </div>
             </div>
           </header>
 
-          {/* Cover image */}
-          {story.coverImage && (
-            <div className="w-full rounded-[30px] overflow-hidden border border-neutral-900 mb-10 shadow-2xl aspect-[1.8]">
-              <img src={story.coverImage} alt={story.title} className="w-full h-full object-cover" />
+          {/* Interaction Bar */}
+          <div className="py-3.5 flex justify-between items-center text-neutral-500 text-sm mb-10">
+            {/* Left side actions */}
+            <div className="flex items-center gap-5">
+              {/* Claps */}
+              <button 
+                onMouseDown={startClapping}
+                onMouseUp={stopClapping}
+                onMouseLeave={stopClapping}
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  startClapping();
+                }}
+                onTouchEnd={stopClapping}
+                className="flex items-center gap-2 hover:text-neutral-350 transition-colors group cursor-pointer select-none"
+                title="Clap (Hold to add more)"
+              >
+                {userClaps > 0 ? (
+                  <PiHandsClappingFill className="w-[18px] h-[18px] text-neutral-400 group-hover:text-white transition-colors shrink-0" />
+                ) : (
+                  <PiHandsClappingLight className="w-[18px] h-[18px] text-neutral-400 group-hover:text-white transition-colors shrink-0" />
+                )}
+                <span className={`text-xs font-mono font-medium text-neutral-400 group-hover:text-white transition-colors inline-block ${isClapPopping ? 'animate-emoji-pop' : ''}`}>
+                  {showPlus ? '+' : ''}{localClaps}
+                </span>
+              </button>
             </div>
-          )}
+
+            {/* Right side actions */}
+            <div className="flex items-center gap-4">
+              {/* Share */}
+              <button className="hover:text-neutral-350 transition-colors cursor-pointer" title="Share">
+                <svg className="w-[18px] h-[18px] stroke-current fill-none stroke-[1.5]" viewBox="0 0 24 24">
+                  <circle cx="18" cy="5" r="3" />
+                  <circle cx="6" cy="12" r="3" />
+                  <circle cx="18" cy="19" r="3" />
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+
 
           {/* Article Content */}
           <article className={`prose prose-invert max-w-none text-[1.125rem] leading-[1.7] text-neutral-300 mb-16 ${story.isPremium ? 'paywall' : ''}`}>
@@ -290,24 +429,46 @@ export default function StoryDetailPage({ params }) {
             />
           </article>
 
-          {/* Bottom clap section */}
-          <div className="flex flex-col items-center justify-center gap-4 py-8 border-t border-b border-neutral-900 bg-neutral-950/20 rounded-3xl p-6">
-            <span className="text-xs text-neutral-400 font-mono">
-              Clap for this story to show support
-            </span>
-            <button
-              onClick={handleClap}
-              className="w-16 h-16 bg-neutral-900 hover:bg-neutral-850 border border-neutral-800 hover:border-neutral-700 rounded-full flex flex-col items-center justify-center shadow-lg transition-all active:scale-95 text-xl cursor-pointer"
-            >
-              👏
-            </button>
-            <div className="flex flex-col items-center">
-              <span className="text-base font-mono font-bold text-white">{localClaps} claps</span>
-              {user && (
-                <span className="text-[10px] text-neutral-500 font-mono mt-1">
-                  You clapped {userClaps}/50 times
+          {/* Bottom Interaction Bar */}
+          <div className="py-3.5 flex justify-between items-center text-neutral-500 text-sm mb-10">
+            {/* Left side actions */}
+            <div className="flex items-center gap-5">
+              {/* Claps */}
+              <button 
+                onMouseDown={startClapping}
+                onMouseUp={stopClapping}
+                onMouseLeave={stopClapping}
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  startClapping();
+                }}
+                onTouchEnd={stopClapping}
+                className="flex items-center gap-2 hover:text-neutral-350 transition-colors group cursor-pointer select-none"
+                title="Clap (Hold to add more)"
+              >
+                {userClaps > 0 ? (
+                  <PiHandsClappingFill className="w-[18px] h-[18px] text-neutral-400 group-hover:text-white transition-colors shrink-0" />
+                ) : (
+                  <PiHandsClappingLight className="w-[18px] h-[18px] text-neutral-400 group-hover:text-white transition-colors shrink-0" />
+                )}
+                <span className={`text-xs font-mono font-medium text-neutral-400 group-hover:text-white transition-colors inline-block ${isClapPopping ? 'animate-emoji-pop' : ''}`}>
+                  {showPlus ? '+' : ''}{localClaps}
                 </span>
-              )}
+              </button>
+            </div>
+
+            {/* Right side actions */}
+            <div className="flex items-center gap-4">
+              {/* Share */}
+              <button className="hover:text-neutral-350 transition-colors cursor-pointer" title="Share">
+                <svg className="w-[18px] h-[18px] stroke-current fill-none stroke-[1.5]" viewBox="0 0 24 24">
+                  <circle cx="18" cy="5" r="3" />
+                  <circle cx="6" cy="12" r="3" />
+                  <circle cx="18" cy="19" r="3" />
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                </svg>
+              </button>
             </div>
           </div>
 

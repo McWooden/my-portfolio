@@ -21,10 +21,33 @@ export default async function Page() {
   const allProjects = allStories.filter(s => s.type === 'project');
   const allBlogs = allStories.filter(s => s.type === 'blog');
 
+  // 1.5 Fetch homepage settings from Supabase
+  const { data: settingsData, error: settingsError } = await supabase
+    .from('site_settings')
+    .select('value')
+    .eq('key', 'homepage')
+    .single();
+
+  if (settingsError && settingsError.code !== 'PGRST116') {
+    console.error('Error fetching homepage settings:', settingsError);
+  }
+
+  const homepageSettings = settingsData?.value || {};
+  let partitions = homepageSettings.partitions;
+  if (!partitions || !Array.isArray(partitions)) {
+    partitions = [];
+    const openCount = Number(homepageSettings.openSlots) ?? 2;
+    const isWorking = homepageSettings.status === 'working' || homepageSettings.status === 'busy';
+    for (let i = 0; i < 4; i++) {
+      if (i < openCount) partitions.push('open');
+      else if (isWorking) partitions.push('working');
+      else partitions.push('campus');
+    }
+  }
+
   // Fallback / homepageData configuration
   const homepageData = {
-    status: 'available',
-    openSlots: 2,
+    partitions,
     heroTestimonialProject: 'onyx-skincare',
     featuredProjects: [],
     featuredBlogs: []
@@ -44,12 +67,17 @@ export default async function Page() {
     };
   }
 
-  // 3. Filter featured projects: projects marked as featured, or first 4
-  const featured = allProjects.filter(p => p.featured);
+  // 3. Filter featured projects: projects marked as featured (sorted by featured_order), or first 4
+  const featured = allProjects
+    .filter(p => p.featured)
+    .sort((a, b) => (a.featured_order ?? 999) - (b.featured_order ?? 999));
   const projectsData = featured.length > 0 ? featured : allProjects.slice(0, 4);
 
-  // 4. Filter featured blogs: first 4 blog posts
-  const blogsData = allBlogs.slice(0, 4);
+  // 4. Filter featured blogs: blogs marked as featured (sorted by featured_order), or first 4
+  const featuredBlogsList = allBlogs
+    .filter(b => b.featured)
+    .sort((a, b) => (a.featured_order ?? 999) - (b.featured_order ?? 999));
+  const blogsData = featuredBlogsList.length > 0 ? featuredBlogsList : allBlogs.slice(0, 4);
 
   // 5. Sort FAQs
   const faqsData = [...staticFaqs].sort((a, b) => (a.number || '').localeCompare(b.number || ''));

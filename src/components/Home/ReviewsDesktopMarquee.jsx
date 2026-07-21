@@ -113,13 +113,13 @@ export default function ReviewsDesktopMarquee({ reviews = staticReviews }) {
       {/* Left Edge Hotspot (Rewind) */}
       <div
         onClick={() => triggerSpeedChange('backward')}
-        className="absolute left-0 top-0 bottom-0 w-[15%] z-20 cursor-pointer bg-gradient-to-r from-[#1a1a1a] via-[#1a1a1a]/30 to-transparent transition-all select-none duration-200"
+        className="absolute left-0 top-0 bottom-0 w-[15%] z-20 cursor-pointer bg-gradient-to-r from-bg-dark via-bg-dark/30 to-transparent transition-all select-none duration-200"
       />
 
       {/* Right Edge Hotspot (Fast Forward) */}
       <div
         onClick={() => triggerSpeedChange('forward')}
-        className="absolute right-0 top-0 bottom-0 w-[15%] z-20 cursor-pointer bg-gradient-to-l from-[#1a1a1a] via-[#1a1a1a]/30 to-transparent transition-all select-none duration-200"
+        className="absolute right-0 top-0 bottom-0 w-[15%] z-20 cursor-pointer bg-gradient-to-l from-bg-dark via-bg-dark/30 to-transparent transition-all select-none duration-200"
       />
 
       {/* Ticker Track */}

@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import ProjectDetail from '../../../../views/ProjectDetail';
 import { supabase, mapStory } from '../../../../utils/supabase';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;

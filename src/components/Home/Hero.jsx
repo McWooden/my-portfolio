@@ -1,6 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from 'react';
-import Button from '../Utils/Button';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import HeroVisual from './HeroVisual';
 import Ticker from '../Utils/Ticker';
 import Marquee from '../Utils/Marquee';
@@ -10,6 +9,7 @@ import { SiSololearn } from 'react-icons/si';
 import { LiaFreeCodeCamp } from 'react-icons/lia';
 import { HiMiniCodeBracket } from 'react-icons/hi2';
 import { IoPlay, IoPause } from 'react-icons/io5';
+import { useClickOutside } from '../../hooks/useClickOutside';
 
 function CursorCard({ triggerText, children, imageSrc }) {
   const [hovered, setHovered] = useState(false);
@@ -106,27 +106,11 @@ export default function Hero({ homepageData, testimonialCard }) {
   const [showTrustedTooltip, setShowTrustedTooltip] = useState(false);
   const trustedTooltipRef = useRef(null);
 
-  // Close tooltip when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (youtubeTooltipRef.current && !youtubeTooltipRef.current.contains(event.target)) {
-        setShowTooltip(false);
-      }
-      if (trustedTooltipRef.current && !trustedTooltipRef.current.contains(event.target)) {
-        setShowTrustedTooltip(false);
-      }
-    };
-
-    if (showTooltip || showTrustedTooltip) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('touchstart', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
-    };
-  }, [showTooltip, showTrustedTooltip]);
+  // Close tooltips when clicking outside (shared hook)
+  const closeYoutubeTooltip = useCallback(() => setShowTooltip(false), []);
+  const closeTrustedTooltip = useCallback(() => setShowTrustedTooltip(false), []);
+  useClickOutside(youtubeTooltipRef, closeYoutubeTooltip, showTooltip);
+  useClickOutside(trustedTooltipRef, closeTrustedTooltip, showTrustedTooltip);
 
   // Load YT Player script
   useEffect(() => {
@@ -311,7 +295,6 @@ export default function Hero({ homepageData, testimonialCard }) {
     };
 
     let lastWidth = window.innerWidth;
-    let lastHeight = window.innerHeight;
     setViewportHeight(window.innerHeight);
     setIsMobileDevice(checkMobile());
 
@@ -325,12 +308,10 @@ export default function Hero({ homepageData, testimonialCard }) {
         if (currentWidth !== lastWidth) {
           setViewportHeight(currentHeight);
           lastWidth = currentWidth;
-          lastHeight = currentHeight;
         }
       } else {
         setViewportHeight(currentHeight);
         lastWidth = currentWidth;
-        lastHeight = currentHeight;
       }
     };
 
@@ -552,10 +533,9 @@ export default function Hero({ homepageData, testimonialCard }) {
 
 
 
-  const jobs = ["Full-Stack Developer", "UX Designer", "Freelancer", "Research", "Analysist", "Philosopher", "The Leader", "The Sage", "Hi!", "Hello!", "Welcome!"];
+  const jobs = ["Full-Stack Developer", "UX Designer", "Freelancer", "Research", "Analyst", "Philosopher", "The Leader", "The Sage", "Hi!", "Hello!", "Welcome!"];
   const [jobIndex, setJobIndex] = useState(0);
   const [isRolling, setIsRolling] = useState(false);
-  const [speed, setSpeed] = useState(400);
 
   const rollJob = () => {
     if (isRolling) return;
@@ -580,7 +560,7 @@ export default function Hero({ homepageData, testimonialCard }) {
       currentStep++;
       currentTempIndex = (currentTempIndex + 1) % jobs.length;
 
-      setSpeed(speeds[currentStep - 1] || 300);
+      // Speed used for visual pacing reference only
 
       if (currentStep === steps) {
         setJobIndex(targetIndex);
@@ -597,16 +577,6 @@ export default function Hero({ homepageData, testimonialCard }) {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: `
-        html, body {
-          scrollbar-width: none !important;
-        }
-        ::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          height: 0 !important;
-        }
-      `}} />
       <section
         ref={containerRef}
         id="hero"
@@ -738,32 +708,6 @@ export default function Hero({ homepageData, testimonialCard }) {
                     ))}
                 </p>
               </div>
-
-              {/* Spotify embed commented out as requested */}
-              {/*
-              <div className={`shrink-0 select-none relative overflow-hidden ${
-                isMobileDevice 
-                  ? "w-[112px] h-[141px] order-1 self-end" 
-                  : "w-[140px] h-[176px] order-2 self-auto"
-              }`}>
-                <iframe 
-                  data-testid="embed-iframe" 
-                  style={{ 
-                    borderRadius: "12px",
-                    transform: isMobileDevice ? "scale(0.4)" : "scale(0.5)",
-                    transformOrigin: "top left",
-                    width: "280px",
-                    height: "352px",
-                    border: 0
-                  }} 
-                  src="https://open.spotify.com/embed/track/0fBEsqcT3oMfhEGtJxEZxK?utm_source=generator&theme=0&si=dc61b0ff8126424b" 
-                  frameBorder="0" 
-                  allowFullScreen="" 
-                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
-                  loading="lazy"
-                ></iframe>
-              </div>
-              */}
 
               {/* YouTube Polaroid style embed */}
               <motion.div

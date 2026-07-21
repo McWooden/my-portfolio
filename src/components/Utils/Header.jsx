@@ -1,42 +1,22 @@
 "use client";
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { SiGithub, SiMedium } from 'react-icons/si';
 import { FaLinkedinIn } from "react-icons/fa";
 import { RxDoubleArrowUp } from 'react-icons/rx';
 import { navigationMenu } from '../../data/siteData';
-import { supabase } from '../../utils/supabase';
+import { useSession } from '../../hooks/useSession';
+import { useClickOutside } from '../../hooks/useClickOutside';
+import PartitionBar from './PartitionBar';
+import StatusTooltip from './StatusTooltip';
 
 export default function Header({ partitions = ['open', 'open', 'working', 'campus'] }) {
-  const getSummaryText = (parts) => {
-    const openCount = parts.filter(p => p === 'open').length;
-    const workingCount = parts.filter(p => p === 'working').length;
-    const campusCount = parts.filter(p => p === 'campus').length;
-    const meCount = parts.filter(p => p === 'me').length;
-    
-    const segments = [];
-    if (openCount > 0) segments.push(`${openCount} Open`);
-    if (workingCount > 0) segments.push(`${workingCount} Working`);
-    if (campusCount > 0) segments.push(`${campusCount} Campus`);
-    if (meCount > 0) segments.push(`${meCount} Me Time`);
-    
-    return segments.length > 0 ? segments.join(' • ') : 'Busy';
-  };
   const pathname = usePathname();
   const openCount = partitions.filter(p => p === 'open').length;
-  const meCount = partitions.filter(p => p === 'me').length;
-  const workingCount = partitions.filter(p => p === 'working').length;
-  const campusCount = partitions.filter(p => p === 'campus').length;
-  const getSegmentStyle = (val) => {
-    if (val === 'open') return { className: '', style: { backgroundColor: '#c6ff34' } };
-    if (val === 'me') return { className: '', style: { backgroundColor: '#6CCFF6' } };
-    if (val === 'working') return { className: '', style: { backgroundColor: '#FE7F2D' } };
-    return { className: '', style: { backgroundColor: '#AC58E9' } };
-  };
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isBrandMenuOpen, setIsBrandMenuOpen] = useState(false);
-  const [session, setSession] = useState(null);
+  const session = useSession();
   const headerRef = useRef(null);
   const brandMenuRef = useRef(null);
   const [time, setTime] = useState('');
@@ -72,43 +52,14 @@ export default function Header({ partitions = ['open', 'open', 'working', 'campu
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
+  // Click-outside handlers using shared hook
+  const handleHeaderClickOutside = useCallback(() => setIsMenuOpen(false), []);
+  const handleBrandClickOutside = useCallback(() => setIsBrandMenuOpen(false), []);
+  const handleMapClickOutside = useCallback(() => setShowMapTooltip(false), []);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (headerRef.current && !headerRef.current.contains(event.target)) {
-        setIsMenuOpen(false);
-      }
-      if (brandMenuRef.current && !brandMenuRef.current.contains(event.target)) {
-        setIsBrandMenuOpen(false);
-      }
-      if (mapTooltipRef.current && !mapTooltipRef.current.contains(event.target)) {
-        setShowMapTooltip(false);
-      }
-    };
-
-    if (isMenuOpen || isBrandMenuOpen || showMapTooltip) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('touchstart', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
-    };
-  }, [isMenuOpen, isBrandMenuOpen, showMapTooltip]);
+  useClickOutside(headerRef, handleHeaderClickOutside, isMenuOpen);
+  useClickOutside(brandMenuRef, handleBrandClickOutside, isBrandMenuOpen);
+  useClickOutside(mapTooltipRef, handleMapClickOutside, showMapTooltip);
 
   const handleContactClick = (e) => {
     e.preventDefault();
@@ -249,28 +200,11 @@ export default function Header({ partitions = ['open', 'open', 'working', 'campu
                   </button>
                 )}
                 <div className="relative group flex items-center gap-1.5 text-[0.65rem] font-sans font-semibold text-text-primary bg-white/5 border border-white/10 rounded-full px-2 py-0.5 select-none shrink-0 cursor-pointer">
-                  <div className="flex w-5 h-1.5 rounded-full overflow-hidden shrink-0 border border-white/10">
-                    {partitions.map((val, idx) => {
-                      const styleInfo = getSegmentStyle(val);
-                      return (
-                        <span 
-                          key={idx}
-                          className={`flex-1 h-full ${styleInfo.className}`}
-                          style={styleInfo.style}
-                        />
-                      );
-                    })}
-                  </div>
+                  <PartitionBar partitions={partitions} className="w-5 h-1.5" />
                   <span>{openCount} Slots Open</span>
                   
                   {/* Tooltip */}
-                  <div className="absolute top-full mt-2 right-0 bg-neutral-900 border border-neutral-800/80 px-3 py-2.5 rounded-xl text-[10px] font-mono text-neutral-400 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 shadow-2xl whitespace-nowrap z-50 text-left flex flex-col gap-1">
-                    <div className="font-sans font-normal text-white border-b border-neutral-800 pb-1 mb-0.5">Status Details</div>
-                    <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#c6ff34' }} />{openCount} Open Slot{openCount !== 1 ? 's' : ''}</div>
-                    <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#FE7F2D' }} />{workingCount} Working</div>
-                    <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#AC58E9' }} />{campusCount} Campus/Org</div>
-                    <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#6CCFF6' }} />{meCount} Me Time</div>
-                  </div>
+                  <StatusTooltip partitions={partitions} className="top-full mt-2 right-0" />
                 </div>
                 <div className="text-[0.65rem] font-sans font-semibold text-text-primary bg-white/5 border border-white/10 rounded-full px-2 py-0.5 select-none">
                   {time}
@@ -291,18 +225,7 @@ export default function Header({ partitions = ['open', 'open', 'working', 'campu
               {/* Availability status badge */}
               <div className="relative group flex flex-col items-end text-[0.75rem] select-none max-md:hidden cursor-pointer">
                 <span className="font-sans font-semibold text-text-primary flex items-center gap-1.5 tracking-[-0.02em] leading-tight">
-                  <div className="flex w-7 h-2 rounded-full overflow-hidden shrink-0 border border-white/10">
-                    {partitions.map((val, idx) => {
-                      const styleInfo = getSegmentStyle(val);
-                      return (
-                        <span 
-                          key={idx}
-                          className={`flex-1 h-full ${styleInfo.className}`}
-                          style={styleInfo.style}
-                        />
-                      );
-                    })}
-                  </div>
+                  <PartitionBar partitions={partitions} className="w-7 h-2" />
                   <span>{openCount} Slots Open</span>
                 </span>
                 <span className="font-mono text-text-muted text-[0.65rem] tracking-[0.06em] leading-none mt-1 uppercase">
@@ -310,13 +233,7 @@ export default function Header({ partitions = ['open', 'open', 'working', 'campu
                 </span>
 
                 {/* Tooltip */}
-                <div className="absolute top-full mt-2 right-0 bg-neutral-900 border border-neutral-800/80 px-3 py-2.5 rounded-xl text-[10px] font-mono text-neutral-400 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 shadow-2xl whitespace-nowrap z-50 text-left flex flex-col gap-1">
-                  <div className="font-sans font-normal text-white border-b border-neutral-800 pb-1 mb-0.5">Status Details</div>
-                  <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#c6ff34' }} />{openCount} Open Slot{openCount !== 1 ? 's' : ''}</div>
-                  <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#FE7F2D' }} />{workingCount} Working</div>
-                  <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#AC58E9' }} />{campusCount} Campus/Org</div>
-                  <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#6CCFF6' }} />{meCount} Me Time</div>
-                </div>
+                <StatusTooltip partitions={partitions} className="top-full mt-2 right-0" />
               </div>
 
               {/* Timezone clock */}
@@ -475,13 +392,13 @@ export default function Header({ partitions = ['open', 'open', 'working', 'campu
             </a>
             
             <div className="flex gap-4 items-center">
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors" aria-label="GitHub">
+              <a href="https://github.com/McWooden" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors" aria-label="GitHub">
                 <SiGithub className="w-5 h-5" />
               </a>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors" aria-label="LinkedIn">
+              <a href="https://linkedin.com/in/sholahuddin-ahmad" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors" aria-label="LinkedIn">
                 <FaLinkedinIn className="w-5 h-5" />
               </a>
-              <a href="https://medium.com" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors" aria-label="Medium">
+              <a href="https://medium.com/@halohuddin" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors" aria-label="Medium">
                 <SiMedium className="w-5 h-5" />
               </a>
             </div>
@@ -499,18 +416,7 @@ export default function Header({ partitions = ['open', 'open', 'working', 'campu
           >
             {/* Availability status badge */}
             <div className="relative group flex items-center gap-2 select-none shrink-0 cursor-pointer">
-              <div className="flex w-6 h-1.5 rounded-full overflow-hidden shrink-0 border border-white/10">
-                {partitions.map((val, idx) => {
-                  const styleInfo = getSegmentStyle(val);
-                  return (
-                    <span 
-                      key={idx}
-                      className={`flex-1 h-full ${styleInfo.className}`}
-                      style={styleInfo.style}
-                    />
-                  );
-                })}
-              </div>
+              <PartitionBar partitions={partitions} className="w-6 h-1.5" />
               <div className="flex flex-col text-left">
                 <span className="font-sans font-semibold text-text-primary text-[0.75rem] leading-none">
                   {openCount} Slots Open
@@ -519,13 +425,7 @@ export default function Header({ partitions = ['open', 'open', 'working', 'campu
               </div>
 
               {/* Tooltip */}
-              <div className="absolute bottom-full mb-2 left-0 bg-neutral-900 border border-neutral-800/80 px-3 py-2.5 rounded-xl text-[10px] font-mono text-neutral-400 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 shadow-2xl whitespace-nowrap z-50 text-left flex flex-col gap-1">
-                <div className="font-sans font-normal text-white border-b border-neutral-800 pb-1 mb-0.5">Status Details</div>
-                <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#c6ff34' }} />{openCount} Open Slot{openCount !== 1 ? 's' : ''}</div>
-                <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#FE7F2D' }} />{workingCount} Working</div>
-                <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#AC58E9' }} />{campusCount} Campus/Org</div>
-                <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#6CCFF6' }} />{meCount} Me Time</div>
-              </div>
+              <StatusTooltip partitions={partitions} className="bottom-full mb-2 left-0 top-auto right-auto" />
             </div>
 
             {/* Timezone clock */}

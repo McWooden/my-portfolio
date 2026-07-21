@@ -139,7 +139,7 @@ export default function ReviewsMobileCarousel({ reviews = staticReviews }) {
               <div className="h-1 bg-white/10 rounded-full w-full overflow-hidden">
                 <div
                   ref={(el) => (progressBarsRef.current[i] = el)}
-                  className="h-full bg-[#E0FF6F]"
+                  className="h-full bg-accent"
                   style={{
                     width: initialWidth,
                   }}

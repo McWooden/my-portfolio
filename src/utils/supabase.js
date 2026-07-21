@@ -14,42 +14,7 @@ export const supabase = createClient(
   supabaseAnonKey || 'placeholder'
 );
 
-export function mapProject(dbProject) {
-  if (!dbProject) return null;
-  return {
-    id: dbProject.id,
-    slug: dbProject.slug,
-    title: dbProject.title,
-    subtitle: dbProject.subtitle,
-    date: dbProject.date,
-    location: dbProject.location,
-    industry: dbProject.industry,
-    featured: dbProject.featured,
-    published: dbProject.published ?? false,
-    coverImage: dbProject.cover_image,
-    testimonial: dbProject.testimonial_quote ? {
-      quote: dbProject.testimonial_quote,
-      author: dbProject.testimonial_author,
-      company: dbProject.testimonial_company
-    } : null,
-    content: dbProject.content
-  };
-}
-
-export function mapBlog(dbBlog) {
-  if (!dbBlog) return null;
-  return {
-    id: dbBlog.id,
-    slug: dbBlog.slug,
-    title: dbBlog.title,
-    subtitle: dbBlog.subtitle,
-    date: dbBlog.date,
-    category: dbBlog.category,
-    published: dbBlog.published ?? false,
-    coverImage: dbBlog.cover_image,
-    content: dbBlog.content
-  };
-}
+// mapProject() and mapBlog() removed — use mapStory() for all story types
 
 export function mapStory(dbStory) {
   if (!dbStory) return null;

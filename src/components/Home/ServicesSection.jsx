@@ -110,7 +110,7 @@ export default function ServicesSection() {
               </div>
             </div>
             <div className="flex flex-col gap-3">
-              <h4 className="text-[26px] font-medium text-[#F2F2F2] tracking-[-1.56px] leading-tight">{item.title}</h4>
+              <h4 className="text-[26px] font-medium text-text-primary tracking-[-1.56px] leading-tight">{item.title}</h4>
               <p className="text-[16px] font-normal text-text-secondary leading-relaxed">{item.description}</p>
             </div>
           </div>

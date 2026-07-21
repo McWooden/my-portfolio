@@ -24,6 +24,8 @@ export default function Header({ partitions = ['open', 'open', 'working', 'campu
   const [isScrolled, setIsScrolled] = useState(false);
   const [showMapTooltip, setShowMapTooltip] = useState(false);
   const mapTooltipRef = useRef(null);
+  const [showStatusTooltip, setShowStatusTooltip] = useState(false);
+  const statusTooltipRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -56,10 +58,12 @@ export default function Header({ partitions = ['open', 'open', 'working', 'campu
   const handleHeaderClickOutside = useCallback(() => setIsMenuOpen(false), []);
   const handleBrandClickOutside = useCallback(() => setIsBrandMenuOpen(false), []);
   const handleMapClickOutside = useCallback(() => setShowMapTooltip(false), []);
+  const handleStatusClickOutside = useCallback(() => setShowStatusTooltip(false), []);
 
   useClickOutside(headerRef, handleHeaderClickOutside, isMenuOpen);
   useClickOutside(brandMenuRef, handleBrandClickOutside, isBrandMenuOpen);
   useClickOutside(mapTooltipRef, handleMapClickOutside, showMapTooltip);
+  useClickOutside(statusTooltipRef, handleStatusClickOutside, showStatusTooltip);
 
   const handleContactClick = (e) => {
     e.preventDefault();
@@ -199,12 +203,18 @@ export default function Header({ partitions = ['open', 'open', 'working', 'campu
                     <RxDoubleArrowUp className="w-3.5 h-3.5" />
                   </button>
                 )}
-                <div className="relative group flex items-center gap-1.5 text-[0.65rem] font-sans font-semibold text-text-primary bg-white/5 border border-white/10 rounded-full px-2 py-0.5 select-none shrink-0 cursor-pointer">
+                <div 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowStatusTooltip(prev => !prev);
+                  }}
+                  className="relative group flex items-center gap-1.5 text-[0.65rem] font-sans font-semibold text-text-primary bg-white/5 border border-white/10 rounded-full px-2 py-0.5 select-none shrink-0 cursor-pointer"
+                >
                   <PartitionBar partitions={partitions} className="w-5 h-1.5" />
                   <span>{openCount} Slots Open</span>
                   
                   {/* Tooltip */}
-                  <StatusTooltip partitions={partitions} className="top-full mt-2 right-0" />
+                  <StatusTooltip partitions={partitions} className="top-full mt-2 right-0" isOpen={showStatusTooltip} />
                 </div>
                 <div className="text-[0.65rem] font-sans font-semibold text-text-primary bg-white/5 border border-white/10 rounded-full px-2 py-0.5 select-none">
                   {time}
@@ -223,7 +233,13 @@ export default function Header({ partitions = ['open', 'open', 'working', 'campu
               </div>
 
               {/* Availability status badge */}
-              <div className="relative group flex flex-col items-end text-[0.75rem] select-none max-md:hidden cursor-pointer">
+              <div 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowStatusTooltip(prev => !prev);
+                }}
+                className="relative group flex flex-col items-end text-[0.75rem] select-none max-md:hidden cursor-pointer"
+              >
                 <span className="font-sans font-semibold text-text-primary flex items-center gap-1.5 tracking-[-0.02em] leading-tight">
                   <PartitionBar partitions={partitions} className="w-7 h-2" />
                   <span>{openCount} Slots Open</span>
@@ -233,7 +249,7 @@ export default function Header({ partitions = ['open', 'open', 'working', 'campu
                 </span>
 
                 {/* Tooltip */}
-                <StatusTooltip partitions={partitions} className="top-full mt-2 right-0" />
+                <StatusTooltip partitions={partitions} className="top-full mt-2 right-0" isOpen={showStatusTooltip} />
               </div>
 
               {/* Timezone clock */}
@@ -415,7 +431,13 @@ export default function Header({ partitions = ['open', 'open', 'working', 'campu
             }}
           >
             {/* Availability status badge */}
-            <div className="relative group flex items-center gap-2 select-none shrink-0 cursor-pointer">
+            <div 
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowStatusTooltip(prev => !prev);
+              }}
+              className="relative group flex items-center gap-2 select-none shrink-0 cursor-pointer"
+            >
               <PartitionBar partitions={partitions} className="w-6 h-1.5" />
               <div className="flex flex-col text-left">
                 <span className="font-sans font-semibold text-text-primary text-[0.75rem] leading-none">
@@ -425,7 +447,7 @@ export default function Header({ partitions = ['open', 'open', 'working', 'campu
               </div>
 
               {/* Tooltip */}
-              <StatusTooltip partitions={partitions} className="bottom-full mb-2 left-0 top-auto right-auto" />
+              <StatusTooltip partitions={partitions} className="bottom-full mb-2 left-0 top-auto right-auto" isOpen={showStatusTooltip} />
             </div>
 
             {/* Timezone clock */}

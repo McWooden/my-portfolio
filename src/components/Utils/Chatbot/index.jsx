@@ -12,7 +12,7 @@ import { useClickOutside } from '../../../hooks/useClickOutside';
 import { useChatbotQuota } from './useChatbotQuota';
 import { getCurrentTask, getSteppedProgress } from './chatbotQuota';
 import { parseCommandOrFaq, getAutoCompleteItems } from './chatbotCommands';
-import { isSensitiveInput } from './chatbotConstants';
+import { isSensitiveInput, RANDOM_REASONS } from './chatbotConstants';
 
 export default function Chatbot() {
   const router = useRouter();

@@ -28,7 +28,7 @@ export async function getHomepageSettings() {
 
   if (!partitions || !Array.isArray(partitions)) {
     partitions = [];
-    const openCount = Number(homepageSettings.openSlots) ?? 2;
+    const openCount = Number(homepageSettings.openSlots) || 2;
     const isWorking = homepageSettings.status === 'working' || homepageSettings.status === 'busy';
     for (let i = 0; i < 4; i++) {
       if (i < openCount) partitions.push('open');

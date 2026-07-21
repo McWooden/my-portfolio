@@ -1,7 +1,9 @@
 import React from 'react';
 import { Inter, DM_Mono, Sedgwick_Ave, Bebas_Neue } from 'next/font/google';
-import InAppBrowserOverlay from '../components/Utils/InAppBrowserOverlay';
+import dynamic from 'next/dynamic';
 import './globals.css';
+
+const InAppBrowserOverlay = dynamic(() => import('../components/Utils/InAppBrowserOverlay'));
 
 const inter = Inter({
   subsets: ['latin'],

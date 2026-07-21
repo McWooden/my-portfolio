@@ -94,8 +94,7 @@ export default function Hero({ homepageData, testimonialCard }) {
   const videoRef = useRef(null);
 
   const [isMobileDevice, setIsMobileDevice] = useState(false);
-  const [mobileVideoState, setMobileVideoState] = useState('image'); // 'image' | 'playing'
-  const [isMobileBgVisible, setIsMobileBgVisible] = useState(true);
+  const [mobileVideoState, setMobileVideoState] = useState('idle'); // 'idle' | 'loading' | 'playing' | 'fading_out'
   const [isScrolledFromTop, setIsScrolledFromTop] = useState(false);
 
   const [musicState, setMusicState] = useState('idle'); // 'idle' | 'loading' | 'playing'
@@ -112,7 +111,7 @@ export default function Hero({ homepageData, testimonialCard }) {
   useClickOutside(youtubeTooltipRef, closeYoutubeTooltip, showTooltip);
   useClickOutside(trustedTooltipRef, closeTrustedTooltip, showTrustedTooltip);
 
-  // Load YT Player script
+  // YouTube player state tracking timer
   useEffect(() => {
     console.log(
       "%c[YouTube Embed] Note: If you see net::ERR_BLOCKED_BY_CLIENT errors in the console, " +
@@ -120,16 +119,6 @@ export default function Hero({ homepageData, testimonialCard }) {
       "The player functions normally.",
       "color: #ff0000; font-weight: bold;"
     );
-    if (!window.YT) {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      if (firstScriptTag && firstScriptTag.parentNode) {
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-      } else {
-        document.head.appendChild(tag);
-      }
-    }
   }, []);
 
   // Monitor time to stop exactly at 0:33
@@ -187,6 +176,17 @@ export default function Hero({ homepageData, testimonialCard }) {
       }
     };
 
+    if (!window.YT) {
+      setMusicState('loading');
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      window.onYouTubeIframeAPIReady = () => {
+        initAndPlay();
+      };
+      document.head.appendChild(tag);
+      return;
+    }
+
     if (!ytPlayerRef.current || !ytPlayerRef.current.playVideo) {
       initAndPlay();
       return;
@@ -205,26 +205,21 @@ export default function Hero({ homepageData, testimonialCard }) {
     }
   };
 
-  const triggerCloseTransition = () => {
+  const triggerCloseTransition = useCallback(() => {
+    if (mobileVideoState === 'fading_out' || mobileVideoState === 'idle') return;
+
     const video = videoRef.current;
-    setIsMobileBgVisible(false);
-    
-    // Wait for fade-out to complete (150ms), then switch state while hidden
+    setMobileVideoState('fading_out');
+
+    // Smoothly cross-fade back to static image (300ms)
     setTimeout(() => {
-      setMobileVideoState('image');
+      setMobileVideoState('idle');
       if (video) {
         video.pause();
         video.currentTime = 0;
       }
-      // Wait for the browser to paint the image before fading in,
-      // matching the same "settle then reveal" rhythm as the start transition
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setIsMobileBgVisible(true);
-        });
-      });
-    }, 150);
-  };
+    }, 300);
+  }, [mobileVideoState]);
 
   const handleHeroClickMobile = (e) => {
     if (!isMobileDevice) return;
@@ -236,48 +231,37 @@ export default function Hero({ homepageData, testimonialCard }) {
     const video = videoRef.current;
     if (!video) return;
 
-    if (!isMobileBgVisible) return;
-
-    if (mobileVideoState === 'image') {
-      // Phase 1: Fade out (now fast)
-      setIsMobileBgVisible(false);
-
-      // Phase 2: After fade-out completes (now 150ms), prepare video while still hidden
-      setTimeout(() => {
-        setMobileVideoState('playing');
-        video.currentTime = 0;
-
-        // Wait for the video to be ready at the seeked position before fading in
-        let didFadeIn = false;
-        const fadeIn = () => {
-          if (didFadeIn) return;
-          didFadeIn = true;
-          video.play().catch(() => {});
-          setIsMobileBgVisible(true);
-        };
-
-        // Listen for the video to signal it's ready to render
-        const onReady = () => {
-          video.removeEventListener('canplay', onReady);
-          video.removeEventListener('seeked', onReady);
-          fadeIn();
-        };
-        video.addEventListener('canplay', onReady, { once: true });
-        video.addEventListener('seeked', onReady, { once: true });
-
-        // Safety timeout — don't leave the screen black forever on slow devices
-        setTimeout(fadeIn, 1000);
-
-        // Trigger loading if the video hasn't started buffering yet
-        if (video.readyState >= 3) {
-          // Already has enough data, fade in immediately
-          fadeIn();
-        } else {
-          video.load();
-        }
-      }, 150);
-    } else if (mobileVideoState === 'playing') {
+    if (mobileVideoState === 'idle') {
+      setMobileVideoState('loading');
+      video.currentTime = 0;
+      
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // If autoplay/play was blocked by browser, reset to idle
+          setMobileVideoState('idle');
+        });
+      }
+    } else if (mobileVideoState === 'playing' || mobileVideoState === 'loading') {
       triggerCloseTransition();
+    }
+  };
+
+  const handleVideoPlaying = () => {
+    if (isMobileDevice && mobileVideoState === 'loading') {
+      setMobileVideoState('playing');
+    }
+  };
+
+  const handleVideoTimeUpdate = () => {
+    if (isMobileDevice && mobileVideoState === 'playing') {
+      const video = videoRef.current;
+      if (video && video.duration > 0) {
+        // Trigger pre-end cross-fade 400ms before video finishes
+        if (video.currentTime >= video.duration - 0.4) {
+          triggerCloseTransition();
+        }
+      }
     }
   };
 
@@ -586,16 +570,13 @@ export default function Hero({ homepageData, testimonialCard }) {
       >
         {/* Full-screen Background with premium blend gradients */}
         <div 
-          style={{ transition: 'opacity 150ms ease-in-out' }}
-          className={`absolute top-0 left-0 w-full h-[75%] md:h-full z-0 overflow-hidden pointer-events-none ${
-            isMobileDevice && !isMobileBgVisible ? 'opacity-0' : 'opacity-100'
-          }`}
+          className="absolute top-0 left-0 w-full h-[75%] md:h-full z-0 overflow-hidden pointer-events-none"
         >
           {/* Static WebP Background Image (visible on mobile, and as fallback behind video) */}
           <motion.img 
             src="/hero-bg.webp"
             alt="Hero Background Static"
-            className="absolute inset-0 w-full h-full object-cover object-center md:object-left transition-opacity duration-250"
+            className="absolute inset-0 w-full h-full object-cover object-center md:object-left transition-opacity duration-300 ease-in-out"
             style={{
               x: springBgX,
               y: springBgY,
@@ -613,9 +594,11 @@ export default function Hero({ homepageData, testimonialCard }) {
             src="/hero-bg.webm" 
             muted
             playsInline
-            preload="auto"
+            preload="metadata"
+            onPlaying={handleVideoPlaying}
+            onTimeUpdate={handleVideoTimeUpdate}
             onEnded={handleVideoEnded}
-            className="absolute inset-0 w-full h-full object-cover object-center md:object-left transition-opacity duration-250"
+            className="absolute inset-0 w-full h-full object-cover object-center md:object-left transition-opacity duration-300 ease-in-out"
             style={{
               x: springBgX,
               y: springBgY,

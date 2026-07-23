@@ -26,3 +26,8 @@ dist-ssr
 # Next.js
 .next/
 out/
+
+# Secret component catalog
+src/app/component/
+public/animmaster
+src/data/animmaster.json

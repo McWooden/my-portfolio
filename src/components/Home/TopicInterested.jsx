@@ -15,7 +15,7 @@ const INTERESTED_TOPICS = [
   'Government Apps'
 ];
 
-export default function BentoTechStack() {
+export default function TopicInterested() {
   const headerRef = useRef(null);
   const badgesRef = useRef(null);
   const headerInView = useInView(headerRef, { once: true, margin: "-100px 0px" });

@@ -68,13 +68,33 @@ export default async function Page() {
   const reviewsData = staticReviews;
 
   return (
-    <Home 
-      projects={projectsData}
-      blogPosts={blogsData}
-      reviews={reviewsData}
-      homepageData={homepageData}
-      testimonialCard={testimonialCard}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "VideoObject",
+            "name": "HaloHuddin | Portfolio Background Showcase",
+            "description": "Background video showcase of Sholahuddin Ahmad (HaloHuddin) Full-Stack Developer & UI/UX Designer portfolio.",
+            "thumbnailUrl": [
+              "https://halohuddin.vercel.app/hero-bg.webp"
+            ],
+            "uploadDate": "2026-07-20T08:00:00Z",
+            "contentUrl": "https://halohuddin.vercel.app/hero-bg.webm",
+            "embedUrl": "https://halohuddin.vercel.app/",
+            "interactionCount": "1000"
+          })
+        }}
+      />
+      <Home 
+        projects={projectsData}
+        blogPosts={blogsData}
+        reviews={reviewsData}
+        homepageData={homepageData}
+        testimonialCard={testimonialCard}
+      />
+    </>
   );
 }
 

@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import HeroVisual from './HeroVisual';
+import BentoSection from './BentoSection';
 import Ticker from '../Utils/Ticker';
 import Marquee from '../Utils/Marquee';
 import { createPortal } from 'react-dom';
@@ -356,6 +357,10 @@ export default function Hero({ homepageData, testimonialCard }) {
   const opacityVal = useTransform(scrollY, [0, 500], [0.95, 0.3]);
   const filterVal = useTransform(scrollY, [0, 500], ["brightness(1.05) saturate(1.0)", "brightness(0.3) saturate(0.8)"]);
 
+  // Scroll animations for hero text/content (fades out and slides up on scroll)
+  const contentOpacity = useTransform(scrollY, [0, 350], [1, 0]);
+  const contentY = useTransform(scrollY, [0, 350], [0, -60]);
+
   useEffect(() => {
     document.documentElement.classList.add('home-page');
     return () => {
@@ -617,8 +622,9 @@ export default function Hero({ homepageData, testimonialCard }) {
 
         <div className="w-full h-full max-w-[1600px] mx-auto px-5 xl:px-10 relative z-10">
           <div className="room-stage w-full h-full relative z-10 flex flex-col pt-[70px] md:pt-[110px] pb-6 md:pb-6">
-            <div 
+            <motion.div 
               ref={contentRef} 
+              style={{ opacity: contentOpacity, y: contentY }}
               className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-6 md:gap-8 mt-auto md:flex-1 md:py-6"
             >
               <div className="w-full max-w-[320px] order-2 md:order-1">
@@ -812,10 +818,13 @@ export default function Hero({ homepageData, testimonialCard }) {
                   </div>
                 </div>
               </motion.div>
-            </div>
+            </motion.div>
 
             {/* Bottom Row Panel (Trusted by on the left, Buttons on the right) */}
-            <div className="w-full flex flex-col md:flex-row md:justify-between md:items-end gap-6 mt-6 md:mt-0">
+            <motion.div 
+              style={{ opacity: contentOpacity, y: contentY }}
+              className="w-full flex flex-col md:flex-row md:justify-between md:items-end gap-6 mt-6 md:mt-0"
+            >
               
               {/* Left Side: Trusted By Marquee (35% width on desktop, bottom order on mobile) */}
               <motion.div 
@@ -926,22 +935,15 @@ export default function Hero({ homepageData, testimonialCard }) {
                 </a>
               </motion.div>
 
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* Expandable Images Section (Full-width after Hero) */}
       <section className="px-5 xl:px-10 max-w-[1600px] mx-auto mt-16 relative z-10">
-        <div ref={visualRef} className="w-full flex justify-center">
-          <div className="w-full max-w-[1000px] relative flex justify-center items-center">
-            <HeroVisual 
-              contentHeight={null} 
-              homepageData={homepageData} 
-              testimonialCard={testimonialCard} 
-              mousePos={rightMousePos}
-            />
-          </div>
+        <div className="w-full">
+          <BentoSection homepageData={homepageData} testimonialCard={testimonialCard} />
         </div>
       </section>
 

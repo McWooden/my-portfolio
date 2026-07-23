@@ -41,17 +41,17 @@ export default function ReviewCard({ review, className = "" }) {
       </div>
 
       {/* Author Information (Bottom Section) */}
-      <div className="flex flex-row items-center gap-[16px]">
+      <div className="flex flex-row items-center gap-3">
         <img
           src={avatarUrl}
           alt={review.author}
-          className="w-10 h-10 rounded-full object-cover border border-white/10"
+          className="w-9 h-9 rounded-full object-cover border border-white/10 shrink-0"
         />
-        <div className="flex flex-col">
-          <span className="text-[18px] font-medium text-[#F2F2F2] font-sans">
+        <div className="flex flex-col leading-tight min-w-0">
+          <span className="text-[15px] font-semibold text-[#F2F2F2] font-sans truncate">
             {review.author}
           </span>
-          <span className="font-mono text-[16px] text-[#E0FF6F] uppercase tracking-wider">
+          <span className="font-mono text-[11px] text-[#E0FF6F] uppercase tracking-wider opacity-80 truncate mt-0.5">
             {review.company}
           </span>
         </div>

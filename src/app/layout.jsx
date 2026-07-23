@@ -1,5 +1,5 @@
 import React from 'react';
-import { Inter, DM_Mono, Sedgwick_Ave, Bebas_Neue } from 'next/font/google';
+import { Inter, DM_Mono, Sedgwick_Ave, Bebas_Neue, Outfit } from 'next/font/google';
 import dynamic from 'next/dynamic';
 import './globals.css';
 
@@ -29,6 +29,12 @@ const bebasNeue = Bebas_Neue({
   weight: '400',
   subsets: ['latin'],
   variable: '--font-bebas-neue',
+  display: 'swap',
+});
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  variable: '--font-outfit',
   display: 'swap',
 });
 
@@ -96,9 +102,18 @@ export const metadata = {
     title: 'Huddin | Magelang Full-Stack Developer & UI/UX Designer',
     description: 'Full-Stack Developer & UI/UX Designer di Magelang. Spesialisasi Brand Systems, UI/UX Design, dan App Development.',
     siteName: 'Huddin Portfolio',
+    videos: [
+      {
+        url: 'https://halohuddin.vercel.app/hero-bg.webm',
+        secureUrl: 'https://halohuddin.vercel.app/hero-bg.webm',
+        type: 'video/webm',
+        width: 1200,
+        height: 630,
+      }
+    ],
     images: [
       {
-        url: '/hero-bg.webp',
+        url: 'https://halohuddin.vercel.app/hero-bg.webp',
         width: 1200,
         height: 630,
         alt: 'Huddin - Magelang Full-Stack Developer & UI/UX Designer Portfolio Hero',
@@ -245,7 +260,7 @@ const jsonLd = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${inter.variable} ${dmMono.variable} ${sedgwickAve.variable} ${bebasNeue.variable}`} data-scroll-behavior="smooth">
+    <html lang="en" className={`${inter.variable} ${dmMono.variable} ${sedgwickAve.variable} ${bebasNeue.variable} ${outfit.variable}`} data-scroll-behavior="smooth">
       <head>
         <script
           type="application/ld+json"

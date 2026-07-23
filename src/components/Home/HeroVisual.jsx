@@ -99,9 +99,12 @@ export default function HeroVisual({ contentHeight, homepageData, testimonialCar
         transformStyle: 'preserve-3d',
         transition: isDragging ? 'none' : 'transform 500ms ease-out'
       }}
-      className="w-full min-h-[380px] sm:min-h-[440px] xl:min-h-[500px] relative rounded-[30px] overflow-visible bg-bg-card border-8 border-border transition-all"
+      className="w-full h-full min-h-[220px] relative transition-all"
     >
-      <ExpandableImages />
+      {/* Background artwork panel with border and rounded corner clipping */}
+      <div className="w-full h-full relative rounded-[30px] overflow-hidden bg-bg-card">
+        <ExpandableImages />
+      </div>
 
       {/* Floating testimonial card */}
       <div
@@ -114,29 +117,37 @@ export default function HeroVisual({ contentHeight, homepageData, testimonialCar
           cursor: isDragging ? 'grabbing' : 'grab',
           touchAction: 'none'
         }}
-        className="absolute top-[30px] left-5 bg-white text-bg-dark p-5 rounded-3xl w-[280px] flex flex-col gap-4 z-30 select-none shadow-[0_20px_50px_rgba(0,0,0,0.3)]"
+        className="absolute top-4 left-4 bg-white text-neutral-900 p-4 rounded-[22px] w-[230px] sm:w-[250px] flex flex-col gap-3 z-30 select-none shadow-[0_12px_32px_rgba(0,0,0,0.25)]"
       >
-        <p className="font-sans text-[0.95rem] leading-[1.4] text-[#1a1a1a] font-medium">
-          "{quote}"
-        </p>
-        <div className="flex items-center gap-[10px]">
+        {/* Top Row: Quote text + Circular top-right arrow button */}
+        <div className="flex items-start justify-between gap-2.5">
+          <p className="font-sans text-[0.8125rem] leading-[1.35] text-neutral-800 font-normal">
+            {quote}
+          </p>
+          <Link 
+            href={`/portfolio/${slug}`}
+            onMouseDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+            className="w-7 h-7 rounded-full border border-neutral-800 flex items-center justify-center text-neutral-900 hover:bg-neutral-100 active:scale-95 transition-all shrink-0 cursor-pointer"
+          >
+            <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7" />
+              <polyline points="7 7 17 7 17 17" />
+            </svg>
+          </Link>
+        </div>
+
+        {/* Bottom Row: Avatar + Single-line Muted Subtitle */}
+        <div className="flex items-center gap-2 pt-0.5">
           <img
             src={avatarUrl}
             alt={author}
-            className="w-8 h-8 rounded-full object-cover"
+            className="w-6 h-6 rounded-full object-cover shrink-0"
           />
-          <span className="text-[0.9rem] text-text-muted font-medium">{author}, {company}</span>
+          <span className="text-[0.75rem] text-[#888888] font-normal truncate">
+            {author}, {company}
+          </span>
         </div>
-        <Link 
-          href={`/portfolio/${slug}`}
-          onMouseDown={(e) => e.stopPropagation()}
-          onTouchStart={(e) => e.stopPropagation()}
-          className="absolute right-5 bottom-5 text-bg-dark hover:scale-110 transition-transform duration-200 cursor-pointer"
-        >
-          <svg viewBox="0 0 36 36" className="w-6 h-6">
-            <path d="M10 26 L24 12 M24 12 L14 12 M24 12 L24 22" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-          </svg>
-        </Link>
       </div>
     </div>
   );

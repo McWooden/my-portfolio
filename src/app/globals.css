@@ -46,7 +46,7 @@ DESIGN SYSTEM & CODING RULES (Keep styling consistent / No hallucinations)
   --color-online-green:   #1eff00;
 
   /* Fonts */
-  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: var(--font-outfit), var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: var(--font-dm-mono), monospace;
   --font-sedgwick: var(--font-sedgwick-ave), cursive;
   --font-bebas: var(--font-bebas-neue), sans-serif;

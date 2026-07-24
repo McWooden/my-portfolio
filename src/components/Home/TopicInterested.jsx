@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useRef, useState, useEffect } from 'react';
-import { motion, useInView } from 'framer-motion';
+import React from 'react';
+import { motion } from 'framer-motion';
 
 const INTERESTED_TOPICS = [
   'Scroll-Driven Motion',
@@ -15,12 +15,7 @@ const INTERESTED_TOPICS = [
   'Government Apps'
 ];
 
-export default function TopicInterested() {
-  const headerRef = useRef(null);
-  const badgesRef = useRef(null);
-  const headerInView = useInView(headerRef, { once: true, margin: "-25% 0px -10% 0px" });
-  const badgesInView = useInView(badgesRef, { once: true, margin: "-35% 0px -10% 0px" });
-
+export default function TopicInterested({ animateTrigger }) {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -48,11 +43,13 @@ export default function TopicInterested() {
   const headerContainerVariants = {
     hidden: { opacity: 0 },
     visible: {
-      opacity: 1
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.08,
+        delayChildren: 0.15
+      }
     }
   };
-
-  const BUILD_EASE = [0.2, 0.8, 0.2, 1];
 
   const wordVariants = {
     hidden: { 
@@ -70,7 +67,7 @@ export default function TopicInterested() {
       filter: "blur(0px)",
       transition: {
         duration: idx === 0 ? 0.34 : 0.43,
-        ease: BUILD_EASE,
+        ease: [0.2, 0.8, 0.2, 1],
         delay: idx * 0.43 // Stagger delay at 430ms per word as per build timing
       }
     })
@@ -80,10 +77,9 @@ export default function TopicInterested() {
     <>
       {/* Header with Kinetic Center Build styled word-by-word reveal */}
       <motion.div 
-        ref={headerRef}
         variants={headerContainerVariants}
         initial="hidden"
-        animate={headerInView ? "visible" : "hidden"}
+        animate={animateTrigger ? "visible" : "hidden"}
         className="flex flex-wrap items-center"
       >
         {["Topics", "I'm", "Interested", "In"].map((word, idx) => (
@@ -109,10 +105,9 @@ export default function TopicInterested() {
 
       {/* Badges Container without badge icons or extra borders */}
       <motion.div 
-        ref={badgesRef}
         variants={containerVariants}
         initial="hidden"
-        animate={badgesInView ? "visible" : "hidden"}
+        animate={animateTrigger ? "visible" : "hidden"}
         className="flex flex-wrap gap-2"
       >
         {INTERESTED_TOPICS.map((topic, idx) => (

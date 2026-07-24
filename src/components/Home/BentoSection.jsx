@@ -1,7 +1,5 @@
-'use client';
-
 import React, { useRef, useState, useEffect } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
 import HeroVisual from './HeroVisual';
 import TopicInterested from './TopicInterested';
 import BentoPublicChat from './BentoPublicChat';
@@ -20,12 +18,19 @@ export default function BentoSection({ homepageData, testimonialCard }) {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  const [shouldAnimateTopics, setShouldAnimateTopics] = useState(false);
+
   const headlineRef = useRef(null);
 
-  // Scroll animations targeted directly at the headline
   const { scrollYProgress } = useScroll({
     target: headlineRef,
     offset: ["start end", "end start"]
+  });
+
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    if (latest >= 0.48) {
+      setShouldAnimateTopics(true);
+    }
   });
 
   // Staggered word scroll-reveal transforms (lighten up exactly around the center of the viewport)
@@ -120,7 +125,7 @@ export default function BentoSection({ homepageData, testimonialCard }) {
 
           {/* Right Side - Topics I'm Interested In */}
           <motion.div variants={itemVariants} className="flex flex-col justify-between py-1 max-w-[420px] w-full gap-4 md:gap-0">
-            <TopicInterested />
+            <TopicInterested animateTrigger={shouldAnimateTopics} />
           </motion.div>
         </motion.div>
       </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
 
 const INTERESTED_TOPICS = [
@@ -18,8 +18,8 @@ const INTERESTED_TOPICS = [
 export default function TopicInterested() {
   const headerRef = useRef(null);
   const badgesRef = useRef(null);
-  const headerInView = useInView(headerRef, { once: true, margin: "-100px 0px" });
-  const badgesInView = useInView(badgesRef, { once: true, margin: "-200px 0px" });
+  const headerInView = useInView(headerRef, { once: true, margin: "-25% 0px -10% 0px" });
+  const badgesInView = useInView(badgesRef, { once: true, margin: "-35% 0px -10% 0px" });
 
   const containerVariants = {
     hidden: { opacity: 0 },
